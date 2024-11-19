@@ -1,0 +1,594 @@
+<html><head><base href="." />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Hospitalario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f6fa;
+            --text-color: #2d3436;
+            --accent-color: #6c5ce7;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #d63031;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .main-content {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .guests .card-icon {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
+
+        .arrivals .card-icon {
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--success-color);
+        }
+
+        .departures .card-icon {
+            background: rgba(253, 203, 110, 0.1);
+            color: var(--warning-color);
+        }
+
+        .follow-ups .card-icon {
+            background: rgba(108, 92, 231, 0.1);
+            color: var(--accent-color);
+        }
+
+        .card h3 {
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .card .number {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .recent-activity {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-icon {
+            margin-right: 1rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            backdrop-filter: blur(4px);
+        }
+
+        .popup {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 600px;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eef2f7;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+        }
+
+        .popup-close {
+            font-size: 1.8rem;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+
+        .popup-close:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+
+        .popup-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .popup-content li {
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            background: rgba(74, 144, 226, 0.04);
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #334155;
+            transition: all 0.3s ease;
+        }
+
+        .popup-content li:hover {
+            background: rgba(74, 144, 226, 0.08);
+            transform: translateX(5px);
+        }
+
+        .popup-content li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Custom scrollbar for popup */
+        .popup {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) #f1f5f9;
+        }
+
+        .popup::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .popup::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .popup::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        /* Animation for popup entrance */
+        @keyframes popupSlideIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -40%);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .popup.active {
+            animation: popupSlideIn 0.3s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+            .popup {
+                width: 90%;
+                margin: 20px auto;
+                padding: 1.5rem;
+            }
+
+            .popup-title {
+                font-size: 1.2rem;
+            }
+
+            .popup-content li {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .popup-close {
+                font-size: 1.5rem;
+                position: absolute;
+                right: 1rem;
+                top: 1rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .popup {
+                width: 600px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .popup {
+                width: 95%;
+                padding: 1rem;
+                max-height: 90vh;
+            }
+
+            .popup-content li {
+                padding: 0.7rem 0.8rem;
+                font-size: 0.85rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .popup-title {
+                font-size: 1.1rem;
+                padding-right: 30px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            .popup {
+                max-height: 85vh;
+                top: 55%;
+            }
+
+            .popup-content {
+                max-height: 50vh;
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">InHouse Manager</div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="inhouse.html">InHouse</a>
+                <a href="seguimientos.html">Seguimientos</a>
+                <a href="ventas.html">Ventas</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="dashboard-grid">
+            <div class="card guests">
+                <div class="card-header">
+                    <i class="ri-user-line card-icon"></i>
+                    <h3>Huéspedes Actuales</h3>
+                </div>
+                <div class="number">42</div>
+            </div>
+
+            <div class="card arrivals">
+                <div class="card-header">
+                    <i class="ri-flight-land-line card-icon"></i>
+                    <h3>Llegadas Esperadas</h3>
+                </div>
+                <div class="number">12</div>
+            </div>
+
+            <div class="card departures">
+                <div class="card-header">
+                    <i class="ri-flight-takeoff-line card-icon"></i>
+                    <h3>Salidas Programadas</h3>
+                </div>
+                <div class="number">8</div>
+            </div>
+
+            <div class="card follow-ups">
+                <div class="card-header">
+                    <i class="ri-calendar-check-line card-icon"></i>
+                    <h3>Seguimientos Pendientes</h3>
+                </div>
+                <div class="number">15</div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <div class="activity-header">
+                <h2>Actividad Reciente</h2>
+            </div>
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <i class="ri-user-follow-line activity-icon"></i>
+                    <div class="activity-content">
+                        <h4>Nuevo check-in: Familia Rodríguez</h4>
+                        <p>Hace 5 minutos</p>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <i class="ri-calendar-event-line activity-icon"></i>
+                    <div class="activity-content">
+                        <h4>Seguimiento programado: Habitación 304</h4>
+                        <p>Hace 15 minutos</p>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <i class="ri-user-unfollow-line activity-icon"></i>
+                    <div class="activity-content">
+                        <h4>Check-out completado: Sr. Johnson</h4>
+                        <p>Hace 1 hora</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </main>
+
+    <div class="popup-overlay">
+        <div class="popup">
+            <div class="popup-header">
+                <h3 class="popup-title">Detalles</h3>
+                <i class="ri-close-line popup-close"></i>
+            </div>
+            <div class="popup-content">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const numbers = document.querySelectorAll('.number');
+            numbers.forEach(number => {
+                const finalValue = parseInt(number.innerHTML);
+                animateValue(number, 0, finalValue, 1000);
+            });
+
+            const cards = document.querySelectorAll('.card');
+            const popupOverlay = document.querySelector('.popup-overlay');
+            const popup = document.querySelector('.popup');
+            const popupClose = document.querySelector('.popup-close');
+            const popupTitle = document.querySelector('.popup-title');
+            const popupContent = document.querySelector('.popup-content');
+
+            const popupData = {
+                guests: {
+                    title: 'Huéspedes Actuales',
+                    content: `
+                        <ul>
+                            <li>Hab 201: Familia García - 4 personas (2 adultos, 2 niños)</li>
+                            <li>Hab 204: Sr. y Sra. Smith - 2 personas</li>
+                            <li>Hab 205: Juan Pérez - 1 persona</li>
+                            <li>Hab 301: Familia Rodríguez - 3 personas (2 adultos, 1 niño)</li>
+                            <li>Hab 302: María González - 1 persona</li>
+                            <li>Hab 304: Grupo Empresarial ABC - 4 personas</li>
+                            <li>Hab 401: Sr. y Sra. Johnson - 2 personas</li>
+                            <li>Hab 403: Familia Torres - 5 personas (2 adultos, 3 niños)</li>
+                        </ul>
+                    `
+                },
+                arrivals: {
+                    title: 'Llegadas Esperadas',
+                    content: `
+                        <ul>
+                            <li>Hab 202: Familia Martínez - Check-in 14:00</li>
+                            <li>Hab 203: Sr. Thompson - Check-in 15:00</li>
+                            <li>Hab 303: Sra. Wilson - Check-in 16:00</li>
+                            <li>Hab 305: Familia López - Check-in 14:30</li>
+                            <li>Hab 402: Grupo Corporativo XYZ - Check-in 13:00</li>
+                            <li>Hab 404: Sr. y Sra. Brown - Check-in 15:30</li>
+                        </ul>
+                    `
+                },
+                departures: {
+                    title: 'Salidas Programadas',
+                    content: `
+                        <ul>
+                            <li>Hab 201: Familia García - Check-out 12:00</li>
+                            <li>Hab 204: Sr. y Sra. Smith - Check-out 11:00</li>
+                            <li>Hab 301: Familia Rodríguez - Check-out 12:00</li>
+                            <li>Hab 304: Grupo Empresarial ABC - Check-out 10:00 (Early)</li>
+                            <li>Hab 403: Familia Torres - Check-out 13:00 (Late)</li>
+                        </ul>
+                    `
+                },
+                followUps: {
+                    title: 'Seguimientos Pendientes',
+                    content: `
+                        <ul>
+                            <li>Hab 202: Verificar aire acondicionado - Prioridad Alta</li>
+                            <li>Hab 301: Cambio de toallas solicitado - Pendiente</li>
+                            <li>Hab 304: Solicitud de almohadas adicionales - En proceso</li>
+                            <li>Hab 403: Revisión de minibar - Pendiente</li>
+                            <li>Hab 404: Servicio de lavandería - En espera</li>
+                            <li>Hab 205: Mantenimiento TV - Prioridad Media</li>
+                            <li>Hab 302: Limpieza profunda solicitada - Programado</li>
+                        </ul>
+                    `
+                }
+            };
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const cardType = Array.from(card.classList)
+                        .find(className => popupData[className])
+                        .replace('-', '');
+                    
+                    // Add icon to popup title based on card type
+                    const iconClass = {
+                        guests: 'ri-user-line',
+                        arrivals: 'ri-flight-land-line',
+                        departures: 'ri-flight-takeoff-line',
+                        followUps: 'ri-calendar-check-line'
+                    }[cardType];
+                    
+                    popupTitle.innerHTML = `<i class="${iconClass}" style="margin-right: 10px;"></i>${popupData[cardType].title}`;
+                    popupContent.innerHTML = popupData[cardType].content;
+                    
+                    popupOverlay.style.display = 'block';
+                    setTimeout(() => {
+                        popup.classList.add('active');
+                    }, 10);
+                });
+            });
+
+            function closePopup() {
+                popup.classList.remove('active');
+                setTimeout(() => {
+                    popupOverlay.style.display = 'none';
+                }, 300);
+            }
+
+            popupClose.addEventListener('click', closePopup);
+            popupOverlay.addEventListener('click', (e) => {
+                if (e.target === popupOverlay) {
+                    closePopup();
+                }
+            });
+
+            const currentPage = window.location.pathname.split("/").pop();
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.style.color = 'var(--primary-color)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
