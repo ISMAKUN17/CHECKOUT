@@ -1,0 +1,535 @@
+<html><head><base href="." />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InHouse Manager - Huéspedes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f6fa;
+            --text-color: #2d3436;
+            --accent-color: #6c5ce7;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #d63031;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .main-content {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .table-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 2rem;
+        }
+
+        .action-buttons {
+            margin-bottom: 2rem;
+        }
+
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .guest-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .guest-table thead th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            padding: 1.2rem 1rem;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .guest-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .guest-table tbody tr:hover {
+            background-color: rgba(74, 144, 226, 0.05);
+        }
+
+        .guest-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
+        }
+
+        .status-llegada {
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-encasa {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
+
+        .status-salida {
+            background: rgba(214, 48, 49, 0.1);
+            color: var(--danger-color);
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 0.2rem;
+        }
+
+        .btn-edit {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
+
+        .btn-delete {
+            background: rgba(214, 48, 49, 0.1);
+            color: var(--danger-color);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .popup-close {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .popup-close:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+
+        @media (max-width: 768px) {
+            .popup {
+                width: 95%;
+                padding: 1rem;
+            }
+            
+            .guest-table {
+                font-size: 0.9rem;
+            }
+            
+            .status-badge {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            
+            .action-btn {
+                padding: 0.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">InHouse Manager</div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="inhouse.html">InHouse</a>
+                <a href="seguimientos.html">Seguimientos</a>
+                <a href="ventas.html">Ventas</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="action-buttons">
+            <button class="btn-add" onclick="openAddGuestForm()">
+                <i class="ri-add-line"></i> Nuevo Huésped
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table id="guestTable" class="guest-table display responsive nowrap">
+                <thead>
+                    <tr>
+                        <th>Habitación</th>
+                        <th>Huésped</th>
+                        <th>Llegada</th>
+                        <th>Salida</th>
+                        <th>Estado</th>
+                        <th>Nacionalidad</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div class="popup-overlay" id="addGuestModal">
+        <div class="popup">
+            <div class="popup-header">
+                <h3 class="popup-title">Agregar Nuevo Huésped</h3>
+                <i class="ri-close-line popup-close" onclick="closeAddGuestForm()"></i>
+            </div>
+            <div class="popup-content">
+                <form id="guestForm" class="guest-form">
+                    <div class="form-group">
+                        <label for="roomNumber">Número de Habitación</label>
+                        <input type="text" id="roomNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="guestName">Nombre del Huésped</label>
+                        <input type="text" id="guestName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkIn">Fecha de Llegada</label>
+                        <input type="datetime-local" id="checkIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkOut">Fecha de Salida</label>
+                        <input type="datetime-local" id="checkOut" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nationality">Nacionalidad</label>
+                        <input type="text" id="nationality" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="observations">Observaciones</label>
+                        <textarea id="observations"></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <button type="submit" class="btn-add" style="width: 100%;">Guardar Huésped</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUirwoSQgvcMZn7uLjKMAxlTA15Jkl2BM",
+            authDomain: "ismakun-bf0fa.firebaseapp.com",
+            databaseURL: "https://ismakun-bf0fa-default-rtdb.firebaseio.com",
+            projectId: "ismakun-bf0fa",
+            storageBucket: "ismakun-bf0fa.firebasestorage.app",
+            messagingSenderId: "1028877703945",
+            appId: "1:1028877703945:web:331de48acbcdf2234a51d8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const table = $('#guestTable').DataTable({
+            responsive: true,
+            columns: [
+                { data: 'roomNumber' },
+                { data: 'guestName' },
+                { data: 'checkIn' },
+                { data: 'checkOut' },
+                { 
+                    data: 'status',
+                    render: function(data, type, row) {
+                        let icon, text;
+                        switch(data) {
+                            case 'llegada':
+                                icon = 'ri-flight-land-line';
+                                text = 'Llegada';
+                                break;
+                            case 'encasa':
+                                icon = 'ri-home-smile-line';
+                                text = 'En Casa';
+                                break;
+                            case 'salida':
+                                icon = 'ri-flight-takeoff-line';
+                                text = 'Salida';
+                                break;
+                        }
+                        return `<span class="status-badge status-${data}">
+                            <i class="${icon}"></i>${text}
+                        </span>`;
+                    }
+                },
+                { data: 'nationality' },
+                { data: 'observations' },
+                { 
+                    data: null,
+                    render: function(data, type, row) {
+                        return `
+                            <button onclick="editGuest('${row.id}')" class="action-btn btn-edit">
+                                <i class="ri-edit-line"></i>
+                            </button>
+                            <button onclick="deleteGuest('${row.id}')" class="action-btn btn-delete">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        `;
+                    }
+                }
+            ],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
+            }
+        });
+
+        const guestsRef = ref(database, 'guests');
+        onValue(guestsRef, (snapshot) => {
+            const data = snapshot.val();
+            const guests = [];
+
+            for (let id in data) {
+                const guest = data[id];
+                const now = new Date();
+                const checkOut = new Date(guest.checkOut);
+                const checkIn = new Date(guest.checkIn);
+
+                let status;
+                if (now < checkIn) {
+                    status = 'llegada';
+                } else if (now >= checkIn && now < checkOut) {
+                    status = 'encasa';
+                } else {
+                    status = 'salida';
+                }
+
+                guests.push({
+                    id: id,
+                    ...guest,
+                    status: status
+                });
+            }
+
+            table.clear().rows.add(guests).draw();
+        });
+
+        document.getElementById('guestForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = {
+                roomNumber: document.getElementById('roomNumber').value,
+                guestName: document.getElementById('guestName').value,
+                checkIn: document.getElementById('checkIn').value,
+                checkOut: document.getElementById('checkOut').value,
+                nationality: document.getElementById('nationality').value,
+                observations: document.getElementById('observations').value
+            };
+
+            push(guestsRef, formData)
+                .then(() => {
+                    closeAddGuestForm();
+                    document.getElementById('guestForm').reset();
+                })
+                .catch((error) => {
+                    console.error("Error adding guest: ", error);
+                });
+        });
+
+        window.openAddGuestForm = function() {
+            document.getElementById('addGuestModal').style.display = 'block';
+        };
+
+        window.closeAddGuestForm = function() {
+            document.getElementById('addGuestModal').style.display = 'none';
+            document.getElementById('guestForm').reset();
+            document.getElementById('guestForm').onsubmit = null;
+        };
+
+        window.editGuest = function(id) {
+            const guestRef = ref(database, `guests/${id}`);
+            
+            get(guestRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const guest = snapshot.val();
+                    
+                    document.getElementById('roomNumber').value = guest.roomNumber;
+                    document.getElementById('guestName').value = guest.guestName;
+                    document.getElementById('checkIn').value = guest.checkIn;
+                    document.getElementById('checkOut').value = guest.checkOut;
+                    document.getElementById('nationality').value = guest.nationality;
+                    document.getElementById('observations').value = guest.observations;
+                    
+                    openAddGuestForm();
+                    
+                    const form = document.getElementById('guestForm');
+                    form.onsubmit = (e) => {
+                        e.preventDefault();
+                        
+                        const updatedData = {
+                            roomNumber: document.getElementById('roomNumber').value,
+                            guestName: document.getElementById('guestName').value,
+                            checkIn: document.getElementById('checkIn').value,
+                            checkOut: document.getElementById('checkOut').value,
+                            nationality: document.getElementById('nationality').value,
+                            observations: document.getElementById('observations').value
+                        };
+                        
+                        update(guestRef, updatedData)
+                            .then(() => {
+                                closeAddGuestForm();
+                                form.reset();
+                                form.onsubmit = null;
+                            })
+                            .catch((error) => {
+                                console.error("Error updating guest: ", error);
+                            });
+                    };
+                }
+            });
+        };
+
+        window.deleteGuest = function(id) {
+            if (confirm('¿Está seguro de que desea eliminar este huésped?')) {
+                remove(ref(database, `guests/${id}`));
+            }
+        };
+    </script>
+</body>
+</html>
