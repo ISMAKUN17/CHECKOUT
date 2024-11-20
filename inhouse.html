@@ -231,6 +231,71 @@
             overflow-y: auto; /* Add overflow for scrolling */
         }
 
+        .guest-details-popup {
+            max-width: 600px !important;
+        }
+
+        .guest-details {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            padding: 0.5rem;
+            background: var(--secondary-color);
+            border-radius: 8px;
+        }
+
+        .editable-field {
+            border: 1px solid #e1e1e1;
+            padding: 0.8rem;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .editable-field:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+        }
+
+        .status-select {
+            padding: 0.8rem;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            width: 100%;
+            background: white;
+        }
+
+        .save-changes-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .save-changes-btn:hover {
+            background: #009e7f;
+        }
+
         .popup-header {
             display: flex;
             justify-content: space-between;
@@ -409,6 +474,17 @@
             background: var(--primary-color);
             border-radius: 10px;
         }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-container .action-btn {
+            padding: 0.3rem;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -492,6 +568,50 @@
         </div>
     </div>
 
+    <div class="popup-overlay" id="guestDetailsModal">
+        <div class="popup guest-details-popup">
+            <div class="popup-header">
+                <h3 class="popup-title">Detalles del Huésped</h3>
+                <i class="ri-close-line popup-close" onclick="closeGuestDetails()"></i>
+            </div>
+            <div class="guest-details">
+                <div class="detail-item">
+                    <span class="detail-label">Habitación</span>
+                    <span class="detail-value" id="detail-room"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Huésped</span>
+                    <span class="detail-value" id="detail-name"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Llegada</span>
+                    <span class="detail-value" id="detail-checkin"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Salida</span>
+                    <span class="detail-value" id="detail-checkout"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Estado</span>
+                    <select class="status-select" id="detail-status">
+                        <option value="llegada">Llegada</option>
+                        <option value="encasa">En Casa</option>
+                        <option value="salida">Salida</option>
+                    </select>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Nacionalidad</span>
+                    <span class="detail-value" id="detail-nationality"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Observaciones</span>
+                    <textarea class="editable-field" id="detail-observations"></textarea>
+                </div>
+                <button class="save-changes-btn" onclick="saveGuestDetails()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
@@ -513,6 +633,39 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        let currentGuestId = null;
+
+        const calculateStatus = (checkIn, checkOut) => {
+            const now = new Date();
+            const checkInDate = new Date(checkIn);
+            const checkOutDate = new Date(checkOut);
+
+            if (now < checkInDate) {
+                return 'llegada';
+            } else if (now >= checkInDate && now < checkOutDate) {
+                return 'encasa';
+            } else {
+                return 'salida';
+            }
+        };
+
+        const guestsRef = ref(database, 'guests');
+        onValue(guestsRef, (snapshot) => {
+            const data = snapshot.val();
+            const guests = [];
+
+            for (let id in data) {
+                const guest = data[id];
+                guests.push({
+                    id: id,
+                    ...guest,
+                    status: guest.status || calculateStatus(guest.checkIn, guest.checkOut)
+                });
+            }
+
+            table.clear().rows.add(guests).draw();
+        });
+
         const table = $('#guestTable').DataTable({
             responsive: true,
             columns: [
@@ -523,24 +676,35 @@
                 { 
                     data: 'status',
                     render: function(data, type, row) {
-                        let icon, text;
+                        let icon, text, buttonClass;
                         switch(data) {
                             case 'llegada':
                                 icon = 'ri-flight-land-line';
                                 text = 'Llegada';
+                                buttonClass = 'status-llegada';
                                 break;
                             case 'encasa':
                                 icon = 'ri-home-smile-line';
                                 text = 'En Casa';
+                                buttonClass = 'status-encasa';
                                 break;
                             case 'salida':
                                 icon = 'ri-flight-takeoff-line';
                                 text = 'Salida';
+                                buttonClass = 'status-salida';
                                 break;
                         }
-                        return `<span class="status-badge status-${data}">
-                            <i class="${icon}"></i>${text}
-                        </span>`;
+                        return `
+                            <div class="status-container">
+                                <span class="status-badge ${buttonClass}">
+                                    <i class="${icon}"></i>${text}
+                                </span>
+                                ${data === 'llegada' ? 
+                                    `<button onclick="changeStatus('${row.id}', 'encasa')" class="action-btn btn-edit">
+                                        <i class="ri-home-smile-line"></i>
+                                    </button>` : ''
+                                }
+                            </div>`;
                     }
                 },
                 { data: 'nationality' },
@@ -561,37 +725,16 @@
             ],
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
-            }
-        });
-
-        const guestsRef = ref(database, 'guests');
-        onValue(guestsRef, (snapshot) => {
-            const data = snapshot.val();
-            const guests = [];
-
-            for (let id in data) {
-                const guest = data[id];
-                const now = new Date();
-                const checkOut = new Date(guest.checkOut);
-                const checkIn = new Date(guest.checkIn);
-
-                let status;
-                if (now < checkIn) {
-                    status = 'llegada';
-                } else if (now >= checkIn && now < checkOut) {
-                    status = 'encasa';
-                } else {
-                    status = 'salida';
-                }
-
-                guests.push({
-                    id: id,
-                    ...guest,
-                    status: status
+            },
+            rowCallback: function(row, data) {
+                $(row).css('cursor', 'pointer');
+                $(row).on('click', function(e) {
+                    // Prevent click event when clicking action buttons
+                    if (!$(e.target).closest('.action-btn').length) {
+                        showGuestDetails(data.id);
+                    }
                 });
             }
-
-            table.clear().rows.add(guests).draw();
         });
 
         document.getElementById('guestForm').addEventListener('submit', (e) => {
@@ -599,10 +742,11 @@
             const formData = {
                 roomNumber: document.getElementById('roomNumber').value,
                 guestName: document.getElementById('guestName').value,
-                checkIn: document.getElementById('checkIn').value,
-                checkOut: document.getElementById('checkOut').value,
+                checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(),
+                checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(),
                 nationality: document.getElementById('nationality').value,
-                observations: document.getElementById('observations').value
+                observations: document.getElementById('observations').value,
+                status: 'llegada' // Set default status to 'llegada'
             };
 
             push(guestsRef, formData)
@@ -625,6 +769,53 @@
             document.getElementById('guestForm').onsubmit = null;
         };
 
+        window.showGuestDetails = function(id) {
+            const guestRef = ref(database, `guests/${id}`);
+            currentGuestId = id;
+            
+            get(guestRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const guest = snapshot.val();
+                    
+                    document.getElementById('detail-room').textContent = guest.roomNumber;
+                    document.getElementById('detail-name').textContent = guest.guestName;
+                    document.getElementById('detail-checkin').textContent = guest.checkIn;
+                    document.getElementById('detail-checkout').textContent = guest.checkOut;
+                    document.getElementById('detail-status').value = guest.status || calculateStatus(guest.checkIn, guest.checkOut);
+                    document.getElementById('detail-nationality').textContent = guest.nationality;
+                    document.getElementById('detail-observations').value = guest.observations || '';
+                    
+                    document.getElementById('guestDetailsModal').style.display = 'block';
+                }
+            });
+        };
+
+        window.closeGuestDetails = function() {
+            document.getElementById('guestDetailsModal').style.display = 'none';
+            currentGuestId = null;
+        };
+
+        window.saveGuestDetails = function() {
+            if (!currentGuestId) return;
+            
+            const guestRef = ref(database, `guests/${currentGuestId}`);
+            const newStatus = document.getElementById('detail-status').value;
+            const newObservations = document.getElementById('detail-observations').value;
+            
+            update(guestRef, {
+                status: newStatus,
+                observations: newObservations
+            })
+            .then(() => {
+                closeGuestDetails();
+                alert('Cambios guardados exitosamente');
+            })
+            .catch((error) => {
+                console.error("Error updating guest details: ", error);
+                alert('Error al guardar los cambios');
+            });
+        };
+
         window.editGuest = function(id) {
             const guestRef = ref(database, `guests/${id}`);
             
@@ -632,10 +823,15 @@
                 if (snapshot.exists()) {
                     const guest = snapshot.val();
                     
+                    // Convert date strings to proper datetime-local format
+                    const checkInDate = new Date(guest.checkIn);
+                    const checkOutDate = new Date(guest.checkOut);
+                    
                     document.getElementById('roomNumber').value = guest.roomNumber;
                     document.getElementById('guestName').value = guest.guestName;
-                    document.getElementById('checkIn').value = guest.checkIn;
-                    document.getElementById('checkOut').value = guest.checkOut;
+                    // Format dates properly for datetime-local input
+                    document.getElementById('checkIn').value = checkInDate.toISOString().slice(0, 16);
+                    document.getElementById('checkOut').value = checkOutDate.toISOString().slice(0, 16);
                     document.getElementById('nationality').value = guest.nationality;
                     document.getElementById('observations').value = guest.observations;
                     
@@ -648,10 +844,11 @@
                         const updatedData = {
                             roomNumber: document.getElementById('roomNumber').value,
                             guestName: document.getElementById('guestName').value,
-                            checkIn: document.getElementById('checkIn').value,
-                            checkOut: document.getElementById('checkOut').value,
+                            checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(),
+                            checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(),
                             nationality: document.getElementById('nationality').value,
-                            observations: document.getElementById('observations').value
+                            observations: document.getElementById('observations').value,
+                            status: guest.status // Preserve existing status
                         };
                         
                         update(guestRef, updatedData)
@@ -659,9 +856,11 @@
                                 closeAddGuestForm();
                                 form.reset();
                                 form.onsubmit = null;
+                                alert('Huésped actualizado exitosamente');
                             })
                             .catch((error) => {
                                 console.error("Error updating guest: ", error);
+                                alert('Error al actualizar el huésped');
                             });
                     };
                 }
@@ -672,6 +871,22 @@
             if (confirm('¿Está seguro de que desea eliminar este huésped?')) {
                 remove(ref(database, `guests/${id}`));
             }
+        };
+
+        // Add the changeStatus function
+        window.changeStatus = function(id, newStatus) {
+            const guestRef = ref(database, `guests/${id}`);
+            
+            update(guestRef, {
+                status: newStatus
+            })
+            .then(() => {
+                alert('Estado actualizado exitosamente');
+            })
+            .catch((error) => {
+                console.error("Error updating status: ", error);
+                alert('Error al actualizar el estado');
+            });
         };
     </script>
 </body>
