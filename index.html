@@ -118,11 +118,12 @@
             align-items: center;
             gap: 1.5rem;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
 
         .stat-icon {
@@ -743,6 +744,33 @@
         .add-follow-up-btn, .history-btn, .report-btn {
             display: none; /* Hide the buttons */
         }
+
+        .stat-details {
+            padding: 1rem;
+        }
+
+        .stat-details p {
+            margin-bottom: 1rem;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .stat-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .stat-details li {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-details li:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -760,7 +788,7 @@
 
     <main class="main-content">
         <div class="dashboard-stats">
-            <div class="stat-card">
+            <div class="stat-card" onclick="window.showStatDetails('currentGuests')">
                 <div class="stat-icon">
                     <i class="ri-user-line"></i>
                 </div>
@@ -770,7 +798,7 @@
                 </div>
             </div>
             
-            <div class="stat-card">
+            <div class="stat-card" onclick="window.showStatDetails('expectedArrivals')">
                 <div class="stat-icon">
                     <i class="ri-flight-land-line"></i>
                 </div>
@@ -780,7 +808,7 @@
                 </div>
             </div>
             
-            <div class="stat-card">
+            <div class="stat-card" onclick="window.showStatDetails('scheduledDepartures')">
                 <div class="stat-icon">
                     <i class="ri-flight-takeoff-line"></i>
                 </div>
@@ -790,7 +818,7 @@
                 </div>
             </div>
             
-            <div class="stat-card">
+            <div class="stat-card" onclick="window.showStatDetails('pendingFollowUps')">
                 <div class="stat-icon">
                     <i class="ri-notification-line"></i>
                 </div>
@@ -803,7 +831,7 @@
 
         <div class="follow-up-history">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>Historial de Seguimientos</h2>
+                <h2>Actividad Reciente</h2>
             </div>
             <div class="timeline" id="followUpTimeline">
                 <!-- Timeline items will be populated dynamically -->
@@ -959,6 +987,109 @@
     </div>
 
     <script type="module">
+        window.showStatDetails = function(statType) {
+            const database = getDatabase();
+            const guestsRef = ref(database, 'guests');
+            const followUpsRef = ref(database, 'followUps');
+
+            let title = '';
+            let content = '';
+
+            Promise.all([
+                new Promise(resolve => onValue(guestsRef, resolve, {onlyOnce: true})),
+                new Promise(resolve => onValue(followUpsRef, resolve, {onlyOnce: true}))
+            ]).then(([guestsSnapshot, followUpsSnapshot]) => {
+                const guests = [];
+                guestsSnapshot.forEach(child => {
+                    guests.push(child.val());
+                });
+
+                const followUps = [];
+                followUpsSnapshot.forEach(child => {
+                    followUps.push(child.val());
+                });
+
+                switch(statType) {
+                    case 'currentGuests':
+                        const currentGuests = guests.filter(g => g.status === 'encasa');
+                        title = 'Huéspedes Actuales';
+                        content = `
+                            <div class="stat-details">
+                                <p>Total de huéspedes en casa: ${currentGuests.length}</p>
+                                <ul>
+                                    ${currentGuests.map(g => `
+                                        <li>Habitación ${g.roomNumber}: ${g.guestName}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                        break;
+
+                    case 'expectedArrivals':
+                        const expectedArrivals = guests.filter(g => g.status === 'llegada');
+                        title = 'Llegadas Esperadas';
+                        content = `
+                            <div class="stat-details">
+                                <p>Total de llegadas esperadas: ${expectedArrivals.length}</p>
+                                <ul>
+                                    ${expectedArrivals.map(g => `
+                                        <li>Habitación ${g.roomNumber}: ${g.guestName}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                        break;
+
+                    case 'scheduledDepartures':
+                        const departures = guests.filter(g => g.status === 'salida');
+                        title = 'Salidas Programadas';
+                        content = `
+                            <div class="stat-details">
+                                <p>Total de salidas programadas: ${departures.length}</p>
+                                <ul>
+                                    ${departures.map(g => `
+                                        <li>Habitación ${g.roomNumber}: ${g.guestName}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                        break;
+
+                    case 'pendingFollowUps':
+                        const pendingFollowUps = followUps.filter(f => f.actionRequired === 'yes');
+                        title = 'Seguimientos Pendientes';
+                        content = `
+                            <div class="stat-details">
+                                <p>Total de seguimientos pendientes: ${pendingFollowUps.length}</p>
+                                <ul>
+                                    ${pendingFollowUps.map(f => `
+                                        <li>Habitación ${f.roomNumber}: ${f.notes}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                        break;
+                }
+
+                // Create and show popup
+                const popup = document.createElement('div');
+                popup.className = 'popup-overlay';
+                popup.style.display = 'block';
+                popup.innerHTML = `
+                    <div class="popup">
+                        <div class="popup-header">
+                            <h3>${title}</h3>
+                            <i class="ri-close-line popup-close" onclick="this.closest('.popup-overlay').remove()"></i>
+                        </div>
+                        <div class="popup-content">
+                            ${content}
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+            });
+        };
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, query, orderByChild, equalTo } 
         from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
