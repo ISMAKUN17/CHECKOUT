@@ -659,7 +659,9 @@
                 guests.push({
                     id: id,
                     ...guest,
-                    status: guest.status || calculateStatus(guest.checkIn, guest.checkOut)
+                    status: guest.status || calculateStatus(guest.checkIn, guest.checkOut),
+                    checkIn: new Date(guest.checkIn).toLocaleDateString(),
+                    checkOut: new Date(guest.checkOut).toLocaleDateString(),
                 });
             }
 
@@ -742,8 +744,8 @@
             const formData = {
                 roomNumber: document.getElementById('roomNumber').value,
                 guestName: document.getElementById('guestName').value,
-                checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(),
-                checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(),
+                checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(), // Changed to short date format
+                checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(), // Changed to short date format
                 nationality: document.getElementById('nationality').value,
                 observations: document.getElementById('observations').value,
                 status: 'llegada' // Set default status to 'llegada'
@@ -779,8 +781,8 @@
                     
                     document.getElementById('detail-room').textContent = guest.roomNumber;
                     document.getElementById('detail-name').textContent = guest.guestName;
-                    document.getElementById('detail-checkin').textContent = guest.checkIn;
-                    document.getElementById('detail-checkout').textContent = guest.checkOut;
+                    document.getElementById('detail-checkin').textContent = new Date(guest.checkIn).toLocaleDateString(); // Display in short format
+                    document.getElementById('detail-checkout').textContent = new Date(guest.checkOut).toLocaleDateString(); // Display in short format
                     document.getElementById('detail-status').value = guest.status || calculateStatus(guest.checkIn, guest.checkOut);
                     document.getElementById('detail-nationality').textContent = guest.nationality;
                     document.getElementById('detail-observations').value = guest.observations || '';
@@ -823,13 +825,12 @@
                 if (snapshot.exists()) {
                     const guest = snapshot.val();
                     
-                    // Convert date strings to proper datetime-local format
+                    document.getElementById('roomNumber').value = guest.roomNumber;
+                    document.getElementById('guestName').value = guest.guestName;
+                    // Parse the short date format back to datetime-local
                     const checkInDate = new Date(guest.checkIn);
                     const checkOutDate = new Date(guest.checkOut);
                     
-                    document.getElementById('roomNumber').value = guest.roomNumber;
-                    document.getElementById('guestName').value = guest.guestName;
-                    // Format dates properly for datetime-local input
                     document.getElementById('checkIn').value = checkInDate.toISOString().slice(0, 16);
                     document.getElementById('checkOut').value = checkOutDate.toISOString().slice(0, 16);
                     document.getElementById('nationality').value = guest.nationality;
@@ -844,8 +845,8 @@
                         const updatedData = {
                             roomNumber: document.getElementById('roomNumber').value,
                             guestName: document.getElementById('guestName').value,
-                            checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(),
-                            checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(),
+                            checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(), // Changed to short date format
+                            checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(), // Changed to short date format
                             nationality: document.getElementById('nationality').value,
                             observations: document.getElementById('observations').value,
                             status: guest.status // Preserve existing status
