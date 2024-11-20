@@ -1,10 +1,10 @@
 <html><head><base href="." />
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Hospitalario</title>
+    <title>InHouse Manager - Seguimientos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -49,6 +49,13 @@
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--primary-color);
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo:hover {
+            color: #357abd;
+            transform: scale(1.02);
         }
 
         .nav-links {
@@ -64,19 +71,27 @@
             position: relative;
         }
 
-        .nav-links a::after {
+        .nav-links a[href="index.html"] {
+            position: relative;
+            font-weight: 600;
+        }
+
+        .nav-links a[href="index.html"]::after {
             content: '';
             position: absolute;
-            width: 0;
+            width: 100%;
             height: 2px;
             bottom: -5px;
             left: 0;
             background-color: var(--primary-color);
-            transition: width 0.3s ease;
+            transition: transform 0.3s ease;
+            transform-origin: right;
+            transform: scaleX(0);
         }
 
-        .nav-links a:hover::after {
-            width: 100%;
+        .nav-links a[href="index.html"]:hover::after {
+            transform-origin: left;
+            transform: scaleX(1);
         }
 
         .main-content {
@@ -87,102 +102,203 @@
             margin-right: auto;
         }
 
-        .dashboard-grid {
+        .dashboard-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .card {
+        .stat-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 10px;
+            border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-header {
             display: flex;
             align-items: center;
-            margin-bottom: 1rem;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
         }
 
-        .card-icon {
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            background: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.5rem;
-            margin-right: 1rem;
-            padding: 0.5rem;
-            border-radius: 50%;
         }
 
-        .guests .card-icon {
-            background: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
+        .stat-info h3 {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 0.5rem;
         }
 
-        .arrivals .card-icon {
-            background: rgba(0, 184, 148, 0.1);
-            color: var(--success-color);
-        }
-
-        .departures .card-icon {
-            background: rgba(253, 203, 110, 0.1);
-            color: var(--warning-color);
-        }
-
-        .follow-ups .card-icon {
-            background: rgba(108, 92, 231, 0.1);
-            color: var(--accent-color);
-        }
-
-        .card h3 {
-            color: var(--text-color);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .card .number {
-            font-size: 2rem;
+        .stat-info span {
+            font-size: 1.8rem;
             font-weight: 600;
             color: var(--text-color);
         }
 
-        .recent-activity {
+        @media (max-width: 768px) {
+            .dashboard-stats {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1.2rem;
+            }
+            
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .stat-info h3 {
+                font-size: 0.9rem;
+            }
+            
+            .stat-info span {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .follow-up-history {
             background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
+            padding: 2rem;
+            border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        .activity-header {
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 1.5rem;
+            background: var(--secondary-color);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .timeline-item[data-priority="high"] {
+            border-left: 4px solid var(--danger-color);
+            background: rgba(214, 48, 49, 0.1);
+        }
+
+        .timeline-item[data-priority="medium"] {
+            border-left: 4px solid var(--warning-color);
+            background: rgba(253, 203, 110, 0.1);
+        }
+
+        .timeline-item[data-priority="low"] {
+            border-left: 4px solid var(--success-color);
+            background: rgba(0, 184, 148, 0.1);
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content {
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .timeline-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #666;
         }
 
-        .activity-list {
-            list-style: none;
-        }
-
-        .activity-item {
-            padding: 1rem 0;
-            border-bottom: 1px solid #eee;
+        .follow-up-tags {
             display: flex;
-            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
         }
 
-        .activity-icon {
-            margin-right: 1rem;
-            padding: 0.5rem;
-            border-radius: 50%;
+        .tag {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
             background: rgba(74, 144, 226, 0.1);
             color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .tag:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tag.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .mood-option {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0,0,0,0.1);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .mood-option:hover {
+            background: rgba(74, 144, 226, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .mood-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
+
+        .mood-option i {
+            font-size: 1.2rem;
         }
 
         .popup-overlay {
@@ -192,186 +308,447 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1001;
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1100;
+            animation: fadeIn 0.3s ease;
+            padding: 20px;
         }
 
         .popup {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
-            padding: 2.5rem;
+            position: relative;
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            margin: 20px auto;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            max-height: 80vh;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.4s ease;
             overflow-y: auto;
-            width: 600px;
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
         }
 
         .popup-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #eef2f7;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-            position: relative;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 20px 20px 0 0;
         }
 
-        .popup-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            letter-spacing: 0.5px;
+        .popup-header h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
         }
 
         .popup-close {
-            font-size: 1.8rem;
-            color: #94a3b8;
-            transition: all 0.3s ease;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.3s ease;
         }
 
         .popup-close:hover {
-            color: var(--danger-color);
             transform: rotate(90deg);
         }
 
-        .popup-content ul {
-            list-style: none;
-            padding: 0;
+        .popup-content {
+            padding: 1.5rem;
         }
 
-        .popup-content li {
-            padding: 1rem 1.5rem;
+        .follow-up-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
             margin-bottom: 0.5rem;
-            border-radius: 12px;
-            background: rgba(74, 144, 226, 0.04);
-            border-left: 4px solid var(--primary-color);
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
             font-size: 0.95rem;
-            line-height: 1.6;
-            color: #334155;
             transition: all 0.3s ease;
         }
 
-        .popup-content li:hover {
-            background: rgba(74, 144, 226, 0.08);
-            transform: translateX(5px);
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            outline: none;
         }
 
-        .popup-content li:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Custom scrollbar for popup */
-        .popup {
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) #f1f5f9;
-        }
-
-        .popup::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .popup::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 10px;
-        }
-
-        .popup::-webkit-scrollbar-thumb {
+        .btn-add {
             background: var(--primary-color);
-            border-radius: 10px;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
         }
 
-        /* Animation for popup entrance */
-        @keyframes popupSlideIn {
-            0% {
+        .btn-add:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
                 opacity: 0;
-                transform: translate(-50%, -40%);
             }
-            100% {
+            to {
+                transform: translateY(0);
                 opacity: 1;
-                transform: translate(-50%, -50%);
             }
         }
 
-        .popup.active {
-            animation: popupSlideIn 0.3s ease forwards;
+        @media print {
+            .navbar, .follow-up-form, .popup-close {
+                display: none !important;
+            }
+            
+            .report-content {
+                padding: 0;
+            }
+            
+            .report-header {
+                margin-top: 0;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .popup {
+                width: 85%;
+                max-width: 800px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .popup {
+                width: 90%;
+                max-width: 600px;
+            }
         }
 
         @media (max-width: 768px) {
             .popup {
-                width: 90%;
-                margin: 20px auto;
-                padding: 1.5rem;
-            }
-
-            .popup-title {
-                font-size: 1.2rem;
-            }
-
-            .popup-content li {
-                padding: 0.8rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .popup-close {
-                font-size: 1.5rem;
-                position: absolute;
-                right: 1rem;
-                top: 1rem;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .popup {
-                width: 600px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .popup {
                 width: 95%;
+                max-width: 500px;
+                margin: 10px auto;
+            }
+            
+            .popup-header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .popup-content {
                 padding: 1rem;
+            }
+            
+            .main-content > div:first-child {
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .popup {
+                width: 98%;
+                max-width: none;
+                margin: 5px auto;
                 max-height: 90vh;
             }
-
-            .popup-content li {
-                padding: 0.7rem 0.8rem;
-                font-size: 0.85rem;
-                margin-bottom: 0.3rem;
+            
+            .popup-header h3 {
+                font-size: 1.2rem;
             }
-
-            .popup-title {
-                font-size: 1.1rem;
-                padding-right: 30px;
+            
+            .main-content > div:first-child {
+                flex-direction: column;
             }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            
+            .timeline-item {
+                padding: 1rem;
             }
         }
 
-        @media (max-height: 600px) and (orientation: landscape) {
+        @media (max-height: 700px) {
             .popup {
                 max-height: 85vh;
-                top: 55%;
             }
-
+            
             .popup-content {
-                max-height: 50vh;
+                max-height: calc(85vh - 60px);
                 overflow-y: auto;
             }
+        }
+
+        .popup-content {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) rgba(0,0,0,0.1);
+        }
+
+        .popup-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .popup-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+
+        .popup-content::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+                margin-top: 80px;
+            }
+            
+            .follow-up-history {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .follow-up-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .popup {
+                width: 95%;
+                margin: 10px auto;
+                max-height: 85vh;
+            }
+            
+            .popup-content {
+                padding: 1rem;
+            }
+            
+            .mood-selector {
+                flex-direction: column;
+            }
+            
+            .mood-option {
+                width: 100%;
+            }
+        }
+
+        .follow-up-details {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .follow-up-details .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .follow-up-details .content {
+            margin: 1rem 0;
+        }
+
+        .follow-up-details .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .history-table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 2rem;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .history-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        .history-table tr:hover {
+            background: rgba(74, 144, 226, 0.05);
+        }
+
+        .priority-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .priority-badge.high {
+            background: rgba(214, 48, 49, 0.1);
+            color: var(--danger-color);
+        }
+
+        .priority-badge.medium {
+            background: rgba(253, 203, 110, 0.1);
+            color: var(--warning-color);
+        }
+
+        .priority-badge.low {
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--success-color);
+        }
+
+        .satisfaction-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .satisfaction-indicator i {
+            font-size: 1.2rem;
+        }
+
+        .satisfaction-high {
+            color: var(--success-color);
+        }
+
+        .satisfaction-medium {
+            color: var(--warning-color);
+        }
+
+        .satisfaction-low {
+            color: var(--danger-color);
+        }
+
+        .follow-up-count {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background: rgba(253, 203, 110, 0.1);
+            color: var(--warning-color);
+        }
+
+        .guest-info {
+            background: var(--secondary-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .guest-info h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .history-table tr {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-table tr:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .guest-info {
+                padding: 0.8rem;
+            }
+            
+            .guest-info h4 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .guest-info {
+                padding: 0.6rem;
+            }
+            
+            .guest-info h4 {
+                font-size: 1rem;
+            }
+        }
+
+        .add-follow-up-btn, .history-btn, .report-btn {
+            display: none; /* Hide the buttons */
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">InHouse Manager</div>
+            <div class="logo" onclick="goToHome()">InHouse Manager</div>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="inhouse.html">InHouse</a>
@@ -382,213 +759,400 @@
     </nav>
 
     <main class="main-content">
-        <div class="dashboard-grid">
-            <div class="card guests">
-                <div class="card-header">
-                    <i class="ri-user-line card-icon"></i>
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="ri-user-line"></i>
+                </div>
+                <div class="stat-info">
                     <h3>Huéspedes Actuales</h3>
+                    <span id="currentGuestsCount">0</span>
                 </div>
-                <div class="number">42</div>
             </div>
-
-            <div class="card arrivals">
-                <div class="card-header">
-                    <i class="ri-flight-land-line card-icon"></i>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="ri-flight-land-line"></i>
+                </div>
+                <div class="stat-info">
                     <h3>Llegadas Esperadas</h3>
+                    <span id="expectedArrivalsCount">0</span>
                 </div>
-                <div class="number">12</div>
             </div>
-
-            <div class="card departures">
-                <div class="card-header">
-                    <i class="ri-flight-takeoff-line card-icon"></i>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="ri-flight-takeoff-line"></i>
+                </div>
+                <div class="stat-info">
                     <h3>Salidas Programadas</h3>
+                    <span id="scheduledDeparturesCount">0</span>
                 </div>
-                <div class="number">8</div>
             </div>
-
-            <div class="card follow-ups">
-                <div class="card-header">
-                    <i class="ri-calendar-check-line card-icon"></i>
-                    <h3>Seguimientos Pendientes</h3>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="ri-notification-line"></i>
                 </div>
-                <div class="number">15</div>
+                <div class="stat-info">
+                    <h3>Seguimientos Pendientes</h3>
+                    <span id="pendingFollowUpsCount">0</span>
+                </div>
             </div>
         </div>
 
-        <div class="recent-activity">
-            <div class="activity-header">
-                <h2>Actividad Reciente</h2>
+        <div class="follow-up-history">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Historial de Seguimientos</h2>
             </div>
-            <ul class="activity-list">
-                <li class="activity-item">
-                    <i class="ri-user-follow-line activity-icon"></i>
-                    <div class="activity-content">
-                        <h4>Nuevo check-in: Familia Rodríguez</h4>
-                        <p>Hace 5 minutos</p>
-                    </div>
-                </li>
-                <li class="activity-item">
-                    <i class="ri-calendar-event-line activity-icon"></i>
-                    <div class="activity-content">
-                        <h4>Seguimiento programado: Habitación 304</h4>
-                        <p>Hace 15 minutos</p>
-                    </div>
-                </li>
-                <li class="activity-item">
-                    <i class="ri-user-unfollow-line activity-icon"></i>
-                    <div class="activity-content">
-                        <h4>Check-out completado: Sr. Johnson</h4>
-                        <p>Hace 1 hora</p>
-                    </div>
-                </li>
-            </ul>
+            <div class="timeline" id="followUpTimeline">
+                <!-- Timeline items will be populated dynamically -->
+            </div>
         </div>
     </main>
 
-    <div class="popup-overlay">
+    <div class="popup-overlay" id="followUpFormModal">
         <div class="popup">
             <div class="popup-header">
-                <h3 class="popup-title">Detalles</h3>
-                <i class="ri-close-line popup-close"></i>
+                <h3>Nuevo Seguimiento</h3>
+                <i class="ri-close-line popup-close" onclick="closeFollowUpForm()"></i>
             </div>
             <div class="popup-content">
-                <!-- Content will be dynamically inserted here -->
+                <form id="followUpForm" class="follow-up-grid">
+                    <div class="form-group">
+                        <label for="roomSelect">Habitación</label>
+                        <select id="roomSelect" required>
+                            <option value="">Seleccionar habitación</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="followUpDate">Fecha</label>
+                        <input type="date" id="followUpDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="guestMood">Estado de ánimo del huésped</label>
+                        <div class="mood-selector">
+                            <div class="mood-option" data-mood="happy">
+                                <i class="ri-emotion-happy-line"></i> Feliz
+                            </div>
+                            <div class="mood-option" data-mood="neutral">
+                                <i class="ri-emotion-normal-line"></i> Normal
+                            </div>
+                            <div class="mood-option" data-mood="unhappy">
+                                <i class="ri-emotion-unhappy-line"></i> Insatisfecho
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Categorías</label>
+                        <div class="follow-up-tags">
+                            <span class="tag">Limpieza</span>
+                            <span class="tag">Mantenimiento</span>
+                            <span class="tag">Servicio</span>
+                            <span class="tag">Solicitud especial</span>
+                            <span class="tag">Queja</span>
+                            <span class="tag">Sugerencia</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="followUpNotes">Notas del seguimiento</label>
+                        <textarea id="followUpNotes" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="actionRequired">¿Requiere acción?</label>
+                        <select id="actionRequired">
+                            <option value="no">No</option>
+                            <option value="yes">Sí</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority">Prioridad</label>
+                        <select id="priority">
+                            <option value="low">Baja</option>
+                            <option value="medium">Media</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <button type="submit" class="btn-add">
+                            <i class="ri-save-line"></i> Guardar Seguimiento
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <script>
-        function animateValue(obj, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
+    <div class="popup-overlay report-modal" id="reportModal">
+        <div class="popup">
+            <div class="popup-header">
+                <h3>Reporte de Seguimientos</h3>
+                <i class="ri-close-line popup-close" onclick="closeReport()"></i>
+            </div>
+            <div class="report-content" id="reportContent">
+                <!-- Report content will be generated dynamically -->
+            </div>
+        </div>
+    </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const numbers = document.querySelectorAll('.number');
-            numbers.forEach(number => {
-                const finalValue = parseInt(number.innerHTML);
-                animateValue(number, 0, finalValue, 1000);
-            });
+    <div class="popup-overlay" id="historyTableModal">
+        <div class="popup" style="max-width: 90%; width: 1200px;">
+            <div class="popup-header">
+                <h3>Historial de Seguimientos</h3>
+                <i class="ri-close-line popup-close" onclick="closeHistoryTable()"></i>
+            </div>
+            <div class="popup-content">
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Habitación</th>
+                                <th>Notas</th>
+                                <th>Estado de ánimo</th>
+                                <th>Prioridad</th>
+                                <th>Acción requerida</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Table content will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            const cards = document.querySelectorAll('.card');
-            const popupOverlay = document.querySelector('.popup-overlay');
-            const popup = document.querySelector('.popup');
-            const popupClose = document.querySelector('.popup-close');
-            const popupTitle = document.querySelector('.popup-title');
-            const popupContent = document.querySelector('.popup-content');
+    <div class="popup-overlay" id="roomStatsTableModal">
+        <div class="popup" style="max-width: 90%; width: 1200px;">
+            <div class="popup-header">
+                <h3>Estadísticas por Habitación</h3>
+                <i class="ri-close-line popup-close" onclick="closeRoomStatsTable()"></i>
+            </div>
+            <div class="popup-content">
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Habitación</th>
+                                <th>Huésped</th>
+                                <th>Fecha de Salida</th>
+                                <th>Seguimientos</th>
+                                <th>Estado</th>
+                                <th>Satisfacción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomStatsTableBody">
+                            <!-- Table content will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            const popupData = {
-                guests: {
-                    title: 'Huéspedes Actuales',
-                    content: `
-                        <ul>
-                            <li>Hab 201: Familia García - 4 personas (2 adultos, 2 niños)</li>
-                            <li>Hab 204: Sr. y Sra. Smith - 2 personas</li>
-                            <li>Hab 205: Juan Pérez - 1 persona</li>
-                            <li>Hab 301: Familia Rodríguez - 3 personas (2 adultos, 1 niño)</li>
-                            <li>Hab 302: María González - 1 persona</li>
-                            <li>Hab 304: Grupo Empresarial ABC - 4 personas</li>
-                            <li>Hab 401: Sr. y Sra. Johnson - 2 personas</li>
-                            <li>Hab 403: Familia Torres - 5 personas (2 adultos, 3 niños)</li>
-                        </ul>
-                    `
-                },
-                arrivals: {
-                    title: 'Llegadas Esperadas',
-                    content: `
-                        <ul>
-                            <li>Hab 202: Familia Martínez - Check-in 14:00</li>
-                            <li>Hab 203: Sr. Thompson - Check-in 15:00</li>
-                            <li>Hab 303: Sra. Wilson - Check-in 16:00</li>
-                            <li>Hab 305: Familia López - Check-in 14:30</li>
-                            <li>Hab 402: Grupo Corporativo XYZ - Check-in 13:00</li>
-                            <li>Hab 404: Sr. y Sra. Brown - Check-in 15:30</li>
-                        </ul>
-                    `
-                },
-                departures: {
-                    title: 'Salidas Programadas',
-                    content: `
-                        <ul>
-                            <li>Hab 201: Familia García - Check-out 12:00</li>
-                            <li>Hab 204: Sr. y Sra. Smith - Check-out 11:00</li>
-                            <li>Hab 301: Familia Rodríguez - Check-out 12:00</li>
-                            <li>Hab 304: Grupo Empresarial ABC - Check-out 10:00 (Early)</li>
-                            <li>Hab 403: Familia Torres - Check-out 13:00 (Late)</li>
-                        </ul>
-                    `
-                },
-                followUps: {
-                    title: 'Seguimientos Pendientes',
-                    content: `
-                        <ul>
-                            <li>Hab 202: Verificar aire acondicionado - Prioridad Alta</li>
-                            <li>Hab 301: Cambio de toallas solicitado - Pendiente</li>
-                            <li>Hab 304: Solicitud de almohadas adicionales - En proceso</li>
-                            <li>Hab 403: Revisión de minibar - Pendiente</li>
-                            <li>Hab 404: Servicio de lavandería - En espera</li>
-                            <li>Hab 205: Mantenimiento TV - Prioridad Media</li>
-                            <li>Hab 302: Limpieza profunda solicitada - Programado</li>
-                        </ul>
-                    `
-                }
-            };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, query, orderByChild, equalTo } 
+        from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-            cards.forEach(card => {
-                card.addEventListener('click', () => {
-                    const cardType = Array.from(card.classList)
-                        .find(className => popupData[className])
-                        .replace('-', '');
-                    
-                    // Add icon to popup title based on card type
-                    const iconClass = {
-                        guests: 'ri-user-line',
-                        arrivals: 'ri-flight-land-line',
-                        departures: 'ri-flight-takeoff-line',
-                        followUps: 'ri-calendar-check-line'
-                    }[cardType];
-                    
-                    popupTitle.innerHTML = `<i class="${iconClass}" style="margin-right: 10px;"></i>${popupData[cardType].title}`;
-                    popupContent.innerHTML = popupData[cardType].content;
-                    
-                    popupOverlay.style.display = 'block';
-                    setTimeout(() => {
-                        popup.classList.add('active');
-                    }, 10);
-                });
-            });
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUirwoSQgvcMZn7uLjKMAxlTA15Jkl2BM",
+            authDomain: "ismakun-bf0fa.firebaseapp.com",
+            databaseURL: "https://ismakun-bf0fa-default-rtdb.firebaseio.com",
+            projectId: "ismakun-bf0fa",
+            storageBucket: "ismakun-bf0fa.firebasestorage.app",
+            messagingSenderId: "1028877703945",
+            appId: "1:1028877703945:web:331de48acbcdf2234a51d8"
+        };
 
-            function closePopup() {
-                popup.classList.remove('active');
-                setTimeout(() => {
-                    popupOverlay.style.display = 'none';
-                }, 300);
-            }
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-            popupClose.addEventListener('click', closePopup);
-            popupOverlay.addEventListener('click', (e) => {
-                if (e.target === popupOverlay) {
-                    closePopup();
-                }
-            });
-
-            const currentPage = window.location.pathname.split("/").pop();
-            const navLinks = document.querySelectorAll('.nav-links a');
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPage) {
-                    link.style.color = 'var(--primary-color)';
+        const guestsRef = ref(database, 'guests');
+        onValue(guestsRef, (snapshot) => {
+            const roomSelect = document.getElementById('roomSelect');
+            roomSelect.innerHTML = '<option value="">Seleccionar habitación</option>';
+            
+            snapshot.forEach((childSnapshot) => {
+                const guest = childSnapshot.val();
+                if (guest.status === 'encasa') {
+                    const option = document.createElement('option');
+                    option.value = guest.roomNumber;
+                    option.textContent = `Habitación ${guest.roomNumber} - ${guest.guestName}`;
+                    roomSelect.appendChild(option);
                 }
             });
         });
+
+        document.getElementById('followUpForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const followUp = {
+                roomNumber: document.getElementById('roomSelect').value,
+                date: document.getElementById('followUpDate').value,
+                notes: document.getElementById('followUpNotes').value,
+                mood: document.querySelector('.mood-option.selected')?.dataset.mood || 'neutral',
+                tags: Array.from(document.querySelectorAll('.tag.selected')).map(tag => tag.textContent),
+                actionRequired: document.getElementById('actionRequired').value,
+                priority: document.getElementById('priority').value,
+                timestamp: Date.now()
+            };
+            
+            push(ref(database, 'followUps'), followUp)
+                .then(() => {
+                    alert('Seguimiento guardado exitosamente');
+                    e.target.reset();
+                    closeFollowUpForm();
+                })
+                .catch((error) => {
+                    console.error("Error saving follow-up: ", error);
+                    alert('Error al guardar el seguimiento');
+                });
+        });
+
+        const followUpsRef = ref(database, 'followUps');
+        onValue(followUpsRef, (snapshot) => {
+            const timeline = document.getElementById('followUpTimeline');
+            timeline.innerHTML = '';
+            
+            const followUps = [];
+            snapshot.forEach((childSnapshot) => {
+                followUps.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val()
+                });
+            });
+            
+            followUps.sort((a, b) => b.timestamp - a.timestamp);
+            
+            followUps.forEach(followUp => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.setAttribute('data-priority', followUp.priority);
+                timelineItem.innerHTML = `
+                    <div class="timeline-date">${new Date(followUp.date).toLocaleDateString()}</div>
+                    <div class="timeline-content">
+                        <strong>Habitación ${followUp.roomNumber}</strong>
+                        <p>${followUp.notes}</p>
+                    </div>
+                    <div class="timeline-meta">
+                        <span>Prioridad: ${followUp.priority}</span>
+                        <span>Estado: ${followUp.actionRequired === 'yes' ? 'Requiere acción' : 'Completado'}</span>
+                    </div>
+                `;
+                timeline.appendChild(timelineItem);
+            });
+        });
+
+        document.querySelectorAll('.mood-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.timeline-item')) {
+                const item = e.target.closest('.timeline-item');
+                const followUpData = {
+                    date: item.querySelector('.timeline-date').textContent,
+                    content: item.querySelector('.timeline-content').textContent,
+                    priority: item.dataset.priority,
+                    meta: item.querySelector('.timeline-meta').textContent
+                };
+                showFollowUpDetails(followUpData);
+            }
+        });
+
+        function showFollowUpDetails(data) {
+            const popup = document.createElement('div');
+            popup.className = 'popup-overlay';
+            popup.innerHTML = `
+                <div class="popup">
+                    <div class="popup-header">
+                        <h3>Detalles del Seguimiento</h3>
+                        <i class="ri-close-line popup-close" onclick="this.closest('.popup-overlay').remove()"></i>
+                    </div>
+                    <div class="popup-content">
+                        <div class="follow-up-details">
+                            <div class="header">
+                                <h4>${data.date}</h4>
+                                <span class="priority-badge ${data.priority}">${data.priority}</span>
+                            </div>
+                            <div class="content">
+                                ${data.content}
+                            </div>
+                            <div class="meta">
+                                ${data.meta}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        function updateDashboardStats() {
+            const guestsRef = ref(database, 'guests');
+            const followUpsRef = ref(database, 'followUps');
+            
+            Promise.all([
+                new Promise(resolve => onValue(guestsRef, resolve, {onlyOnce: true})),
+                new Promise(resolve => onValue(followUpsRef, resolve, {onlyOnce: true}))
+            ]).then(([guestsSnapshot, followUpsSnapshot]) => {
+                // Count current guests (status: 'encasa')
+                let currentGuests = 0;
+                // Count expected arrivals (status: 'llegada')
+                let expectedArrivals = 0;
+                // Count scheduled departures (status: 'salida')
+                let scheduledDepartures = 0;
+                
+                guestsSnapshot.forEach(childSnapshot => {
+                    const guest = childSnapshot.val();
+                    if (guest.status === 'encasa') {
+                        currentGuests++;
+                    } else if (guest.status === 'llegada') {
+                        expectedArrivals++;
+                    } else if (guest.status === 'salida') {
+                        scheduledDepartures++;
+                    }
+                });
+                
+                // Count pending follow-ups (actionRequired: 'yes')
+                let pendingFollowUps = 0;
+                followUpsSnapshot.forEach(childSnapshot => {
+                    const followUp = childSnapshot.val();
+                    if (followUp.actionRequired === 'yes') {
+                        pendingFollowUps++;
+                    }
+                });
+                
+                // Update dashboard numbers
+                document.getElementById('currentGuestsCount').textContent = currentGuests;
+                document.getElementById('expectedArrivalsCount').textContent = expectedArrivals;
+                document.getElementById('scheduledDeparturesCount').textContent = scheduledDepartures;
+                document.getElementById('pendingFollowUpsCount').textContent = pendingFollowUps;
+            });
+        }
+
+        // Call this function when the page loads
+        window.onload = function() {
+            updateDashboardStats();
+        };
     </script>
 </body>
 </html>
