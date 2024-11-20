@@ -1,0 +1,740 @@
+<html><head><base href="." />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InHouse Manager - Seguimientos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f6fa;
+            --text-color: #2d3436;
+            --accent-color: #6c5ce7;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #d63031;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .main-content {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .add-follow-up-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .add-follow-up-btn:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .follow-up-history {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 1.5rem;
+            background: var(--secondary-color);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .timeline-item[data-priority="high"] {
+            border-left: 4px solid var(--danger-color);
+            background: rgba(214, 48, 49, 0.1);
+        }
+
+        .timeline-item[data-priority="medium"] {
+            border-left: 4px solid var(--warning-color);
+            background: rgba(253, 203, 110, 0.1);
+        }
+
+        .timeline-item[data-priority="low"] {
+            border-left: 4px solid var(--success-color);
+            background: rgba(0, 184, 148, 0.1);
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content {
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .timeline-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .report-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .report-btn:hover {
+            background: #5849d1;
+            transform: translateY(-2px);
+        }
+
+        .follow-up-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .tag:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tag.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .mood-option {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0,0,0,0.1);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .mood-option:hover {
+            background: rgba(74, 144, 226, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .mood-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
+
+        .mood-option i {
+            font-size: 1.2rem;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1100;
+            animation: fadeIn 0.3s ease;
+            padding: 20px;
+        }
+
+        .popup {
+            position: relative;
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.4s ease;
+        }
+
+        .popup-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .popup-header h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+
+        .popup-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .popup-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .popup-content {
+            padding: 2rem;
+        }
+
+        .follow-up-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            outline: none;
+        }
+
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-add:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media print {
+            .navbar, .follow-up-form, .popup-close {
+                display: none !important;
+            }
+            
+            .report-content {
+                padding: 0;
+            }
+            
+            .report-header {
+                margin-top: 0;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+                margin-top: 80px;
+            }
+            
+            .follow-up-history {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .follow-up-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .popup {
+                width: 95%;
+                margin: 10px auto;
+            }
+            
+            .popup-content {
+                padding: 1.5rem;
+            }
+            
+            .mood-selector {
+                flex-direction: column;
+            }
+            
+            .mood-option {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">InHouse Manager</div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="inhouse.html">InHouse</a>
+                <a href="seguimientos.html">Seguimientos</a>
+                <a href="ventas.html">Ventas</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <button class="add-follow-up-btn" onclick="showFollowUpForm()">
+            <i class="ri-add-line"></i> Nuevo Seguimiento
+        </button>
+
+        <div class="follow-up-history">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Historial de Seguimientos</h2>
+                <button class="report-btn" onclick="generateReport()">
+                    <i class="ri-file-list-3-line"></i> Generar Reporte
+                </button>
+            </div>
+            <div class="timeline" id="followUpTimeline">
+                <!-- Timeline items will be populated dynamically -->
+            </div>
+        </div>
+    </main>
+
+    <div class="popup-overlay" id="followUpFormModal">
+        <div class="popup">
+            <div class="popup-header">
+                <h3>Nuevo Seguimiento</h3>
+                <i class="ri-close-line popup-close" onclick="closeFollowUpForm()"></i>
+            </div>
+            <div class="popup-content">
+                <form id="followUpForm" class="follow-up-grid">
+                    <div class="form-group">
+                        <label for="roomSelect">Habitación</label>
+                        <select id="roomSelect" required>
+                            <option value="">Seleccionar habitación</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="followUpDate">Fecha</label>
+                        <input type="date" id="followUpDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="guestMood">Estado de ánimo del huésped</label>
+                        <div class="mood-selector">
+                            <div class="mood-option" data-mood="happy">
+                                <i class="ri-emotion-happy-line"></i> Feliz
+                            </div>
+                            <div class="mood-option" data-mood="neutral">
+                                <i class="ri-emotion-normal-line"></i> Normal
+                            </div>
+                            <div class="mood-option" data-mood="unhappy">
+                                <i class="ri-emotion-unhappy-line"></i> Insatisfecho
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Categorías</label>
+                        <div class="follow-up-tags">
+                            <span class="tag">Limpieza</span>
+                            <span class="tag">Mantenimiento</span>
+                            <span class="tag">Servicio</span>
+                            <span class="tag">Solicitud especial</span>
+                            <span class="tag">Queja</span>
+                            <span class="tag">Sugerencia</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="followUpNotes">Notas del seguimiento</label>
+                        <textarea id="followUpNotes" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="actionRequired">¿Requiere acción?</label>
+                        <select id="actionRequired">
+                            <option value="no">No</option>
+                            <option value="yes">Sí</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority">Prioridad</label>
+                        <select id="priority">
+                            <option value="low">Baja</option>
+                            <option value="medium">Media</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <button type="submit" class="btn-add">
+                            <i class="ri-save-line"></i> Guardar Seguimiento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup-overlay report-modal" id="reportModal">
+        <div class="popup">
+            <div class="popup-header">
+                <h3>Reporte de Seguimientos</h3>
+                <i class="ri-close-line popup-close" onclick="closeReport()"></i>
+            </div>
+            <div class="report-content" id="reportContent">
+                <!-- Report content will be generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, query, orderByChild, equalTo } 
+        from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUirwoSQgvcMZn7uLjKMAxlTA15Jkl2BM",
+            authDomain: "ismakun-bf0fa.firebaseapp.com",
+            databaseURL: "https://ismakun-bf0fa-default-rtdb.firebaseio.com",
+            projectId: "ismakun-bf0fa",
+            storageBucket: "ismakun-bf0fa.firebasestorage.app",
+            messagingSenderId: "1028877703945",
+            appId: "1:1028877703945:web:331de48acbcdf2234a51d8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const guestsRef = ref(database, 'guests');
+        onValue(guestsRef, (snapshot) => {
+            const roomSelect = document.getElementById('roomSelect');
+            roomSelect.innerHTML = '<option value="">Seleccionar habitación</option>';
+            
+            snapshot.forEach((childSnapshot) => {
+                const guest = childSnapshot.val();
+                if (guest.status === 'encasa') {
+                    const option = document.createElement('option');
+                    option.value = guest.roomNumber;
+                    option.textContent = `Habitación ${guest.roomNumber} - ${guest.guestName}`;
+                    roomSelect.appendChild(option);
+                }
+            });
+        });
+
+        document.getElementById('followUpForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const followUp = {
+                roomNumber: document.getElementById('roomSelect').value,
+                date: document.getElementById('followUpDate').value,
+                notes: document.getElementById('followUpNotes').value,
+                mood: document.querySelector('.mood-option.selected')?.dataset.mood || 'neutral',
+                tags: Array.from(document.querySelectorAll('.tag.selected')).map(tag => tag.textContent),
+                actionRequired: document.getElementById('actionRequired').value,
+                priority: document.getElementById('priority').value,
+                timestamp: Date.now()
+            };
+            
+            push(ref(database, 'followUps'), followUp)
+                .then(() => {
+                    alert('Seguimiento guardado exitosamente');
+                    e.target.reset();
+                    closeFollowUpForm();
+                })
+                .catch((error) => {
+                    console.error("Error saving follow-up: ", error);
+                    alert('Error al guardar el seguimiento');
+                });
+        });
+
+        const followUpsRef = ref(database, 'followUps');
+        onValue(followUpsRef, (snapshot) => {
+            const timeline = document.getElementById('followUpTimeline');
+            timeline.innerHTML = '';
+            
+            const followUps = [];
+            snapshot.forEach((childSnapshot) => {
+                followUps.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val()
+                });
+            });
+            
+            followUps.sort((a, b) => b.timestamp - a.timestamp);
+            
+            followUps.forEach(followUp => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.setAttribute('data-priority', followUp.priority);
+                timelineItem.innerHTML = `
+                    <div class="timeline-date">${new Date(followUp.date).toLocaleDateString()}</div>
+                    <div class="timeline-content">
+                        <strong>Habitación ${followUp.roomNumber}</strong>
+                        <p>${followUp.notes}</p>
+                    </div>
+                    <div class="timeline-meta">
+                        <span>Prioridad: ${followUp.priority}</span>
+                        <span>Estado: ${followUp.actionRequired === 'yes' ? 'Requiere acción' : 'Completado'}</span>
+                    </div>
+                `;
+                timeline.appendChild(timelineItem);
+            });
+        });
+
+        document.querySelectorAll('.mood-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
+            });
+        });
+
+        window.generateReport = function() {
+            const roomNumber = document.getElementById('roomSelect').value;
+            if (!roomNumber) {
+                alert('Por favor seleccione una habitación');
+                return;
+            }
+            
+            const followUpsRef = query(ref(database, 'followUps'), 
+                                     orderByChild('roomNumber'), 
+                                     equalTo(roomNumber));
+            
+            onValue(followUpsRef, (snapshot) => {
+                const followUps = [];
+                snapshot.forEach((childSnapshot) => {
+                    followUps.push(childSnapshot.val());
+                });
+                
+                followUps.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                const reportContent = document.getElementById('reportContent');
+                reportContent.innerHTML = `
+                    <div class="report-header">
+                        <h2>Reporte de Seguimientos - Habitación ${roomNumber}</h2>
+                        <p>Generado el ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <div class="report-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Total de seguimientos</div>
+                            <div class="meta-value">${followUps.length}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Período</div>
+                            <div class="meta-value">
+                                ${followUps.length ? 
+                                    `${new Date(followUps[followUps.length-1].date).toLocaleDateString()} - 
+                                     ${new Date(followUps[0].date).toLocaleDateString()}` : 
+                                    'N/A'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline">
+                        ${followUps.map(followUp => `
+                            <div class="timeline-item">
+                                <div class="timeline-date">${new Date(followUp.date).toLocaleDateString()}</div>
+                                <div class="timeline-content">
+                                    <p>${followUp.notes}</p>
+                                    ${followUp.tags?.length ? 
+                                        `<div class="follow-up-tags">
+                                            ${followUp.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                        </div>` : 
+                                        ''}
+                                </div>
+                                <div class="timeline-meta">
+                                    <span>Estado de ánimo: ${followUp.mood || 'No registrado'}</span>
+                                    <span>Prioridad: ${followUp.priority}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                document.getElementById('reportModal').style.display = 'block';
+            });
+        };
+
+        window.closeReport = function() {
+            document.getElementById('reportModal').style.display = 'none';
+        };
+
+        window.showFollowUpForm = function() {
+            document.getElementById('followUpFormModal').style.display = 'block';
+        }
+
+        window.closeFollowUpForm = function() {
+            document.getElementById('followUpFormModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
