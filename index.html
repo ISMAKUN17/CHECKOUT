@@ -4,6 +4,7 @@
     <title>InHouse Manager - Seguimientos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
         * {
@@ -29,7 +30,7 @@
 
         .navbar {
             background: white;
-            padding: 1rem 2rem;
+            padding: 0.8rem 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: fixed;
             width: 100%;
@@ -43,6 +44,7 @@
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
         }
 
         .logo {
@@ -58,9 +60,20 @@
             transform: scale(1.02);
         }
 
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
         .nav-links {
             display: flex;
             gap: 2rem;
+            align-items: center;
         }
 
         .nav-links a {
@@ -68,30 +81,57 @@
             color: var(--text-color);
             font-weight: 500;
             transition: all 0.3s ease;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
         }
 
-        .nav-links a[href="index.html"] {
-            position: relative;
-            font-weight: 600;
+        .nav-links a i {
+            font-size: 1.4rem;
+            color: var(--primary-color);
         }
 
-        .nav-links a[href="index.html"]::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: transform 0.3s ease;
-            transform-origin: right;
-            transform: scaleX(0);
+        .nav-links a span {
+            font-size: 0.8rem;
         }
 
-        .nav-links a[href="index.html"]:hover::after {
-            transform-origin: left;
-            transform: scaleX(1);
+        .nav-links a:hover {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        @media screen and (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                border-radius: 0 0 10px 10px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links a {
+                padding: 0.8rem 0;
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-links a:not(:last-child) {
+                border-bottom: 1px solid rgba(0,0,0,0.1);
+            }
         }
 
         .main-content {
@@ -302,78 +342,6 @@
             font-size: 1.2rem;
         }
 
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1100;
-            animation: fadeIn 0.3s ease;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-        }
-
-        .popup {
-            position: relative;
-            background: white;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            margin: 20px auto;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-            animation: slideIn 0.4s ease;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .popup-header {
-            padding: 1.5rem 2rem;
-            background: linear-gradient(135deg, var(--primary-color), #357abd);
-            color: white;
-            border-radius: 20px 20px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .popup-header h3 {
-            font-size: 1.4rem;
-            font-weight: 500;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .popup-close {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: white;
-            transition: all 0.3s ease;
-            opacity: 0.8;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .popup-close:hover {
-            transform: rotate(90deg);
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .popup-content {
-            padding: 2rem;
-            background: white;
-            border-radius: 0 0 20px 20px;
-        }
-
         .stat-details {
             background: #f8f9fa;
             border-radius: 12px;
@@ -422,366 +390,27 @@
             font-size: 1.5rem;
             line-height: 0;
         }
-
-        @keyframes fadeIn {
-            from { 
-                opacity: 0;
-                backdrop-filter: blur(0);
-            }
-            to { 
-                opacity: 1;
-                backdrop-filter: blur(5px);
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @media print {
-            .navbar, .follow-up-form, .popup-close {
-                display: none !important;
-            }
-            
-            .report-content {
-                padding: 0;
-            }
-            
-            .report-header {
-                margin-top: 0;
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .popup {
-                width: 85%;
-                max-width: 800px;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .popup {
-                width: 90%;
-                max-width: 600px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .popup {
-                width: 95%;
-                max-width: 500px;
-                margin: 10px auto;
-            }
-            
-            .popup-header {
-                padding: 1rem 1.5rem;
-            }
-            
-            .popup-content {
-                padding: 1rem;
-            }
-            
-            .main-content > div:first-child {
-                flex-wrap: wrap;
-                gap: 0.8rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .popup {
-                width: 98%;
-                max-width: none;
-                margin: 5px auto;
-                max-height: 90vh;
-            }
-            
-            .popup-header h3 {
-                font-size: 1.2rem;
-            }
-            
-            .main-content > div:first-child {
-                flex-direction: column;
-            }
-            
-            .timeline-item {
-                padding: 1rem;
-            }
-        }
-
-        @media (max-height: 700px) {
-            .popup {
-                max-height: 85vh;
-            }
-            
-            .popup-content {
-                max-height: calc(85vh - 60px);
-                overflow-y: auto;
-            }
-        }
-
-        .popup-content {
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) rgba(0,0,0,0.1);
-        }
-
-        .popup-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .popup-content::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.1);
-            border-radius: 4px;
-        }
-
-        .popup-content::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        @media (max-width: 1024px) {
-            .nav-container {
-                padding: 0 1rem;
-            }
-            
-            .main-content {
-                padding: 1rem;
-                margin-top: 80px;
-            }
-            
-            .follow-up-history {
-                padding: 1rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .follow-up-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .popup {
-                width: 95%;
-                margin: 10px auto;
-                max-height: 85vh;
-            }
-            
-            .popup-content {
-                padding: 1rem;
-            }
-            
-            .mood-selector {
-                flex-direction: column;
-            }
-            
-            .mood-option {
-                width: 100%;
-            }
-        }
-
-        .follow-up-details {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-        }
-
-        .follow-up-details .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .follow-up-details .content {
-            margin: 1rem 0;
-        }
-
-        .follow-up-details .meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .history-table-container {
-            overflow-x: auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-top: 2rem;
-        }
-
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-
-        .history-table th,
-        .history-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .history-table th {
-            background: var(--primary-color);
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), #357abd);
             color: white;
-            font-weight: 500;
         }
 
-        .history-table tr:hover {
-            background: rgba(74, 144, 226, 0.05);
-        }
-
-        .priority-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .priority-badge.high {
-            background: rgba(214, 48, 49, 0.1);
-            color: var(--danger-color);
-        }
-
-        .priority-badge.medium {
-            background: rgba(253, 203, 110, 0.1);
-            color: var(--warning-color);
-        }
-
-        .priority-badge.low {
-            background: rgba(0, 184, 148, 0.1);
-            color: var(--success-color);
-        }
-
-        .satisfaction-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .satisfaction-indicator i {
-            font-size: 1.2rem;
-        }
-
-        .satisfaction-high {
-            color: var(--success-color);
-        }
-
-        .satisfaction-medium {
-            color: var(--warning-color);
-        }
-
-        .satisfaction-low {
-            color: var(--danger-color);
-        }
-
-        .follow-up-count {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.2rem 0.8rem;
+        .modal-content {
             border-radius: 15px;
-            font-size: 0.9rem;
+            border: none;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
 
-        .status-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background: rgba(0, 184, 148, 0.1);
-            color: var(--success-color);
-        }
-
-        .status-pending {
-            background: rgba(253, 203, 110, 0.1);
-            color: var(--warning-color);
-        }
-
-        .guest-info {
-            background: var(--secondary-color);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .guest-info h4 {
-            color: var(--primary-color);
+        .list-group-item {
+            border-left: 4px solid var(--primary-color);
             margin-bottom: 0.5rem;
-        }
-
-        .history-table tr {
-            cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .history-table tr:hover {
-            background: rgba(74, 144, 226, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .guest-info {
-                padding: 0.8rem;
-            }
-            
-            .guest-info h4 {
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .guest-info {
-                padding: 0.6rem;
-            }
-            
-            .guest-info h4 {
-                font-size: 1rem;
-            }
-        }
-
-        .add-follow-up-btn, .history-btn, .report-btn {
-            display: none; /* Hide the buttons */
-        }
-
-        .stat-details {
-            padding: 1rem;
-        }
-
-        .stat-details p {
-            margin-bottom: 1rem;
-            font-weight: 500;
-            color: var(--primary-color);
-        }
-
-        .stat-details ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .stat-details li {
-            padding: 0.5rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .stat-details li:last-child {
-            border-bottom: none;
+        .list-group-item:hover {
+            transform: translateX(5px);
+            background-color: rgba(74, 144, 226, 0.05);
         }
     </style>
 </head>
@@ -789,11 +418,26 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo" onclick="goToHome()">InHouse Manager</div>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <i class="ri-menu-line"></i>
+            </button>
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="inhouse.html">InHouse</a>
-                <a href="seguimientos.html">Seguimientos</a>
-                <a href="ventas.html">Ventas</a>
+                <a href="index.html">
+                    <i class="ri-home-4-line"></i>
+                    <span>Home</span>
+                </a>
+                <a href="inhouse.html">
+                    <i class="ri-hotel-line"></i>
+                    <span>InHouse</span>
+                </a>
+                <a href="seguimientos.html">
+                    <i class="ri-file-list-3-line"></i>
+                    <span>Seguimientos</span>
+                </a>
+                <a href="ventas.html">
+                    <i class="ri-shopping-cart-line"></i>
+                    <span>Ventas</span>
+                </a>
             </div>
         </div>
     </nav>
@@ -851,259 +495,185 @@
         </div>
     </main>
 
+    <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="statsModalLabel"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="statsModalContent">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="popup-overlay" id="followUpFormModal">
-        <div class="popup">
-            <div class="popup-header">
-                <h3>Nuevo Seguimiento</h3>
-                <i class="ri-close-line popup-close" onclick="closeFollowUpForm()"></i>
-            </div>
-            <div class="popup-content">
-                <form id="followUpForm" class="follow-up-grid">
-                    <div class="form-group">
-                        <label for="roomSelect">Habitación</label>
-                        <select id="roomSelect" required>
-                            <option value="">Seleccionar habitación</option>
-                        </select>
+        <div class="modal fade" id="followUpFormModal" tabindex="-1" aria-labelledby="followUpFormModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="followUpFormModalLabel">Nuevo Seguimiento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="followUpDate">Fecha</label>
-                        <input type="date" id="followUpDate" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="guestMood">Estado de ánimo del huésped</label>
-                        <div class="mood-selector">
-                            <div class="mood-option" data-mood="happy">
-                                <i class="ri-emotion-happy-line"></i> Feliz
+                    <div class="modal-body">
+                        <form id="followUpForm" class="follow-up-grid">
+                            <div class="form-group">
+                                <label for="roomSelect">Habitación</label>
+                                <select id="roomSelect" required>
+                                    <option value="">Seleccionar habitación</option>
+                                </select>
                             </div>
-                            <div class="mood-option" data-mood="neutral">
-                                <i class="ri-emotion-normal-line"></i> Normal
+                            
+                            <div class="form-group">
+                                <label for="followUpDate">Fecha</label>
+                                <input type="date" id="followUpDate" required>
                             </div>
-                            <div class="mood-option" data-mood="unhappy">
-                                <i class="ri-emotion-unhappy-line"></i> Insatisfecho
+                            
+                            <div class="form-group">
+                                <label for="guestMood">Estado de ánimo del huésped</label>
+                                <div class="mood-selector">
+                                    <div class="mood-option" data-mood="happy">
+                                        <i class="ri-emotion-happy-line"></i> Feliz
+                                    </div>
+                                    <div class="mood-option" data-mood="neutral">
+                                        <i class="ri-emotion-normal-line"></i> Normal
+                                    </div>
+                                    <div class="mood-option" data-mood="unhappy">
+                                        <i class="ri-emotion-unhappy-line"></i> Insatisfecho
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Categorías</label>
+                                <div class="follow-up-tags">
+                                    <span class="tag">Limpieza</span>
+                                    <span class="tag">Mantenimiento</span>
+                                    <span class="tag">Servicio</span>
+                                    <span class="tag">Solicitud especial</span>
+                                    <span class="tag">Queja</span>
+                                    <span class="tag">Sugerencia</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="followUpNotes">Notas del seguimiento</label>
+                                <textarea id="followUpNotes" rows="4" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="actionRequired">¿Requiere acción?</label>
+                                <select id="actionRequired">
+                                    <option value="no">No</option>
+                                    <option value="yes">Sí</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="priority">Prioridad</label>
+                                <select id="priority">
+                                    <option value="low">Baja</option>
+                                    <option value="medium">Media</option>
+                                    <option value="high">Alta</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ri-save-line"></i> Guardar Seguimiento
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Categorías</label>
-                        <div class="follow-up-tags">
-                            <span class="tag">Limpieza</span>
-                            <span class="tag">Mantenimiento</span>
-                            <span class="tag">Servicio</span>
-                            <span class="tag">Solicitud especial</span>
-                            <span class="tag">Queja</span>
-                            <span class="tag">Sugerencia</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label for="followUpNotes">Notas del seguimiento</label>
-                        <textarea id="followUpNotes" rows="4" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="actionRequired">¿Requiere acción?</label>
-                        <select id="actionRequired">
-                            <option value="no">No</option>
-                            <option value="yes">Sí</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="priority">Prioridad</label>
-                        <select id="priority">
-                            <option value="low">Baja</option>
-                            <option value="medium">Media</option>
-                            <option value="high">Alta</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <button type="submit" class="btn-add">
-                            <i class="ri-save-line"></i> Guardar Seguimiento
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="popup-overlay report-modal" id="reportModal">
-        <div class="popup">
-            <div class="popup-header">
-                <h3>Reporte de Seguimientos</h3>
-                <i class="ri-close-line popup-close" onclick="closeReport()"></i>
-            </div>
-            <div class="report-content" id="reportContent">
-                <!-- Report content will be generated dynamically -->
+        <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reportModalLabel">Reporte de Seguimientos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="reportContent">
+                        <!-- Report content will be generated dynamically -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="popup-overlay" id="historyTableModal">
-        <div class="popup" style="max-width: 90%; width: 1200px;">
-            <div class="popup-header">
-                <h3>Historial de Seguimientos</h3>
-                <i class="ri-close-line popup-close" onclick="closeHistoryTable()"></i>
-            </div>
-            <div class="popup-content">
-                <div class="history-table-container">
-                    <table class="history-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Habitación</th>
-                                <th>Notas</th>
-                                <th>Estado de ánimo</th>
-                                <th>Prioridad</th>
-                                <th>Acción requerida</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody">
-                            <!-- Table content will be populated dynamically -->
-                        </tbody>
-                    </table>
+        <div class="modal fade" id="historyTableModal" tabindex="-1" aria-labelledby="historyTableModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 90%; width: 1200px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyTableModalLabel">Historial de Seguimientos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Habitación</th>
+                                        <th>Notas</th>
+                                        <th>Estado de ánimo</th>
+                                        <th>Prioridad</th>
+                                        <th>Acción requerida</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody">
+                                    <!-- Table content will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="popup-overlay" id="roomStatsTableModal">
-        <div class="popup" style="max-width: 90%; width: 1200px;">
-            <div class="popup-header">
-                <h3>Estadísticas por Habitación</h3>
-                <i class="ri-close-line popup-close" onclick="closeRoomStatsTable()"></i>
-            </div>
-            <div class="popup-content">
-                <div class="history-table-container">
-                    <table class="history-table">
-                        <thead>
-                            <tr>
-                                <th>Habitación</th>
-                                <th>Huésped</th>
-                                <th>Fecha de Salida</th>
-                                <th>Seguimientos</th>
-                                <th>Estado</th>
-                                <th>Satisfacción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="roomStatsTableBody">
-                            <!-- Table content will be populated dynamically -->
-                        </tbody>
-                    </table>
+        <div class="modal fade" id="roomStatsTableModal" tabindex="-1" aria-labelledby="roomStatsTableModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 90%; width: 1200px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="roomStatsTableModalLabel">Estadísticas por Habitación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Habitación</th>
+                                        <th>Huésped</th>
+                                        <th>Fecha de Salida</th>
+                                        <th>Seguimientos</th>
+                                        <th>Estado</th>
+                                        <th>Satisfacción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="roomStatsTableBody">
+                                    <!-- Table content will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script type="module">
-        window.showStatDetails = function(statType) {
-            const database = getDatabase();
-            const guestsRef = ref(database, 'guests');
-            const followUpsRef = ref(database, 'followUps');
-
-            let title = '';
-            let content = '';
-
-            Promise.all([
-                new Promise(resolve => onValue(guestsRef, resolve, {onlyOnce: true})),
-                new Promise(resolve => onValue(followUpsRef, resolve, {onlyOnce: true}))
-            ]).then(([guestsSnapshot, followUpsSnapshot]) => {
-                const guests = [];
-                guestsSnapshot.forEach(child => {
-                    guests.push(child.val());
-                });
-
-                const followUps = [];
-                followUpsSnapshot.forEach(child => {
-                    followUps.push(child.val());
-                });
-
-                switch(statType) {
-                    case 'currentGuests':
-                        const currentGuests = guests.filter(g => g.status === 'encasa');
-                        title = 'Huéspedes Actuales';
-                        content = `
-                            <div class="stat-details">
-                                <p>Total de huéspedes en casa: ${currentGuests.length}</p>
-                                <ul>
-                                    ${currentGuests.map(g => `
-                                        <li>Habitación ${g.roomNumber}: ${g.guestName}</li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        `;
-                        break;
-
-                    case 'expectedArrivals':
-                        const expectedArrivals = guests.filter(g => g.status === 'llegada');
-                        title = 'Llegadas Esperadas';
-                        content = `
-                            <div class="stat-details">
-                                <p>Total de llegadas esperadas: ${expectedArrivals.length}</p>
-                                <ul>
-                                    ${expectedArrivals.map(g => `
-                                        <li>Habitación ${g.roomNumber}: ${g.guestName}</li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        `;
-                        break;
-
-                    case 'scheduledDepartures':
-                        const departures = guests.filter(g => g.status === 'salida');
-                        title = 'Salidas Programadas';
-                        content = `
-                            <div class="stat-details">
-                                <p>Total de salidas programadas: ${departures.length}</p>
-                                <ul>
-                                    ${departures.map(g => `
-                                        <li>Habitación ${g.roomNumber}: ${g.guestName}</li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        `;
-                        break;
-
-                    case 'pendingFollowUps':
-                        const pendingFollowUps = followUps.filter(f => f.actionRequired === 'yes');
-                        title = 'Seguimientos Pendientes';
-                        content = `
-                            <div class="stat-details">
-                                <p>Total de seguimientos pendientes: ${pendingFollowUps.length}</p>
-                                <ul>
-                                    ${pendingFollowUps.map(f => `
-                                        <li>Habitación ${f.roomNumber}: ${f.notes}</li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        `;
-                        break;
-                }
-
-                // Create and show popup
-                const popup = document.createElement('div');
-                popup.className = 'popup-overlay';
-                popup.style.display = 'block';
-                popup.innerHTML = `
-                    <div class="popup">
-                        <div class="popup-header">
-                            <h3>${title}</h3>
-                            <i class="ri-close-line popup-close" onclick="this.closest('.popup-overlay').remove()"></i>
-                        </div>
-                        <div class="popup-content">
-                            ${content}
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(popup);
-            });
-        };
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, query, orderByChild, equalTo } 
+        import { getDatabase, ref, push, onValue, query, orderByChild, equalTo, update } 
         from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -1118,6 +688,202 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+
+        function updateDashboardStats() {
+            const guestsRef = ref(database, 'guests');
+            
+            // Listen for changes in guests
+            onValue(guestsRef, (snapshot) => {
+                let currentGuests = 0;
+                let expectedArrivals = 0;
+                let scheduledDepartures = 0;
+                
+                const guestsList = {
+                    current: [],
+                    arrivals: [],
+                    departures: []
+                };
+                
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    
+                    // Count guests based on their status
+                    switch(guest.status) {
+                        case 'encasa':
+                            currentGuests++;
+                            guestsList.current.push(guest);
+                            break;
+                        case 'llegada':
+                            expectedArrivals++;
+                            guestsList.arrivals.push(guest);
+                            break;
+                        case 'salida':
+                            scheduledDepartures++;
+                            guestsList.departures.push(guest);
+                            break;
+                    }
+                });
+                
+                // Update the dashboard counters
+                document.getElementById('currentGuestsCount').textContent = currentGuests;
+                document.getElementById('expectedArrivalsCount').textContent = expectedArrivals;
+                document.getElementById('scheduledDeparturesCount').textContent = scheduledDepartures;
+                
+                // Update the click handlers for the stat cards
+                window.showStatDetails = function(statType) {
+                    const followUpsRef = ref(database, 'followUps');
+                    let title = '';
+                    let content = '';
+                    
+                    switch(statType) {
+                        case 'currentGuests':
+                            title = 'Huéspedes Actuales';
+                            content = `
+                                <div class="list-group">
+                                    ${guestsList.current.map(guest => `
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Habitación ${guest.roomNumber}</h6>
+                                                    <p class="mb-1">${guest.guestName}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('') || '<p class="text-center">No hay huéspedes actuales</p>'}
+                                </div>
+                            `;
+                            break;
+                            
+                        case 'expectedArrivals':
+                            title = 'Llegadas Esperadas';
+                            content = `
+                                <div class="list-group">
+                                    ${guestsList.arrivals.map(guest => `
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Habitación ${guest.roomNumber}</h6>
+                                                    <p class="mb-1">${guest.guestName}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('') || '<p class="text-center">No hay llegadas esperadas</p>'}
+                                </div>
+                            `;
+                            break;
+                            
+                        case 'scheduledDepartures':
+                            title = 'Salidas Programadas';
+                            content = `
+                                <div class="list-group">
+                                    ${guestsList.departures.map(guest => `
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Habitación ${guest.roomNumber}</h6>
+                                                    <p class="mb-1">${guest.guestName}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('') || '<p class="text-center">No hay salidas programadas</p>'}
+                                </div>
+                            `;
+                            break;
+
+                        case 'pendingFollowUps':
+                            const pendingFollowUps = [];
+                            onValue(followUpsRef, (followUpsSnapshot) => {
+                                followUpsSnapshot.forEach(child => {
+                                    if (child.val().actionRequired === 'yes') {
+                                        pendingFollowUps.push({
+                                            id: child.key,
+                                            ...child.val()
+                                        });
+                                    }
+                                });
+
+                                title = 'Seguimientos Pendientes';
+                                content = `
+                                    <div class="stat-details">
+                                        <p class="fw-bold text-primary">Total de seguimientos pendientes: ${pendingFollowUps.length}</p>
+                                        <ul class="list-group">
+                                            ${pendingFollowUps.map(f => `
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong>Habitación ${f.roomNumber}</strong>: ${f.notes}
+                                                    </div>
+                                                    <button class="btn btn-success btn-sm complete-follow-up" data-id="${f.id}">
+                                                        <i class="ri-check-line"></i> Marcar como completado
+                                                    </button>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                `;
+
+                                // Update and show Bootstrap modal
+                                document.getElementById('statsModalLabel').textContent = title;
+                                document.getElementById('statsModalContent').innerHTML = content;
+                                
+                                const modal = new bootstrap.Modal(document.getElementById('statsModal'));
+                                modal.show();
+
+                                // Add event listeners for complete buttons
+                                document.querySelectorAll('.complete-follow-up').forEach(button => {
+                                    button.addEventListener('click', function() {
+                                        const followUpId = this.dataset.id;
+                                        const followUpRef = ref(database, `followUps/${followUpId}`);
+                                        
+                                        // Update the follow-up to mark it as not requiring action
+                                        update(followUpRef, {
+                                            actionRequired: 'no'
+                                        }).then(() => {
+                                            // Remove the list item
+                                            this.closest('li').remove();
+                                            
+                                            // Update the count
+                                            const countEl = document.querySelector('.stat-details p');
+                                            const currentCount = parseInt(countEl.textContent.match(/\d+/)[0]);
+                                            countEl.textContent = `Total de seguimientos pendientes: ${currentCount - 1}`;
+                                            
+                                            // Update the dashboard count
+                                            const dashboardCount = document.getElementById('pendingFollowUpsCount');
+                                            dashboardCount.textContent = currentCount - 1;
+                                            
+                                            // Show success message
+                                            const toast = new bootstrap.Toast(Object.assign(document.createElement('div'), {
+                                                className: 'toast position-fixed top-0 end-0 m-3',
+                                                innerHTML: `
+                                                    <div class="toast-header bg-success text-white">
+                                                        <strong class="me-auto">Éxito</strong>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                                                    </div>
+                                                    <div class="toast-body">
+                                                        Seguimiento marcado como completado
+                                                    </div>
+                                                `
+                                            }));
+                                            document.body.appendChild(toast.element);
+                                            toast.show();
+                                        }).catch(error => {
+                                            console.error("Error updating follow-up: ", error);
+                                            alert('Error al actualizar el seguimiento');
+                                        });
+                                    });
+                                });
+                            });
+                            return; // Prevent further execution
+                    }
+                    
+                    // Update and show Bootstrap modal
+                    document.getElementById('statsModalLabel').textContent = title;
+                    document.getElementById('statsModalContent').innerHTML = content;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('statsModal'));
+                    modal.show();
+                };
+            });
+        }
 
         const guestsRef = ref(database, 'guests');
         onValue(guestsRef, (snapshot) => {
@@ -1153,7 +919,8 @@
                 .then(() => {
                     alert('Seguimiento guardado exitosamente');
                     e.target.reset();
-                    closeFollowUpForm();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('followUpFormModal'));
+                    modal.hide();
                 })
                 .catch((error) => {
                     console.error("Error saving follow-up: ", error);
@@ -1163,6 +930,14 @@
 
         const followUpsRef = ref(database, 'followUps');
         onValue(followUpsRef, (snapshot) => {
+            let pendingCount = 0;
+            snapshot.forEach((child) => {
+                if (child.val().actionRequired === 'yes') {
+                    pendingCount++;
+                }
+            });
+            document.getElementById('pendingFollowUpsCount').textContent = pendingCount;
+            
             const timeline = document.getElementById('followUpTimeline');
             timeline.innerHTML = '';
             
@@ -1222,80 +997,82 @@
         });
 
         function showFollowUpDetails(data) {
-            const popup = document.createElement('div');
-            popup.className = 'popup-overlay';
-            popup.innerHTML = `
-                <div class="popup">
-                    <div class="popup-header">
-                        <h3>Detalles del Seguimiento</h3>
-                        <i class="ri-close-line popup-close" onclick="this.closest('.popup-overlay').remove()"></i>
-                    </div>
-                    <div class="popup-content">
-                        <div class="follow-up-details">
-                            <div class="header">
-                                <h4>${data.date}</h4>
-                                <span class="priority-badge ${data.priority}">${data.priority}</span>
-                            </div>
-                            <div class="content">
-                                ${data.content}
-                            </div>
-                            <div class="meta">
-                                ${data.meta}
+            // Check if modal already exists and remove it
+            const existingModal = document.getElementById('followUpDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            // Create modal container
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'modal fade';
+            modalDiv.id = 'followUpDetailsModal';
+            modalDiv.tabIndex = '-1';
+            modalDiv.setAttribute('aria-labelledby', 'followUpDetailsModalLabel');
+            modalDiv.setAttribute('aria-hidden', 'true');
+
+            // Set modal content
+            modalDiv.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="followUpDetailsModalLabel">Detalles del Seguimiento</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="follow-up-details">
+                                <div class="header">
+                                    <h4>${data.date}</h4>
+                                    <span class="priority-badge ${data.priority}">${data.priority}</span>
+                                </div>
+                                <div class="content">
+                                    ${data.content}
+                                </div>
+                                <div class="meta">
+                                    ${data.meta}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
-            document.body.appendChild(popup);
+
+            // Append modal to body
+            document.body.appendChild(modalDiv);
+
+            // Initialize and show Bootstrap modal
+            const modal = new bootstrap.Modal(modalDiv);
+            modal.show();
         }
 
-        function updateDashboardStats() {
-            const guestsRef = ref(database, 'guests');
-            const followUpsRef = ref(database, 'followUps');
-            
-            Promise.all([
-                new Promise(resolve => onValue(guestsRef, resolve, {onlyOnce: true})),
-                new Promise(resolve => onValue(followUpsRef, resolve, {onlyOnce: true}))
-            ]).then(([guestsSnapshot, followUpsSnapshot]) => {
-                // Count current guests (status: 'encasa')
-                let currentGuests = 0;
-                // Count expected arrivals (status: 'llegada')
-                let expectedArrivals = 0;
-                // Count scheduled departures (status: 'salida')
-                let scheduledDepartures = 0;
-                
-                guestsSnapshot.forEach(childSnapshot => {
-                    const guest = childSnapshot.val();
-                    if (guest.status === 'encasa') {
-                        currentGuests++;
-                    } else if (guest.status === 'llegada') {
-                        expectedArrivals++;
-                    } else if (guest.status === 'salida') {
-                        scheduledDepartures++;
-                    }
-                });
-                
-                // Count pending follow-ups (actionRequired: 'yes')
-                let pendingFollowUps = 0;
-                followUpsSnapshot.forEach(childSnapshot => {
-                    const followUp = childSnapshot.val();
-                    if (followUp.actionRequired === 'yes') {
-                        pendingFollowUps++;
-                    }
-                });
-                
-                // Update dashboard numbers
-                document.getElementById('currentGuestsCount').textContent = currentGuests;
-                document.getElementById('expectedArrivalsCount').textContent = expectedArrivals;
-                document.getElementById('scheduledDeparturesCount').textContent = scheduledDepartures;
-                document.getElementById('pendingFollowUpsCount').textContent = pendingFollowUps;
-            });
-        }
-
-        // Call this function when the page loads
-        window.onload = function() {
+        // Call updateDashboardStats when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
             updateDashboardStats();
-        };
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.nav-container')) {
+                    navLinks.classList.remove('active');
+                }
+            });
+
+            // Close menu when window is resized above mobile breakpoint
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
