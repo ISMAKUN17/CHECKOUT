@@ -323,6 +323,44 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .modal-header {
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control, .form-select {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 2px solid var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -506,27 +544,107 @@
 
     <!-- Follow-up Modal -->
     <div class="modal fade" id="followUpModal" tabindex="-1" aria-labelledby="followUpModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="followUpModalLabel">Agregar Seguimiento</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="followUpModalLabel">
+                        <i class="ri-file-list-3-line me-2"></i>
+                        Nuevo Seguimiento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="followUpForm">
-                        <div class="mb-3">
-                            <label for="followUpDescription" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="followUpDescription" rows="3" required></textarea>
+                    <form id="followUpForm" class="needs-validation" novalidate>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="followUpRoom" class="form-label">
+                                    <i class="ri-home-4-line me-1"></i>
+                                    Habitación
+                                </label>
+                                <input type="text" class="form-control" id="followUpRoom" required readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="followUpDate" class="form-label">
+                                    <i class="ri-calendar-line me-1"></i>
+                                    Fecha
+                                </label>
+                                <input type="date" class="form-control" id="followUpDate" required>
+                            </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="followUpMood" class="form-label">
+                                    <i class="ri-emotion-line me-1"></i>
+                                    Estado de Ánimo
+                                </label>
+                                <select class="form-select" id="followUpMood" required>
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="happy">😊 Feliz</option>
+                                    <option value="neutral">😐 Neutral</option>
+                                    <option value="upset">😟 Molesto</option>
+                                    <option value="angry">😠 Enojado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="followUpCategory" class="form-label">
+                                    <i class="ri-folder-line me-1"></i>
+                                    Categoría
+                                </label>
+                                <select class="form-select" id="followUpCategory" required>
+                                    <option value="">Seleccionar categoría</option>
+                                    <option value="maintenance">Mantenimiento</option>
+                                    <option value="housekeeping">Limpieza</option>
+                                    <option value="service">Servicio</option>
+                                    <option value="complaint">Queja</option>
+                                    <option value="request">Solicitud</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
-                            <label for="followUpDate" class="form-label">Fecha</label>
-                            <input type="date" class="form-control" id="followUpDate" required>
+                            <label for="followUpNotes" class="form-label">
+                                <i class="ri-file-text-line me-1"></i>
+                                Notas del Seguimiento
+                            </label>
+                            <textarea class="form-control" id="followUpNotes" rows="4" required></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="followUpAction" class="form-label">
+                                    <i class="ri-error-warning-line me-1"></i>
+                                    Requiere Acción
+                                </label>
+                                <select class="form-select" id="followUpAction" required>
+                                    <option value="no">No</option>
+                                    <option value="yes">Sí</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="followUpPriority" class="form-label">
+                                    <i class="ri-flag-line me-1"></i>
+                                    Prioridad
+                                </label>
+                                <select class="form-select" id="followUpPriority" required>
+                                    <option value="low">Baja</option>
+                                    <option value="medium">Media</option>
+                                    <option value="high">Alta</option>
+                                    <option value="urgent">Urgente</option>
+                                </select>
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveFollowUp()">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveFollowUp()">
+                        <i class="ri-save-line me-1"></i>
+                        Guardar Seguimiento
+                    </button>
                 </div>
             </div>
         </div>
@@ -882,6 +1000,53 @@
                 });
         };
 
+        window.saveFollowUp = function() {
+            const guestId = document.getElementById('followUpForm').dataset.guestId;
+            const followUp = {
+                room: document.getElementById('followUpRoom').value,
+                date: document.getElementById('followUpDate').value,
+                mood: document.getElementById('followUpMood').value,
+                category: document.getElementById('followUpCategory').value,
+                notes: document.getElementById('followUpNotes').value,
+                requiresAction: document.getElementById('followUpAction').value,
+                priority: document.getElementById('followUpPriority').value,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            if (!followUp.date || !followUp.mood || !followUp.category || !followUp.notes) {
+                alert('Por favor complete todos los campos requeridos');
+                return;
+            }
+
+            const followUpsRef = ref(database, `followups/${guestId}`);
+            push(followUpsRef, followUp)
+                .then(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('followUpModal'));
+                    modal.hide();
+                    document.getElementById('followUpForm').reset();
+                    alert('Seguimiento guardado exitosamente');
+                })
+                .catch((error) => {
+                    console.error('Error saving follow-up:', error);
+                    alert('Error al guardar el seguimiento');
+                });
+        };
+
+        // Update the addFollowUp function to populate the room number:
+        window.addFollowUp = function(guestId) {
+            const guestRef = ref(database, `guests/${guestId}`);
+            onValue(guestRef, (snapshot) => {
+                const guest = snapshot.val();
+                document.getElementById('followUpRoom').value = guest.roomNumber;
+                document.getElementById('followUpForm').dataset.guestId = guestId;
+                
+                const modal = new bootstrap.Modal(document.getElementById('followUpModal'));
+                modal.show();
+            }, {
+                onlyOnce: true
+            });
+        };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
