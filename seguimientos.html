@@ -4,6 +4,7 @@
     <title>InHouse Manager - Seguimientos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
         * {
@@ -29,7 +30,7 @@
 
         .navbar {
             background: white;
-            padding: 1rem 2rem;
+            padding: 0.8rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: fixed;
             width: 100%;
@@ -45,38 +46,53 @@
             margin: 0 auto;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .nav-links a {
             text-decoration: none;
             color: var(--text-color);
-            font-weight: 500;
+            font-size: 1.5rem;
             transition: all 0.3s ease;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
+        .nav-links a i {
+            font-size: 1.5rem;
+            margin-bottom: 0.2rem;
         }
 
-        .nav-links a:hover::after {
-            width: 100%;
+        .nav-links a span {
+            font-size: 0.7rem;
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .nav-links a span {
+                display: block;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .nav-links {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 0.8rem;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                justify-content: space-around;
+            }
+            
+            .main-content {
+                margin-bottom: 70px;
+            }
         }
 
         .main-content {
@@ -192,60 +208,58 @@
         }
 
         .tag {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
+            background: white;
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: 25px;
+            padding: 0.6rem 1.2rem;
             font-size: 0.9rem;
-            background: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
         }
 
         .tag:hover {
-            background: var(--primary-color);
-            color: white;
+            background: rgba(74, 144, 226, 0.1);
+            border-color: var(--primary-color);
         }
 
         .tag.selected {
             background: var(--primary-color);
-            color: white;
             border-color: var(--primary-color);
+            color: white;
         }
 
         .mood-selector {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
-            margin: 0.5rem 0;
+            margin-top: 0.5rem;
         }
 
         .mood-option {
-            flex: 1;
-            padding: 0.8rem;
-            border-radius: 8px;
+            background: white;
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid rgba(0,0,0,0.1);
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+        }
+
+        .mood-option i {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            display: block;
         }
 
         .mood-option:hover {
-            background: rgba(74, 144, 226, 0.1);
+            transform: translateY(-2px);
             border-color: var(--primary-color);
         }
 
         .mood-option.selected {
+            background: var(--primary-color);
             border-color: var(--primary-color);
-            background: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
-        }
-
-        .mood-option i {
-            font-size: 1.2rem;
+            color: white;
         }
 
         .popup-overlay {
@@ -265,11 +279,13 @@
             position: relative;
             background: white;
             width: 90%;
-            max-width: 800px;
+            max-width: 600px; /* Reduced from 800px */
+            max-height: 90vh; /* Add max height */
             margin: 20px auto;
             border-radius: 20px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
             animation: slideIn 0.4s ease;
+            overflow-y: auto; /* Add scrolling */
         }
 
         .popup-header {
@@ -300,51 +316,48 @@
         }
 
         .popup-content {
-            padding: 2rem;
+            padding: 1.5rem; /* Reduced padding */
         }
 
         .follow-up-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
+            width: 100%;
         }
 
         .form-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
             font-weight: 500;
+            color: #2d3436;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
         }
 
-        .form-group select,
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
+        .form-control, .form-select {
             padding: 0.8rem 1rem;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
             font-size: 0.95rem;
             transition: all 0.3s ease;
+            background-color: white;
         }
 
-        .form-group select:focus,
-        .form-group input:focus,
-        .form-group textarea:focus {
+        .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-            outline: none;
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
         }
 
         .btn-add {
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), #357abd);
             color: white;
             border: none;
             padding: 1rem 2rem;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 500;
             display: inline-flex;
             align-items: center;
@@ -352,11 +365,9 @@
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            justify-content: center;
         }
 
         .btn-add:hover {
-            background: #357abd;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
         }
@@ -408,25 +419,81 @@
 
         @media (max-width: 768px) {
             .follow-up-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
             }
             
-            .popup {
-                width: 95%;
-                margin: 10px auto;
-            }
-            
-            .popup-content {
-                padding: 1.5rem;
+            .modal-body {
+                padding: 1rem;
             }
             
             .mood-selector {
-                flex-direction: column;
+                grid-template-columns: 1fr !important;
+            }
+            
+            .follow-up-tags {
+                gap: 0.5rem;
+            }
+            
+            .tag {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            .modal-header {
+                padding: 1rem;
+            }
+            
+            .modal-title {
+                font-size: 1.2rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
             }
             
             .mood-option {
-                width: 100%;
+                padding: 0.8rem;
             }
+            
+            .mood-option i {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Update modal styles for better responsiveness */
+        .modal-dialog {
+            max-width: 600px;
+            margin: 1.75rem auto;
+        }
+
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .follow-up-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .mood-selector,
+        .follow-up-tags,
+        .form-group {
+            width: 100%;
         }
     </style>
 </head>
@@ -435,10 +502,22 @@
         <div class="nav-container">
             <div class="logo">InHouse Manager</div>
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="inhouse.html">InHouse</a>
-                <a href="seguimientos.html">Seguimientos</a>
-                <a href="ventas.html">Ventas</a>
+                <a href="index.html">
+                    <i class="ri-home-line"></i>
+                    <span>Home</span>
+                </a>
+                <a href="inhouse.html">
+                    <i class="ri-building-line"></i>
+                    <span>InHouse</span>
+                </a>
+                <a href="seguimientos.html">
+                    <i class="ri-file-list-line"></i>
+                    <span>Seguimientos</span>
+                </a>
+                <a href="ventas.html">
+                    <i class="ri-shopping-cart-line"></i>
+                    <span>Ventas</span>
+                </a>
             </div>
         </div>
     </nav>
@@ -461,100 +540,129 @@
         </div>
     </main>
 
-    <div class="popup-overlay" id="followUpFormModal">
-        <div class="popup">
-            <div class="popup-header">
-                <h3>Nuevo Seguimiento</h3>
-                <i class="ri-close-line popup-close" onclick="closeFollowUpForm()"></i>
-            </div>
-            <div class="popup-content">
-                <form id="followUpForm" class="follow-up-grid">
-                    <div class="form-group">
-                        <label for="roomSelect">Habitación</label>
-                        <select id="roomSelect" required>
-                            <option value="">Seleccionar habitación</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="followUpDate">Fecha</label>
-                        <input type="date" id="followUpDate" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="guestMood">Estado de ánimo del huésped</label>
-                        <div class="mood-selector">
-                            <div class="mood-option" data-mood="happy">
-                                <i class="ri-emotion-happy-line"></i> Feliz
+    <div class="modal fade" id="followUpFormModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Seguimiento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="followUpForm">
+                        <div class="follow-up-grid">
+                            <div class="form-group">
+                                <label for="roomSelect">Habitación</label>
+                                <select id="roomSelect" required class="form-select">
+                                    <option value="">Seleccionar habitación</option>
+                                </select>
                             </div>
-                            <div class="mood-option" data-mood="neutral">
-                                <i class="ri-emotion-normal-line"></i> Normal
+                            
+                            <div class="form-group">
+                                <label for="followUpDate">Fecha</label>
+                                <input type="date" id="followUpDate" required class="form-control">
                             </div>
-                            <div class="mood-option" data-mood="unhappy">
-                                <i class="ri-emotion-unhappy-line"></i> Insatisfecho
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="guestMood">Estado de ánimo del huésped</label>
+                                <div class="mood-selector">
+                                    <div class="mood-option" data-mood="happy">
+                                        <i class="ri-emotion-happy-line"></i> Feliz
+                                    </div>
+                                    <div class="mood-option" data-mood="neutral">
+                                        <i class="ri-emotion-normal-line"></i> Normal
+                                    </div>
+                                    <div class="mood-option" data-mood="unhappy">
+                                        <i class="ri-emotion-unhappy-line"></i> Insatisfecho
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Categorías</label>
+                                <div class="follow-up-tags">
+                                    <span class="tag">Limpieza</span>
+                                    <span class="tag">Mantenimiento</span>
+                                    <span class="tag">Servicio</span>
+                                    <span class="tag">Solicitud especial</span>
+                                    <span class="tag">Queja</span>
+                                    <span class="tag">Sugerencia</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="followUpNotes">Notas del seguimiento</label>
+                                <textarea id="followUpNotes" rows="4" required class="form-control"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="actionRequired">¿Requiere acción?</label>
+                                <select id="actionRequired" class="form-select">
+                                    <option value="no">No</option>
+                                    <option value="yes">Sí</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="priority">Prioridad</label>
+                                <select id="priority" class="form-select">
+                                    <option value="low">Baja</option>
+                                    <option value="medium">Media</option>
+                                    <option value="high">Alta</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <button type="submit" class="btn-add">
+                                    <i class="ri-save-line"></i> Guardar Seguimiento
+                                </button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Categorías</label>
-                        <div class="follow-up-tags">
-                            <span class="tag">Limpieza</span>
-                            <span class="tag">Mantenimiento</span>
-                            <span class="tag">Servicio</span>
-                            <span class="tag">Solicitud especial</span>
-                            <span class="tag">Queja</span>
-                            <span class="tag">Sugerencia</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label for="followUpNotes">Notas del seguimiento</label>
-                        <textarea id="followUpNotes" rows="4" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="actionRequired">¿Requiere acción?</label>
-                        <select id="actionRequired">
-                            <option value="no">No</option>
-                            <option value="yes">Sí</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="priority">Prioridad</label>
-                        <select id="priority">
-                            <option value="low">Baja</option>
-                            <option value="medium">Media</option>
-                            <option value="high">Alta</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <button type="submit" class="btn-add">
-                            <i class="ri-save-line"></i> Guardar Seguimiento
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="popup-overlay report-modal" id="reportModal">
-        <div class="popup">
-            <div class="popup-header">
-                <h3>Reporte de Seguimientos</h3>
-                <i class="ri-close-line popup-close" onclick="closeReport()"></i>
-            </div>
-            <div class="report-content" id="reportContent">
-                <!-- Report content will be generated dynamically -->
+    <div class="modal fade" id="reportSelectionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Generar Reporte Detallado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-4">
+                        <label class="form-label fw-bold">Seleccionar Habitación</label>
+                        <select id="reportRoomSelect" class="form-select form-select-lg mb-3">
+                            <option value="">Seleccione una habitación</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-4" id="guestSelectContainer" style="display: none;">
+                        <label class="form-label fw-bold">Seleccionar Huésped</label>
+                        <select id="reportGuestSelect" class="form-select form-select-lg mb-3">
+                            <option value="">Seleccione un huésped</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label fw-bold">Período de Reporte</label>
+                        <select id="reportPeriod" class="form-select form-select-lg">
+                            <option value="all">Todo el historial</option>
+                            <option value="year">Último año</option>
+                            <option value="month">Último mes</option>
+                            <option value="week">Última semana</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-lg w-100" onclick="generateDetailedReport()">
+                        <i class="ri-file-chart-line me-2"></i>Generar Reporte Detallado
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, query, orderByChild, equalTo } 
+        import { getDatabase, ref, push, onValue, query, orderByChild, equalTo, get } 
         from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -659,82 +767,282 @@
             });
         });
 
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.timeline-item')) {
+                const item = e.target.closest('.timeline-item');
+                const followUpData = {
+                    date: item.querySelector('.timeline-date').textContent,
+                    content: item.querySelector('.timeline-content').textContent,
+                    priority: item.dataset.priority,
+                    meta: item.querySelector('.timeline-meta').textContent
+                };
+                showFollowUpDetails(followUpData);
+            }
+        });
+
         window.generateReport = function() {
-            const roomNumber = document.getElementById('roomSelect').value;
-            if (!roomNumber) {
-                alert('Por favor seleccione una habitación');
+            const modalHtml = `
+                <div class="modal fade" id="reportSelectionModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">Generar Reporte Detallado</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group mb-4">
+                                    <label class="form-label fw-bold">Seleccionar Habitación</label>
+                                    <select id="reportRoomSelect" class="form-select form-select-lg mb-3">
+                                        <option value="">Seleccione una habitación</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-4" id="guestSelectContainer" style="display: none;">
+                                    <label class="form-label fw-bold">Seleccionar Huésped</label>
+                                    <select id="reportGuestSelect" class="form-select form-select-lg mb-3">
+                                        <option value="">Seleccione un huésped</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label class="form-label fw-bold">Período de Reporte</label>
+                                    <select id="reportPeriod" class="form-select form-select-lg">
+                                        <option value="all">Todo el historial</option>
+                                        <option value="year">Último año</option>
+                                        <option value="month">Último mes</option>
+                                        <option value="week">Última semana</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-lg w-100" onclick="generateDetailedReport()">
+                                    <i class="ri-file-chart-line me-2"></i>Generar Reporte Detallado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('reportSelectionModal'));
+            
+            const roomSelect = document.getElementById('reportRoomSelect');
+            const guestsRef = ref(database, 'guests');
+            
+            onValue(guestsRef, (snapshot) => {
+                const rooms = new Set();
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    rooms.add(guest.roomNumber);
+                });
+                
+                [...rooms].sort().forEach(room => {
+                    const option = document.createElement('option');
+                    option.value = room;
+                    option.textContent = `Habitación ${room}`;
+                    roomSelect.appendChild(option);
+                });
+            });
+            
+            roomSelect.addEventListener('change', function() {
+                const selectedRoom = this.value;
+                if (selectedRoom) {
+                    loadGuestsForRoom(selectedRoom);
+                }
+            });
+            
+            modal.show();
+        };
+
+        function loadGuestsForRoom(roomNumber) {
+            const guestSelect = document.getElementById('reportGuestSelect');
+            const guestContainer = document.getElementById('guestSelectContainer');
+            const guestsRef = ref(database, 'guests');
+            
+            onValue(guestsRef, (snapshot) => {
+                guestSelect.innerHTML = '<option value="">Seleccione un huésped</option>';
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    if (guest.roomNumber === roomNumber) {
+                        const option = document.createElement('option');
+                        option.value = childSnapshot.key;
+                        option.textContent = `${guest.guestName} (${guest.checkIn} - ${guest.checkOut || 'Actual'})`;
+                        guestSelect.appendChild(option);
+                    }
+                });
+                guestContainer.style.display = 'block';
+            });
+        }
+
+        function generateDetailedReport() {
+            const roomNumber = document.getElementById('reportRoomSelect').value;
+            const guestId = document.getElementById('reportGuestSelect').value;
+            const period = document.getElementById('reportPeriod').value;
+            
+            if (!roomNumber || !guestId) {
+                alert('Por favor seleccione habitación y huésped');
                 return;
             }
             
-            const followUpsRef = query(ref(database, 'followUps'), 
-                                     orderByChild('roomNumber'), 
-                                     equalTo(roomNumber));
+            bootstrap.Modal.getInstance(document.getElementById('reportSelectionModal')).hide();
             
-            onValue(followUpsRef, (snapshot) => {
+            const guestRef = ref(database, `guests/${guestId}`);
+            const followUpsRef = query(ref(database, 'followUps'), 
+                                      orderByChild('roomNumber'), 
+                                      equalTo(roomNumber));
+            
+            Promise.all([
+                get(guestRef),
+                get(followUpsRef)
+            ]).then(([guestSnapshot, followupsSnapshot]) => {
+                const guest = guestSnapshot.val();
                 const followUps = [];
-                snapshot.forEach((childSnapshot) => {
-                    followUps.push(childSnapshot.val());
+                followupsSnapshot.forEach(childSnapshot => {
+                    const followUp = childSnapshot.val();
+                    if (isFollowUpInPeriod(followUp.date, period)) {
+                        followUps.push(followUp);
+                    }
                 });
                 
-                followUps.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                const reportContent = document.getElementById('reportContent');
-                reportContent.innerHTML = `
-                    <div class="report-header">
-                        <h2>Reporte de Seguimientos - Habitación ${roomNumber}</h2>
-                        <p>Generado el ${new Date().toLocaleDateString()}</p>
-                    </div>
-                    <div class="report-meta">
-                        <div class="meta-item">
-                            <div class="meta-label">Total de seguimientos</div>
-                            <div class="meta-value">${followUps.length}</div>
-                        </div>
-                        <div class="meta-item">
-                            <div class="meta-label">Período</div>
-                            <div class="meta-value">
-                                ${followUps.length ? 
-                                    `${new Date(followUps[followUps.length-1].date).toLocaleDateString()} - 
-                                     ${new Date(followUps[0].date).toLocaleDateString()}` : 
-                                    'N/A'}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timeline">
-                        ${followUps.map(followUp => `
-                            <div class="timeline-item">
-                                <div class="timeline-date">${new Date(followUp.date).toLocaleDateString()}</div>
-                                <div class="timeline-content">
-                                    <p>${followUp.notes}</p>
-                                    ${followUp.tags?.length ? 
-                                        `<div class="follow-up-tags">
-                                            ${followUp.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                                        </div>` : 
-                                        ''}
-                                </div>
-                                <div class="timeline-meta">
-                                    <span>Estado de ánimo: ${followUp.mood || 'No registrado'}</span>
-                                    <span>Prioridad: ${followUp.priority}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                
-                document.getElementById('reportModal').style.display = 'block';
+                showDetailedReport(guest, followUps);
             });
-        };
+        }
+
+        function showDetailedReport(guest, followUps) {
+            const modalHtml = `
+                <div class="modal fade" id="detailedReportModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">Reporte Detallado de Seguimientos</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="report-container">
+                                    <div class="guest-info mb-4">
+                                        <h4 class="border-bottom pb-2">Información del Huésped</h4>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Nombre:</strong> ${guest.guestName}</p>
+                                                <p><strong>Habitación:</strong> ${guest.roomNumber}</p>
+                                                <p><strong>Check-in:</strong> ${guest.checkIn}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Email:</strong> ${guest.email || 'N/A'}</p>
+                                                <p><strong>Teléfono:</strong> ${guest.phone || 'N/A'}</p>
+                                                <p><strong>Check-out:</strong> ${guest.checkOut || 'Actual'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="followups-summary mb-4">
+                                        <h4 class="border-bottom pb-2">Resumen de Seguimientos</h4>
+                                        <div class="row text-center">
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h5>Total Seguimientos</h5>
+                                                        <h2>${followUps.length}</h2>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h5>Requieren Acción</h5>
+                                                        <h2>${followUps.filter(f => f.actionRequired === 'yes').length}</h2>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h5>Alta Prioridad</h5>
+                                                        <h2>${followUps.filter(f => f.priority === 'high').length}</h2>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="followups-detail">
+                                        <h4 class="border-bottom pb-2">Detalle de Seguimientos</h4>
+                                        ${followUps.map(followUp => `
+                                            <div class="card mb-3 border-${getPriorityColor(followUp.priority)}">
+                                                <div class="card-header bg-${getPriorityColor(followUp.priority)} text-white d-flex justify-content-between">
+                                                    <span>${new Date(followUp.date).toLocaleDateString()}</span>
+                                                    <span class="badge bg-white text-${getPriorityColor(followUp.priority)}">
+                                                        ${followUp.priority.toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p class="card-text">${followUp.notes}</p>
+                                                    ${followUp.tags ? `
+                                                        <div class="tags mt-2">
+                                                            ${followUp.tags.map(tag => 
+                                                                `<span class="badge bg-secondary me-1">${tag}</span>`
+                                                            ).join('')}
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" onclick="printReport()">
+                                    <i class="ri-printer-line me-2"></i>Imprimir Reporte
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('detailedReportModal'));
+            modal.show();
+        }
+
+        function getPriorityColor(priority) {
+            const colors = {
+                high: 'danger',
+                medium: 'warning',
+                low: 'success'
+            };
+            return colors[priority] || 'primary';
+        }
+
+        function isFollowUpInPeriod(date, period) {
+            const followUpDate = new Date(date);
+            const now = new Date();
+            
+            switch(period) {
+                case 'week':
+                    return (now - followUpDate) <= 7 * 24 * 60 * 60 * 1000;
+                case 'month':
+                    return (now - followUpDate) <= 30 * 24 * 60 * 60 * 1000;
+                case 'year':
+                    return (now - followUpDate) <= 365 * 24 * 60 * 60 * 1000;
+                default:
+                    return true;
+            }
+        }
+
+        function printReport() {
+            window.print();
+        }
 
         window.closeReport = function() {
-            document.getElementById('reportModal').style.display = 'none';
+            bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
         };
 
         window.showFollowUpForm = function() {
-            document.getElementById('followUpFormModal').style.display = 'block';
-        }
+            new bootstrap.Modal(document.getElementById('followUpFormModal')).show();
+        };
 
         window.closeFollowUpForm = function() {
-            document.getElementById('followUpFormModal').style.display = 'none';
-        }
+            bootstrap.Modal.getInstance(document.getElementById('followUpFormModal')).hide();
+        };
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
