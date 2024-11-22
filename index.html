@@ -412,6 +412,54 @@
             transform: translateX(5px);
             background-color: rgba(74, 144, 226, 0.05);
         }
+
+        .modal .bg-gradient {
+            background: linear-gradient(135deg, var(--primary-color), #357abd);
+        }
+
+        .follow-up-details {
+            font-size: 0.95rem;
+        }
+
+        .follow-up-details .content {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .follow-up-details .meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .badge {
+            padding: 0.5em 1em;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            border-radius: 15px 15px 0 0;
+            padding: 1rem 1.5rem;
+        }
+
+        .modal-header .modal-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .follow-up-details i {
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -828,7 +876,7 @@
                                 const modal = new bootstrap.Modal(document.getElementById('statsModal'));
                                 modal.show();
 
-                                // Add event listeners for complete buttons
+                                // Add event listeners for complete buttons 
                                 document.querySelectorAll('.complete-follow-up').forEach(button => {
                                     button.addEventListener('click', function() {
                                         const followUpId = this.dataset.id;
@@ -849,6 +897,10 @@
                                             // Update the dashboard count
                                             const dashboardCount = document.getElementById('pendingFollowUpsCount');
                                             dashboardCount.textContent = currentCount - 1;
+
+                                            // Refresh dashboard stats and timeline
+                                            updateDashboardStats();
+                                            updateTimeline();
                                             
                                             // Show success message
                                             const toast = new bootstrap.Toast(Object.assign(document.createElement('div'), {
@@ -865,6 +917,9 @@
                                             }));
                                             document.body.appendChild(toast.element);
                                             toast.show();
+
+                                            // Close the modal after completion
+                                            modal.hide();
                                         }).catch(error => {
                                             console.error("Error updating follow-up: ", error);
                                             alert('Error al actualizar el seguimiento');
@@ -997,13 +1052,11 @@
         });
 
         function showFollowUpDetails(data) {
-            // Check if modal already exists and remove it
             const existingModal = document.getElementById('followUpDetailsModal');
             if (existingModal) {
                 existingModal.remove();
             }
 
-            // Create modal container
             const modalDiv = document.createElement('div');
             modalDiv.className = 'modal fade';
             modalDiv.id = 'followUpDetailsModal';
@@ -1011,24 +1064,29 @@
             modalDiv.setAttribute('aria-labelledby', 'followUpDetailsModalLabel');
             modalDiv.setAttribute('aria-hidden', 'true');
 
-            // Set modal content
             modalDiv.innerHTML = `
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="followUpDetailsModalLabel">Detalles del Seguimiento</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-header bg-gradient">
+                            <h5 class="modal-title text-white" id="followUpDetailsModalLabel">
+                                <i class="ri-file-list-3-line me-2"></i>Detalles del Seguimiento
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div class="modal-body p-4">
                             <div class="follow-up-details">
-                                <div class="header">
-                                    <h4>${data.date}</h4>
-                                    <span class="priority-badge ${data.priority}">${data.priority}</span>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ri-calendar-line text-primary me-2"></i>
+                                        <h6 class="mb-0">${data.date}</h6>
+                                    </div>
+                                    <span class="badge ${getPriorityClass(data.priority)}">${data.priority}</span>
                                 </div>
-                                <div class="content">
+                                <div class="content border-start border-4 border-primary ps-3 py-2 mb-3">
                                     ${data.content}
                                 </div>
-                                <div class="meta">
+                                <div class="meta p-3 bg-light rounded">
+                                    <i class="ri-information-line text-primary me-2"></i>
                                     ${data.meta}
                                 </div>
                             </div>
@@ -1037,12 +1095,22 @@
                 </div>
             `;
 
-            // Append modal to body
             document.body.appendChild(modalDiv);
-
-            // Initialize and show Bootstrap modal
             const modal = new bootstrap.Modal(modalDiv);
             modal.show();
+        }
+
+        function getPriorityClass(priority) {
+            switch(priority.toLowerCase()) {
+                case 'high':
+                    return 'bg-danger';
+                case 'medium':
+                    return 'bg-warning';
+                case 'low':
+                    return 'bg-success';
+                default:
+                    return 'bg-primary';
+            }
         }
 
         // Call updateDashboardStats when the page loads
@@ -1072,6 +1140,43 @@
                 }
             });
         });
+
+        // Add a new function to update the timeline
+        function updateTimeline() {
+            const followUpsRef = ref(database, 'followUps');
+            onValue(followUpsRef, (snapshot) => {
+                const timeline = document.getElementById('followUpTimeline');
+                timeline.innerHTML = '';
+                
+                const followUps = [];
+                snapshot.forEach((childSnapshot) => {
+                    followUps.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                
+                followUps.sort((a, b) => b.timestamp - a.timestamp);
+                
+                followUps.forEach(followUp => {
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = 'timeline-item';
+                    timelineItem.setAttribute('data-priority', followUp.priority);
+                    timelineItem.innerHTML = `
+                        <div class="timeline-date">${new Date(followUp.date).toLocaleDateString()}</div>
+                        <div class="timeline-content">
+                            <strong>Habitación ${followUp.roomNumber}</strong>
+                            <p>${followUp.notes}</p>
+                        </div>
+                        <div class="timeline-meta">
+                            <span>Prioridad: ${followUp.priority}</span>
+                            <span>Estado: ${followUp.actionRequired === 'yes' ? 'Requiere acción' : 'Completado'}</span>
+                        </div>
+                    `;
+                    timeline.appendChild(timelineItem);
+                });
+            });
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
