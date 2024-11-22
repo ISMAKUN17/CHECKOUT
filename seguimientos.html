@@ -389,16 +389,68 @@
         }
 
         @media print {
-            .navbar, .follow-up-form, .popup-close {
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .navbar, 
+            .modal-header button,
+            .modal-footer,
+            .btn-close,
+            .report-btn {
                 display: none !important;
             }
-            
-            .report-content {
+
+            .modal {
+                position: absolute !important;
+                left: 0;
+                top: 0;
+                margin: 0;
                 padding: 0;
             }
-            
-            .report-header {
-                margin-top: 0;
+
+            .modal-dialog {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .modal-content {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .card {
+                break-inside: avoid;
+                border: 1px solid #dee2e6 !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .guest-info,
+            .followups-summary,
+            .followups-detail {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 1.5rem;
+            }
+
+            .report-container {
+                padding: 0 !important;
+            }
+
+            .text-white {
+                color: #000 !important;
+            }
+
+            .bg-primary {
+                background-color: #fff !important;
+                border-bottom: 2px solid #4a90e2;
             }
         }
 
@@ -494,6 +546,58 @@
         .follow-up-tags,
         .form-group {
             width: 100%;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        }
+
+        .report-container {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .report-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .report-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .report-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .report-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @media print {
+            .modal-dialog {
+                max-width: 100% !important;
+                margin: 0 !important;
+            }
+            
+            .modal-content {
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            .modal-footer {
+                display: none !important;
+            }
+            
+            .card {
+                break-inside: avoid;
+            }
         }
     </style>
 </head>
@@ -652,7 +756,7 @@
                             <option value="week">Última semana</option>
                         </select>
                     </div>
-                    <button type="button" class="btn btn-primary btn-lg w-100" onclick="generateDetailedReport()">
+                    <button type="button" class="btn btn-primary btn-lg w-100" onclick="window.generateDetailedReport()">
                         <i class="ri-file-chart-line me-2"></i>Generar Reporte Detallado
                     </button>
                 </div>
@@ -780,6 +884,77 @@
             }
         });
 
+        function showFollowUpDetails(followUpData) {
+            const modalHtml = `
+                <div class="modal fade" id="followUpDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">
+                                    <i class="ri-file-list-line me-2"></i>
+                                    Detalles del Seguimiento
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="fw-bold text-muted mb-1">
+                                                <i class="ri-calendar-line me-2"></i>Fecha
+                                            </label>
+                                            <p class="mb-0">${followUpData.date}</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="fw-bold text-muted mb-1">
+                                                <i class="ri-file-text-line me-2"></i>Contenido
+                                            </label>
+                                            <p class="mb-0">${followUpData.content}</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="fw-bold text-muted mb-1">
+                                                <i class="ri-flag-line me-2"></i>Prioridad
+                                            </label>
+                                            <span class="badge bg-${getPriorityBadgeColor(followUpData.priority)}">${followUpData.priority.toUpperCase()}</span>
+                                        </div>
+                                        <div>
+                                            <label class="fw-bold text-muted mb-1">
+                                                <i class="ri-information-line me-2"></i>Información Adicional
+                                            </label>
+                                            <p class="mb-0">${followUpData.meta}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="ri-close-line me-2"></i>Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('followUpDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('followUpDetailsModal'));
+            modal.show();
+        }
+
+        function getPriorityBadgeColor(priority) {
+            const colors = {
+                'high': 'danger',
+                'medium': 'warning',
+                'low': 'success'
+            };
+            return colors[priority.toLowerCase()] || 'primary';
+        }
+
         window.generateReport = function() {
             const modalHtml = `
                 <div class="modal fade" id="reportSelectionModal" tabindex="-1">
@@ -811,7 +986,7 @@
                                         <option value="week">Última semana</option>
                                     </select>
                                 </div>
-                                <button type="button" class="btn btn-primary btn-lg w-100" onclick="generateDetailedReport()">
+                                <button type="button" class="btn btn-primary btn-lg w-100" onclick="window.generateDetailedReport()">
                                     <i class="ri-file-chart-line me-2"></i>Generar Reporte Detallado
                                 </button>
                             </div>
@@ -851,27 +1026,7 @@
             modal.show();
         };
 
-        function loadGuestsForRoom(roomNumber) {
-            const guestSelect = document.getElementById('reportGuestSelect');
-            const guestContainer = document.getElementById('guestSelectContainer');
-            const guestsRef = ref(database, 'guests');
-            
-            onValue(guestsRef, (snapshot) => {
-                guestSelect.innerHTML = '<option value="">Seleccione un huésped</option>';
-                snapshot.forEach((childSnapshot) => {
-                    const guest = childSnapshot.val();
-                    if (guest.roomNumber === roomNumber) {
-                        const option = document.createElement('option');
-                        option.value = childSnapshot.key;
-                        option.textContent = `${guest.guestName} (${guest.checkIn} - ${guest.checkOut || 'Actual'})`;
-                        guestSelect.appendChild(option);
-                    }
-                });
-                guestContainer.style.display = 'block';
-            });
-        }
-
-        function generateDetailedReport() {
+        window.generateDetailedReport = function() {
             const roomNumber = document.getElementById('reportRoomSelect').value;
             const guestId = document.getElementById('reportGuestSelect').value;
             const period = document.getElementById('reportPeriod').value;
@@ -903,6 +1058,30 @@
                 
                 showDetailedReport(guest, followUps);
             });
+        };
+
+        window.printReport = function() {
+            window.print();
+        };
+
+        function loadGuestsForRoom(roomNumber) {
+            const guestSelect = document.getElementById('reportGuestSelect');
+            const guestContainer = document.getElementById('guestSelectContainer');
+            const guestsRef = ref(database, 'guests');
+            
+            onValue(guestsRef, (snapshot) => {
+                guestSelect.innerHTML = '<option value="">Seleccione un huésped</option>';
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    if (guest.roomNumber === roomNumber) {
+                        const option = document.createElement('option');
+                        option.value = childSnapshot.key;
+                        option.textContent = `${guest.guestName} (${guest.checkIn} - ${guest.checkOut || 'Actual'})`;
+                        guestSelect.appendChild(option);
+                    }
+                });
+                guestContainer.style.display = 'block';
+            });
         }
 
         function showDetailedReport(guest, followUps) {
@@ -911,73 +1090,138 @@
                     <div class="modal-dialog modal-dialog-centered modal-lg">
                         <div class="modal-content">
                             <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title">Reporte Detallado de Seguimientos</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <h3 class="modal-title fw-bold">
+                                    <i class="ri-file-text-line me-2"></i>
+                                    Reporte Detallado de Seguimientos
+                                </h3>
+                                <div class="print-info d-none d-print-block text-end">
+                                    <p class="mb-0">Fecha de impresión: ${new Date().toLocaleDateString()}</p>
+                                </div>
                             </div>
-                            <div class="modal-body">
+                            <div class="modal-body p-4">
                                 <div class="report-container">
+                                    <!-- Hotel Header for Print -->
+                                    <div class="d-none d-print-block text-center mb-4">
+                                        <h2 class="fw-bold">InHouse Manager</h2>
+                                        <p class="text-muted">Reporte de Seguimientos de Huésped</p>
+                                        <hr>
+                                    </div>
+
+                                    <!-- Guest Information -->
                                     <div class="guest-info mb-4">
-                                        <h4 class="border-bottom pb-2">Información del Huésped</h4>
-                                        <div class="row">
+                                        <h4 class="fw-bold border-bottom pb-2 mb-3">
+                                            <i class="ri-user-line me-2"></i>
+                                            Información del Huésped
+                                        </h4>
+                                        <div class="row g-3">
                                             <div class="col-md-6">
-                                                <p><strong>Nombre:</strong> ${guest.guestName}</p>
-                                                <p><strong>Habitación:</strong> ${guest.roomNumber}</p>
-                                                <p><strong>Check-in:</strong> ${guest.checkIn}</p>
+                                                <div class="card h-100">
+                                                    <div class="card-body">
+                                                        <table class="table table-borderless">
+                                                            <tr>
+                                                                <th width="120"><i class="ri-user-line me-2"></i>Nombre:</th>
+                                                                <td>${guest.guestName}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="ri-hotel-line me-2"></i>Habitación:</th>
+                                                                <td>${guest.roomNumber}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="ri-mail-line me-2"></i>Email:</th>
+                                                                <td>${guest.email || 'N/A'}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <p><strong>Email:</strong> ${guest.email || 'N/A'}</p>
-                                                <p><strong>Teléfono:</strong> ${guest.phone || 'N/A'}</p>
-                                                <p><strong>Check-out:</strong> ${guest.checkOut || 'Actual'}</p>
+                                                <div class="card h-100">
+                                                    <div class="card-body">
+                                                        <table class="table table-borderless">
+                                                            <tr>
+                                                                <th width="120"><i class="ri-phone-line me-2"></i>Teléfono:</th>
+                                                                <td>${guest.phone || 'N/A'}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="ri-calendar-check-line me-2"></i>Check-in:</th>
+                                                                <td>${guest.checkIn}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="ri-calendar-event-line me-2"></i>Check-out:</th>
+                                                                <td>${guest.checkOut || 'Actual'}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
+                                    <!-- Statistics Summary -->
                                     <div class="followups-summary mb-4">
-                                        <h4 class="border-bottom pb-2">Resumen de Seguimientos</h4>
-                                        <div class="row text-center">
+                                        <h4 class="fw-bold border-bottom pb-2 mb-3">
+                                            <i class="ri-bar-chart-line me-2"></i>
+                                            Resumen de Seguimientos
+                                        </h4>
+                                        <div class="row g-3">
                                             <div class="col-md-4">
-                                                <div class="card bg-light">
+                                                <div class="card text-center h-100">
                                                     <div class="card-body">
+                                                        <div class="display-4 text-primary mb-2">${followUps.length}</div>
                                                         <h5>Total Seguimientos</h5>
-                                                        <h2>${followUps.length}</h2>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="card bg-light">
+                                                <div class="card text-center h-100">
                                                     <div class="card-body">
+                                                        <div class="display-4 text-warning mb-2">
+                                                            ${followUps.filter(f => f.actionRequired === 'yes').length}
+                                                        </div>
                                                         <h5>Requieren Acción</h5>
-                                                        <h2>${followUps.filter(f => f.actionRequired === 'yes').length}</h2>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="card bg-light">
+                                                <div class="card text-center h-100">
                                                     <div class="card-body">
+                                                        <div class="display-4 text-danger mb-2">
+                                                            ${followUps.filter(f => f.priority === 'high').length}
+                                                        </div>
                                                         <h5>Alta Prioridad</h5>
-                                                        <h2>${followUps.filter(f => f.priority === 'high').length}</h2>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
+                                    <!-- Detailed Follow-ups -->
                                     <div class="followups-detail">
-                                        <h4 class="border-bottom pb-2">Detalle de Seguimientos</h4>
-                                        ${followUps.map(followUp => `
-                                            <div class="card mb-3 border-${getPriorityColor(followUp.priority)}">
-                                                <div class="card-header bg-${getPriorityColor(followUp.priority)} text-white d-flex justify-content-between">
-                                                    <span>${new Date(followUp.date).toLocaleDateString()}</span>
-                                                    <span class="badge bg-white text-${getPriorityColor(followUp.priority)}">
-                                                        ${followUp.priority.toUpperCase()}
-                                                    </span>
+                                        <h4 class="fw-bold border-bottom pb-2 mb-3">
+                                            <i class="ri-list-check-2 me-2"></i>
+                                            Detalle de Seguimientos
+                                        </h4>
+                                        ${followUps.map((followUp, index) => `
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-light">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="fw-bold">
+                                                            <i class="ri-calendar-line me-2"></i>
+                                                            Seguimiento #${index + 1} - ${new Date(followUp.date).toLocaleDateString()}
+                                                        </span>
+                                                        <span class="badge bg-${getPriorityColor(followUp.priority)}">
+                                                            ${followUp.priority.toUpperCase()}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <div class="card-body">
-                                                    <p class="card-text">${followUp.notes}</p>
+                                                    <p class="mb-3">${followUp.notes}</p>
                                                     ${followUp.tags ? `
-                                                        <div class="tags mt-2">
+                                                        <div class="mt-2">
                                                             ${followUp.tags.map(tag => 
-                                                                `<span class="badge bg-secondary me-1">${tag}</span>`
+                                                                `<span class="badge bg-secondary me-1">
+                                                                    <i class="ri-price-tag-3-line me-1"></i>${tag}
+                                                                </span>`
                                                             ).join('')}
                                                         </div>
                                                     ` : ''}
@@ -988,6 +1232,9 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="ri-close-line me-2"></i>Cerrar
+                                </button>
                                 <button type="button" class="btn btn-primary" onclick="printReport()">
                                     <i class="ri-printer-line me-2"></i>Imprimir Reporte
                                 </button>
@@ -996,6 +1243,11 @@
                     </div>
                 </div>
             `;
+            
+            const existingModal = document.getElementById('detailedReportModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
             
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             const modal = new bootstrap.Modal(document.getElementById('detailedReportModal'));
@@ -1025,10 +1277,6 @@
                 default:
                     return true;
             }
-        }
-
-        function printReport() {
-            window.print();
         }
 
         window.closeReport = function() {
