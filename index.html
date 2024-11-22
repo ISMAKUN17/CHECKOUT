@@ -394,12 +394,13 @@
         .modal-header {
             background: linear-gradient(135deg, var(--primary-color), #357abd);
             color: white;
+            padding: 1.5rem;
         }
 
         .modal-content {
             border-radius: 15px;
             border: none;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         .list-group-item {
@@ -459,6 +460,20 @@
 
         .follow-up-details i {
             font-size: 1.2rem;
+        }
+
+        .stat-details .list-group-item {
+            padding: 1rem 1.5rem;
+        }
+        
+        .stat-details p {
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .btn-outline-success:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -787,17 +802,22 @@
                         case 'currentGuests':
                             title = 'Huéspedes Actuales';
                             content = `
-                                <div class="list-group">
-                                    ${guestsList.current.map(guest => `
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="stat-details">
+                                    <p class="fw-bold text-primary">Total de huéspedes actuales: ${guestsList.current.length}</p>
+                                    <div class="list-group">
+                                        ${guestsList.current.map(guest => `
+                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-primary border-3">
                                                 <div>
-                                                    <h6 class="mb-1">Habitación ${guest.roomNumber}</h6>
-                                                    <p class="mb-1">${guest.guestName}</p>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="ri-user-line text-primary"></i>
+                                                        <h6 class="mb-1 fw-bold">Habitación ${guest.roomNumber}</h6>
+                                                    </div>
+                                                    <p class="mb-0 text-muted">${guest.guestName}</p>
                                                 </div>
+                                                <span class="badge bg-primary rounded-pill">En casa</span>
                                             </div>
-                                        </div>
-                                    `).join('') || '<p class="text-center">No hay huéspedes actuales</p>'}
+                                        `).join('') || '<p class="text-center text-muted py-3">No hay huéspedes actuales</p>'}
+                                    </div>
                                 </div>
                             `;
                             break;
@@ -805,17 +825,22 @@
                         case 'expectedArrivals':
                             title = 'Llegadas Esperadas';
                             content = `
-                                <div class="list-group">
-                                    ${guestsList.arrivals.map(guest => `
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="stat-details">
+                                    <p class="fw-bold text-success">Total de llegadas esperadas: ${guestsList.arrivals.length}</p>
+                                    <div class="list-group">
+                                        ${guestsList.arrivals.map(guest => `
+                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-success border-3">
                                                 <div>
-                                                    <h6 class="mb-1">Habitación ${guest.roomNumber}</h6>
-                                                    <p class="mb-1">${guest.guestName}</p>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="ri-flight-land-line text-success"></i>
+                                                        <h6 class="mb-1 fw-bold">Habitación ${guest.roomNumber}</h6>
+                                                    </div>
+                                                    <p class="mb-0 text-muted">${guest.guestName}</p>
                                                 </div>
+                                                <span class="badge bg-success rounded-pill">Llegada</span>
                                             </div>
-                                        </div>
-                                    `).join('') || '<p class="text-center">No hay llegadas esperadas</p>'}
+                                        `).join('') || '<p class="text-center text-muted py-3">No hay llegadas esperadas</p>'}
+                                    </div>
                                 </div>
                             `;
                             break;
@@ -823,17 +848,22 @@
                         case 'scheduledDepartures':
                             title = 'Salidas Programadas';
                             content = `
-                                <div class="list-group">
-                                    ${guestsList.departures.map(guest => `
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="stat-details">
+                                    <p class="fw-bold text-warning">Total de salidas programadas: ${guestsList.departures.length}</p>
+                                    <div class="list-group">
+                                        ${guestsList.departures.map(guest => `
+                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-warning border-3">
                                                 <div>
-                                                    <h6 class="mb-1">Habitación ${guest.roomNumber}</h6>
-                                                    <p class="mb-1">${guest.guestName}</p>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="ri-flight-takeoff-line text-warning"></i>
+                                                        <h6 class="mb-1 fw-bold">Habitación ${guest.roomNumber}</h6>
+                                                    </div>
+                                                    <p class="mb-0 text-muted">${guest.guestName}</p>
                                                 </div>
+                                                <span class="badge bg-warning rounded-pill">Salida</span>
                                             </div>
-                                        </div>
-                                    `).join('') || '<p class="text-center">No hay salidas programadas</p>'}
+                                        `).join('') || '<p class="text-center text-muted py-3">No hay salidas programadas</p>'}
+                                    </div>
                                 </div>
                             `;
                             break;
@@ -853,19 +883,23 @@
                                 title = 'Seguimientos Pendientes';
                                 content = `
                                     <div class="stat-details">
-                                        <p class="fw-bold text-primary">Total de seguimientos pendientes: ${pendingFollowUps.length}</p>
-                                        <ul class="list-group">
+                                        <p class="fw-bold text-danger">Total de seguimientos pendientes: ${pendingFollowUps.length}</p>
+                                        <div class="list-group">
                                             ${pendingFollowUps.map(f => `
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-danger border-3">
                                                     <div>
-                                                        <strong>Habitación ${f.roomNumber}</strong>: ${f.notes}
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <i class="ri-notification-line text-danger"></i>
+                                                            <h6 class="mb-1 fw-bold">Habitación ${f.roomNumber}</h6>
+                                                        </div>
+                                                        <p class="mb-0 text-muted">${f.notes}</p>
                                                     </div>
-                                                    <button class="btn btn-success btn-sm complete-follow-up" data-id="${f.id}">
-                                                        <i class="ri-check-line"></i> Marcar como completado
+                                                    <button class="btn btn-outline-success btn-sm complete-follow-up" data-id="${f.id}">
+                                                        <i class="ri-check-line"></i> Completar
                                                     </button>
-                                                </li>
-                                            `).join('')}
-                                        </ul>
+                                                </div>
+                                            `).join('') || '<p class="text-center text-muted py-3">No hay seguimientos pendientes</p>'}
+                                        </div>
                                     </div>
                                 `;
 
@@ -887,7 +921,7 @@
                                             actionRequired: 'no'
                                         }).then(() => {
                                             // Remove the list item
-                                            this.closest('li').remove();
+                                            this.closest('div').remove();
                                             
                                             // Update the count
                                             const countEl = document.querySelector('.stat-details p');
