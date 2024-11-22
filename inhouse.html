@@ -1,12 +1,11 @@
 <html><head><base href="." />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InHouse Manager - Huéspedes</title>
+    <title>InHouse Manager - InHouse</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css" rel="stylesheet">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -25,13 +24,9 @@
             --danger-color: #d63031;
         }
 
-        body {
-            background-color: var(--secondary-color);
-        }
-
         .navbar {
             background: white;
-            padding: 1rem 2rem;
+            padding: 0.8rem 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: fixed;
             width: 100%;
@@ -45,40 +40,74 @@
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
         }
 
         .logo {
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--primary-color);
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 0.5rem;
         }
 
         .nav-links {
             display: flex;
             gap: 2rem;
+            align-items: center;
         }
 
         .nav-links a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-decoration: none;
             color: var(--text-color);
-            font-weight: 500;
+            padding: 0.5rem;
+            border-radius: 8px;
             transition: all 0.3s ease;
-            position: relative;
         }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
+        .nav-links a:hover {
+            background: var(--secondary-color);
+            color: var(--primary-color);
         }
 
-        .nav-links a:hover::after {
-            width: 100%;
+        .nav-links i {
+            font-size: 1.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .nav-links span {
+            font-size: 0.7rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 0.5rem;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                justify-content: space-around;
+            }
+            
+            .nav-links span {
+                display: block;
+            }
         }
 
         .main-content {
@@ -89,91 +118,56 @@
             margin-right: auto;
         }
 
-        .table-container {
-            background: white;
-            padding: 1rem;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
             margin-top: 2rem;
-            overflow-x: auto; /* Add horizontal scroll for small screens */
         }
 
-        .action-buttons {
-            margin-bottom: 2rem;
-        }
-
-        .btn-add {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-add:hover {
-            background: #357abd;
-            transform: translateY(-2px);
-        }
-
-        .guest-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+        .room-card {
             background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .guest-table thead th {
-            background: var(--primary-color);
-            color: white;
-            font-weight: 500;
-            padding: 1.2rem 1rem;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-
-        .guest-table tbody tr {
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
 
-        .guest-table tbody tr:hover {
-            background-color: rgba(74, 144, 226, 0.05);
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
         }
 
-        .guest-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-            font-size: 0.95rem;
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
         }
 
-        .status-badge {
+        .room-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .room-status {
             padding: 0.5rem 1rem;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            width: fit-content;
         }
 
-        .status-llegada {
+        .status-encasa {
             background: rgba(0, 184, 148, 0.1);
             color: var(--success-color);
         }
 
-        .status-encasa {
-            background: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
+        .status-llegada {
+            background: rgba(253, 203, 110, 0.1);
+            color: var(--warning-color);
         }
 
         .status-salida {
@@ -181,309 +175,153 @@
             color: var(--danger-color);
         }
 
-        .action-btn {
-            padding: 0.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 0 0.2rem;
+        .guest-info {
+            margin: 1rem 0;
         }
 
-        .btn-edit {
-            background: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
-        }
-
-        .btn-delete {
-            background: rgba(214, 48, 49, 0.1);
-            color: var(--danger-color);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        .popup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh; /* Add max height */
-            overflow-y: auto; /* Add overflow for scrolling */
-        }
-
-        .guest-details-popup {
-            max-width: 600px !important;
+        .guest-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
         }
 
         .guest-details {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: var(--primary-color);
             font-size: 0.9rem;
+            color: #666;
         }
 
-        .detail-value {
-            font-size: 1.1rem;
-            padding: 0.5rem;
-            background: var(--secondary-color);
-            border-radius: 8px;
-        }
-
-        .editable-field {
-            border: 1px solid #e1e1e1;
-            padding: 0.8rem;
-            border-radius: 8px;
-            width: 100%;
-        }
-
-        .editable-field:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
-        }
-
-        .status-select {
-            padding: 0.8rem;
-            border: 1px solid #e1e1e1;
-            border-radius: 8px;
-            width: 100%;
-            background: white;
-        }
-
-        .save-changes-btn {
-            background: var(--success-color);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        .save-changes-btn:hover {
-            background: #009e7f;
-        }
-
-        .popup-header {
+        .guest-details p {
+            margin: 0.3rem 0;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .popup-close {
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: var(--text-color);
-            transition: all 0.3s ease;
-        }
-
-        .popup-close:hover {
-            color: var(--danger-color);
-            transform: rotate(90deg);
-        }
-
-        .guest-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
             gap: 0.5rem;
         }
 
-        .form-group label {
+        .guest-details i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .room-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--secondary-color);
+        }
+
+        .room-actions button {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: white;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .room-actions button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .room-actions button.secondary {
+            background: var(--secondary-color);
             color: var(--text-color);
         }
 
-        .form-group input,
-        .form-group textarea {
-            padding: 0.8rem;
-            border: 1px solid #e1e1e1;
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
             border-radius: 8px;
-            font-size: 0.95rem;
+            background: white;
+            color: var(--text-color);
+            font-weight: 500;
+            cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
+        .search-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
-        @media (max-width: 1024px) {
-            .nav-container {
-                padding: 0 1rem;
+        @media (min-width: 768px) {
+            .search-bar {
+                flex-direction: row;
+                align-items: center;
             }
             
-            .main-content {
-                padding: 1rem;
+            .search-bar .btn {
+                white-space: nowrap;
             }
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid var(--secondary-color);
+            padding: 0.5rem 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
         }
 
         @media (max-width: 768px) {
-            .nav-links {
-                gap: 1rem;
-            }
-            
-            .popup {
-                width: 95%;
-                padding: 1.5rem;
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-            
-            .guest-table {
-                font-size: 0.85rem;
-            }
-            
-            .status-badge {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.75rem;
-            }
-            
-            .action-btn {
-                padding: 0.3rem;
-            }
-            
-            .btn-add {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-            
-            .guest-form {
+            .room-grid {
                 grid-template-columns: 1fr;
             }
-        }
-
-        @media (max-width: 480px) {
-            .navbar {
-                padding: 0.8rem 1rem;
-            }
-            
-            .logo {
-                font-size: 1.2rem;
-            }
-            
-            .nav-links {
-                gap: 0.8rem;
-                font-size: 0.9rem;
-            }
-            
-            .popup {
-                padding: 1rem;
-            }
-            
-            .popup-header h3 {
-                font-size: 1.1rem;
-            }
-            
-            .form-group input,
-            .form-group textarea {
-                padding: 0.6rem;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Update DataTables specific styles */
-        .dataTables_wrapper .dataTables_length,
-        .dataTables_wrapper .dataTables_filter {
-            margin-bottom: 1rem;
-        }
-
-        .dataTables_wrapper .dataTables_length select,
-        .dataTables_wrapper .dataTables_filter input {
-            padding: 0.4rem;
-            border: 1px solid #e1e1e1;
-            border-radius: 6px;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            margin: 0 2px;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: var(--primary-color) !important;
-            border-color: var(--primary-color) !important;
-            color: white !important;
-        }
-
-        /* Add smooth scrolling to popup */
-        .popup {
-            max-height: 90vh;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) #f1f1f1;
-        }
-
-        .popup::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .popup::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .popup::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 10px;
-        }
-
-        .status-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .status-container .action-btn {
-            padding: 0.3rem;
-            font-size: 0.8rem;
         }
     </style>
 </head>
@@ -491,141 +329,219 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo">InHouse Manager</div>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <i class="ri-menu-line"></i>
+            </button>
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="inhouse.html">InHouse</a>
-                <a href="seguimientos.html">Seguimientos</a>
-                <a href="ventas.html">Ventas</a>
+                <a href="index.html">
+                    <i class="ri-home-4-line"></i>
+                    <span>Home</span>
+                </a>
+                <a href="inhouse.html">
+                    <i class="ri-hotel-line"></i>
+                    <span>InHouse</span>
+                </a>
+                <a href="seguimientos.html">
+                    <i class="ri-file-list-3-line"></i>
+                    <span>Seguimientos</span>
+                </a>
+                <a href="ventas.html">
+                    <i class="ri-shopping-cart-line"></i>
+                    <span>Ventas</span>
+                </a>
             </div>
         </div>
     </nav>
 
     <main class="main-content">
-        <div class="action-buttons">
-            <button class="btn-add" onclick="openAddGuestForm()">
-                <i class="ri-add-line"></i> Nuevo Huésped
+        <div class="search-bar">
+            <input type="text" class="search-input" placeholder="Buscar por número de habitación o nombre del huésped..." id="searchInput">
+            <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addGuestModal">
+                <i class="ri-add-line"></i> Agregar Huésped
             </button>
         </div>
 
-        <div class="table-container">
-            <table id="guestTable" class="guest-table display responsive nowrap">
-                <thead>
-                    <tr>
-                        <th>Habitación</th>
-                        <th>Huésped</th>
-                        <th>Llegada</th>
-                        <th>Salida</th>
-                        <th>Estado</th>
-                        <th>Nacionalidad</th>
-                        <th>Observaciones</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Data will be populated dynamically -->
-                </tbody>
-            </table>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="encasa">En Casa</button>
+            <button class="filter-btn" data-filter="llegada">Llegadas</button>
+            <button class="filter-btn" data-filter="salida">Salidas</button>
+        </div>
+
+        <div class="room-grid" id="roomGrid">
+            <!-- Rooms will be populated dynamically -->
         </div>
     </main>
 
-    <div class="popup-overlay" id="addGuestModal">
-        <div class="popup">
-            <div class="popup-header">
-                <h3 class="popup-title">Agregar Nuevo Huésped</h3>
-                <i class="ri-close-line popup-close" onclick="closeAddGuestForm()"></i>
-            </div>
-            <div class="popup-content">
-                <form id="guestForm" class="guest-form">
-                    <div class="form-group">
-                        <label for="roomNumber">Número de Habitación</label>
-                        <input type="text" id="roomNumber" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="guestName">Nombre del Huésped</label>
-                        <input type="text" id="guestName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="checkIn">Fecha de Llegada</label>
-                        <input type="datetime-local" id="checkIn" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="checkOut">Fecha de Salida</label>
-                        <input type="datetime-local" id="checkOut" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nationality">Nacionalidad</label>
-                        <input type="text" id="nationality" required>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label for="observations">Observaciones</label>
-                        <textarea id="observations"></textarea>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <button type="submit" class="btn-add" style="width: 100%;">Guardar Huésped</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="popup-overlay" id="guestDetailsModal">
-        <div class="popup guest-details-popup">
-            <div class="popup-header">
-                <h3 class="popup-title">Detalles del Huésped</h3>
-                <i class="ri-close-line popup-close" onclick="closeGuestDetails()"></i>
-            </div>
-            <div class="guest-details">
-                <div class="detail-item">
-                    <span class="detail-label">Habitación</span>
-                    <span class="detail-value" id="detail-room"></span>
+    <div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGuestModalLabel">Agregar Nuevo Huésped</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Huésped</span>
-                    <span class="detail-value" id="detail-name"></span>
+                <div class="modal-body">
+                    <form id="addGuestForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="roomNumber" class="form-label">Número de Habitación</label>
+                                <input type="number" class="form-control" id="roomNumber" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="guestName" class="form-label">Nombre del Huésped</label>
+                                <input type="text" class="form-control" id="guestName" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="checkIn" class="form-label">Check-in</label>
+                                <input type="date" class="form-control" id="checkIn" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="checkOut" class="form-label">Check-out</label>
+                                <input type="date" class="form-control" id="checkOut" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nationality" class="form-label">Nacionalidad</label>
+                                <input type="text" class="form-control" id="nationality" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Estado</label>
+                                <select class="form-select" id="status" required>
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="encasa">En Casa</option>
+                                    <option value="llegada">Llegada</option>
+                                    <option value="salida">Salida</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="observation" class="form-label">Observación</label>
+                            <textarea class="form-control" id="observation" rows="3"></textarea>
+                        </div>
+                    </form>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Llegada</span>
-                    <span class="detail-value" id="detail-checkin"></span>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveGuest()">Guardar</button>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Salida</span>
-                    <span class="detail-value" id="detail-checkout"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Estado</span>
-                    <select class="status-select" id="detail-status">
-                        <option value="llegada">Llegada</option>
-                        <option value="encasa">En Casa</option>
-                        <option value="salida">Salida</option>
-                    </select>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Nacionalidad</span>
-                    <span class="detail-value" id="detail-nationality"></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Observaciones</span>
-                    <textarea class="editable-field" id="detail-observations"></textarea>
-                </div>
-                <button class="save-changes-btn" onclick="saveGuestDetails()">Guardar Cambios</button>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <!-- Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Detalles del Huésped</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="guestDetailsContent">
+                    <!-- Content will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Guest Modal -->
+    <div class="modal fade" id="editGuestModal" tabindex="-1" aria-labelledby="editGuestModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="editGuestModalLabel">Editar Huésped</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editGuestForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editRoomNumber" class="form-label">Número de Habitación</label>
+                                <input type="number" class="form-control" id="editRoomNumber" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editGuestName" class="form-label">Nombre del Huésped</label>
+                                <input type="text" class="form-control" id="editGuestName" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editCheckIn" class="form-label">Check-in</label>
+                                <input type="date" class="form-control" id="editCheckIn" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editCheckOut" class="form-label">Check-out</label>
+                                <input type="date" class="form-control" id="editCheckOut" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editNationality" class="form-label">Nacionalidad</label>
+                                <input type="text" class="form-control" id="editNationality" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editStatus" class="form-label">Estado</label>
+                                <select class="form-select" id="editStatus" required>
+                                    <option value="encasa">En Casa</option>
+                                    <option value="llegada">Llegada</option>
+                                    <option value="salida">Salida</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editObservation" class="form-label">Observación</label>
+                            <textarea class="form-control" id="editObservation" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" onclick="saveEdit()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Follow-up Modal -->
+    <div class="modal fade" id="followUpModal" tabindex="-1" aria-labelledby="followUpModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followUpModalLabel">Agregar Seguimiento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="followUpForm">
+                        <div class="mb-3">
+                            <label for="followUpDescription" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="followUpDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="followUpDate" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="followUpDate" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFollowUp()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDUirwoSQgvcMZn7uLjKMAxlTA15Jkl2BM",
             authDomain: "ismakun-bf0fa.firebaseapp.com",
             databaseURL: "https://ismakun-bf0fa-default-rtdb.firebaseio.com",
             projectId: "ismakun-bf0fa",
-            storageBucket: "ismakun-bf0fa.firebasestorage.app",
+            storageBucket: "ismakun-bf0fa.appspot.com",
             messagingSenderId: "1028877703945",
             appId: "1:1028877703945:web:331de48acbcdf2234a51d8"
         };
@@ -633,262 +549,340 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        let currentGuestId = null;
-
-        const calculateStatus = (checkIn, checkOut) => {
-            const now = new Date();
-            const checkInDate = new Date(checkIn);
-            const checkOutDate = new Date(checkOut);
-
-            if (now < checkInDate) {
-                return 'llegada';
-            } else if (now >= checkInDate && now < checkOutDate) {
-                return 'encasa';
-            } else {
-                return 'salida';
-            }
-        };
-
-        const guestsRef = ref(database, 'guests');
-        onValue(guestsRef, (snapshot) => {
-            const data = snapshot.val();
-            const guests = [];
-
-            for (let id in data) {
-                const guest = data[id];
-                guests.push({
-                    id: id,
-                    ...guest,
-                    status: guest.status || calculateStatus(guest.checkIn, guest.checkOut),
-                    checkIn: new Date(guest.checkIn).toLocaleDateString(),
-                    checkOut: new Date(guest.checkOut).toLocaleDateString(),
+        // Load and display rooms
+        function loadRooms() {
+            const guestsRef = ref(database, 'guests');
+            onValue(guestsRef, (snapshot) => {
+                const roomGrid = document.getElementById('roomGrid');
+                roomGrid.innerHTML = '';
+                
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    const guestId = childSnapshot.key; // Get the guest ID
+                    const roomCard = createRoomCard(guest, guestId); // Pass both guest data and ID
+                    roomGrid.appendChild(roomCard);
                 });
-            }
+            });
+        }
 
-            table.clear().rows.add(guests).draw();
+        function createRoomCard(guest, guestId) {
+            const div = document.createElement('div');
+            div.className = 'room-card';
+            div.setAttribute('data-status', guest.status);
+            
+            div.innerHTML = `
+                <div class="room-header">
+                    <span class="room-number">Habitación ${guest.roomNumber}</span>
+                    <span class="room-status status-${guest.status}">${getStatusText(guest.status)}</span>
+                </div>
+                <div class="guest-info">
+                    <h3 class="guest-name">${guest.guestName}</h3>
+                    <div class="guest-details">
+                        <p><i class="ri-calendar-line"></i> Check-in: ${guest.checkIn}</p>
+                        <p><i class="ri-calendar-line"></i> Check-out: ${guest.checkOut}</p>
+                        <p><i class="ri-flag-line"></i> Nacionalidad: ${guest.nationality || 'No especificada'}</p>
+                    </div>
+                </div>
+                <div class="room-actions">
+                    <button onclick="addFollowUp('${guestId}')">
+                        <i class="ri-add-line"></i> Seguimiento
+                    </button>
+                    <button class="secondary" onclick="viewDetails('${guestId}')">
+                        <i class="ri-eye-line"></i> Detalles
+                    </button>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'encasa': return 'En Casa';
+                case 'llegada': return 'Llegada';
+                case 'salida': return 'Salida';
+                default: return status;
+            }
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+                
+                // Update active button
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Filter rooms
+                document.querySelectorAll('.room-card').forEach(card => {
+                    if (filter === 'all' || card.dataset.status === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
         });
 
-        const table = $('#guestTable').DataTable({
-            responsive: true,
-            columns: [
-                { data: 'roomNumber' },
-                { data: 'guestName' },
-                { data: 'checkIn' },
-                { data: 'checkOut' },
-                { 
-                    data: 'status',
-                    render: function(data, type, row) {
-                        let icon, text, buttonClass;
-                        switch(data) {
-                            case 'llegada':
-                                icon = 'ri-flight-land-line';
-                                text = 'Llegada';
-                                buttonClass = 'status-llegada';
-                                break;
-                            case 'encasa':
-                                icon = 'ri-home-smile-line';
-                                text = 'En Casa';
-                                buttonClass = 'status-encasa';
-                                break;
-                            case 'salida':
-                                icon = 'ri-flight-takeoff-line';
-                                text = 'Salida';
-                                buttonClass = 'status-salida';
-                                break;
-                        }
-                        return `
-                            <div class="status-container">
-                                <span class="status-badge ${buttonClass}">
-                                    <i class="${icon}"></i>${text}
-                                </span>
-                                ${data === 'llegada' ? 
-                                    `<button onclick="changeStatus('${row.id}', 'encasa')" class="action-btn btn-edit">
-                                        <i class="ri-home-smile-line"></i>
-                                    </button>` : ''
-                                }
-                            </div>`;
-                    }
-                },
-                { data: 'nationality' },
-                { data: 'observations' },
-                { 
-                    data: null,
-                    render: function(data, type, row) {
-                        return `
-                            <button onclick="editGuest('${row.id}')" class="action-btn btn-edit">
-                                <i class="ri-edit-line"></i>
-                            </button>
-                            <button onclick="deleteGuest('${row.id}')" class="action-btn btn-delete">
-                                <i class="ri-delete-bin-line"></i>
-                            </button>
-                        `;
-                    }
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            document.querySelectorAll('.room-card').forEach(card => {
+                const roomNumber = card.querySelector('.room-number').textContent.toLowerCase();
+                const guestName = card.querySelector('.guest-name').textContent.toLowerCase();
+                
+                if (roomNumber.includes(searchTerm) || guestName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
                 }
-            ],
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
-            },
-            rowCallback: function(row, data) {
-                $(row).css('cursor', 'pointer');
-                $(row).on('click', function(e) {
-                    // Prevent click event when clicking action buttons
-                    if (!$(e.target).closest('.action-btn').length) {
-                        showGuestDetails(data.id);
-                    }
-                });
-            }
+            });
         });
 
-        document.getElementById('guestForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = {
-                roomNumber: document.getElementById('roomNumber').value,
-                guestName: document.getElementById('guestName').value,
-                checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(), // Changed to short date format
-                checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(), // Changed to short date format
-                nationality: document.getElementById('nationality').value,
-                observations: document.getElementById('observations').value,
-                status: 'llegada' // Set default status to 'llegada'
+        // Initialize room display
+        window.addEventListener('DOMContentLoaded', loadRooms);
+
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.nav-container')) {
+                    navLinks.classList.remove('active');
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+
+        window.saveGuest = function() {
+            const roomNumber = document.getElementById('roomNumber').value;
+            const guestName = document.getElementById('guestName').value;
+            const checkIn = document.getElementById('checkIn').value;
+            const checkOut = document.getElementById('checkOut').value;
+            const nationality = document.getElementById('nationality').value;
+            const status = document.getElementById('status').value;
+            const observation = document.getElementById('observation').value;
+
+            if (!roomNumber || !guestName || !checkIn || !checkOut || !nationality || !status) {
+                alert('Por favor complete todos los campos requeridos');
+                return;
+            }
+
+            const newGuest = {
+                roomNumber,
+                guestName,
+                checkIn,
+                checkOut,
+                nationality,
+                status,
+                observation
             };
 
-            push(guestsRef, formData)
+            const guestsRef = ref(database, 'guests');
+            const newGuestRef = push(guestsRef);
+            
+            set(newGuestRef, newGuest)
                 .then(() => {
-                    closeAddGuestForm();
-                    document.getElementById('guestForm').reset();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addGuestModal'));
+                    modal.hide();
+                    document.getElementById('addGuestForm').reset();
+                    alert('Huésped agregado exitosamente');
                 })
                 .catch((error) => {
-                    console.error("Error adding guest: ", error);
+                    console.error('Error adding guest:', error);
+                    alert('Error al agregar huésped');
                 });
-        });
-
-        window.openAddGuestForm = function() {
-            document.getElementById('addGuestModal').style.display = 'block';
         };
 
-        window.closeAddGuestForm = function() {
-            document.getElementById('addGuestModal').style.display = 'none';
-            document.getElementById('guestForm').reset();
-            document.getElementById('guestForm').onsubmit = null;
+        // View details functionality
+        window.viewDetails = function(guestId) {
+            const guestsRef = ref(database, 'guests');
+            onValue(guestsRef, (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    const id = childSnapshot.key; // Get the guest ID for editing/deleting
+                    if (id === guestId) {
+                        const detailsContent = document.getElementById('guestDetailsContent');
+                        detailsContent.innerHTML = `
+                            <div class="guest-details-card p-4">
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="detail-group">
+                                            <h6 class="text-primary mb-3"><i class="ri-home-4-line"></i> Habitación</h6>
+                                            <p class="lead fw-bold">${guest.roomNumber}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="detail-group">
+                                            <h6 class="text-primary mb-3"><i class="ri-user-line"></i> Huésped</h6>
+                                            <p class="lead fw-bold">${guest.guestName}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="detail-group">
+                                            <h6 class="text-primary mb-3"><i class="ri-calendar-line"></i> Check-in</h6>
+                                            <p class="badge bg-success fs-6">${guest.checkIn}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="detail-group">
+                                            <h6 class="text-primary mb-3"><i class="ri-calendar-line"></i> Check-out</h6>
+                                            <p class="badge bg-danger fs-6">${guest.checkOut}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="detail-group">
+                                            <h6 class="text-primary mb-3"><i class="ri-flag-line"></i> Nacionalidad</h6>
+                                            <p>${guest.nationality}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="detail-group">
+                                            <h6 class="text-primary mb-3"><i class="ri-file-text-line"></i> Observaciones</h6>
+                                            <p class="bg-light p-3 rounded">${guest.observation || 'Sin observaciones'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-4">
+                                    <div class="col-6">
+                                        <button class="btn btn-warning w-100" onclick="editGuest('${id}')">
+                                            <i class="ri-edit-line"></i> Editar
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-danger w-100" onclick="deleteGuest('${id}')">
+                                            <i class="ri-delete-bin-line"></i> Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+                        modal.show();
+                    }
+                });
+            });
         };
 
-        window.showGuestDetails = function(id) {
-            const guestRef = ref(database, `guests/${id}`);
-            currentGuestId = id;
-            
-            get(guestRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const guest = snapshot.val();
-                    
-                    document.getElementById('detail-room').textContent = guest.roomNumber;
-                    document.getElementById('detail-name').textContent = guest.guestName;
-                    document.getElementById('detail-checkin').textContent = new Date(guest.checkIn).toLocaleDateString(); // Display in short format
-                    document.getElementById('detail-checkout').textContent = new Date(guest.checkOut).toLocaleDateString(); // Display in short format
-                    document.getElementById('detail-status').value = guest.status || calculateStatus(guest.checkIn, guest.checkOut);
-                    document.getElementById('detail-nationality').textContent = guest.nationality;
-                    document.getElementById('detail-observations').value = guest.observations || '';
-                    
-                    document.getElementById('guestDetailsModal').style.display = 'block';
+        // Add edit functionality
+        window.editGuest = function(guestId) {
+            const guestRef = ref(database, `guests/${guestId}`);
+            onValue(guestRef, (snapshot) => {
+                const guest = snapshot.val();
+                
+                // Populate the edit form
+                document.getElementById('editGuestForm').reset();
+                document.getElementById('editRoomNumber').value = guest.roomNumber;
+                document.getElementById('editGuestName').value = guest.guestName;
+                document.getElementById('editCheckIn').value = guest.checkIn;
+                document.getElementById('editCheckOut').value = guest.checkOut;
+                document.getElementById('editNationality').value = guest.nationality;
+                document.getElementById('editStatus').value = guest.status;
+                document.getElementById('editObservation').value = guest.observation || '';
+                
+                // Store the guest ID for the save function
+                document.getElementById('editGuestForm').dataset.guestId = guestId;
+                
+                // Properly handle modal transitions
+                const detailsModal = bootstrap.Modal.getInstance(document.getElementById('detailsModal'));
+                if (detailsModal) {
+                    detailsModal.hide();
                 }
+                
+                // Small timeout to ensure smooth transition between modals
+                setTimeout(() => {
+                    const editModal = new bootstrap.Modal(document.getElementById('editGuestModal'));
+                    editModal.show();
+                }, 150);
+                
+            }, {
+                onlyOnce: true
             });
         };
 
-        window.closeGuestDetails = function() {
-            document.getElementById('guestDetailsModal').style.display = 'none';
-            currentGuestId = null;
-        };
-
-        window.saveGuestDetails = function() {
-            if (!currentGuestId) return;
-            
-            const guestRef = ref(database, `guests/${currentGuestId}`);
-            const newStatus = document.getElementById('detail-status').value;
-            const newObservations = document.getElementById('detail-observations').value;
-            
-            update(guestRef, {
-                status: newStatus,
-                observations: newObservations
-            })
-            .then(() => {
-                closeGuestDetails();
-                alert('Cambios guardados exitosamente');
-            })
-            .catch((error) => {
-                console.error("Error updating guest details: ", error);
-                alert('Error al guardar los cambios');
-            });
-        };
-
-        window.editGuest = function(id) {
-            const guestRef = ref(database, `guests/${id}`);
-            
-            get(guestRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const guest = snapshot.val();
-                    
-                    document.getElementById('roomNumber').value = guest.roomNumber;
-                    document.getElementById('guestName').value = guest.guestName;
-                    // Parse the short date format back to datetime-local
-                    const checkInDate = new Date(guest.checkIn);
-                    const checkOutDate = new Date(guest.checkOut);
-                    
-                    document.getElementById('checkIn').value = checkInDate.toISOString().slice(0, 16);
-                    document.getElementById('checkOut').value = checkOutDate.toISOString().slice(0, 16);
-                    document.getElementById('nationality').value = guest.nationality;
-                    document.getElementById('observations').value = guest.observations;
-                    
-                    openAddGuestForm();
-                    
-                    const form = document.getElementById('guestForm');
-                    form.onsubmit = (e) => {
-                        e.preventDefault();
-                        
-                        const updatedData = {
-                            roomNumber: document.getElementById('roomNumber').value,
-                            guestName: document.getElementById('guestName').value,
-                            checkIn: new Date(document.getElementById('checkIn').value).toLocaleDateString(), // Changed to short date format
-                            checkOut: new Date(document.getElementById('checkOut').value).toLocaleDateString(), // Changed to short date format
-                            nationality: document.getElementById('nationality').value,
-                            observations: document.getElementById('observations').value,
-                            status: guest.status // Preserve existing status
-                        };
-                        
-                        update(guestRef, updatedData)
-                            .then(() => {
-                                closeAddGuestForm();
-                                form.reset();
-                                form.onsubmit = null;
-                                alert('Huésped actualizado exitosamente');
-                            })
-                            .catch((error) => {
-                                console.error("Error updating guest: ", error);
-                                alert('Error al actualizar el huésped');
-                            });
-                    };
-                }
-            });
-        };
-
-        window.deleteGuest = function(id) {
-            if (confirm('¿Está seguro de que desea eliminar este huésped?')) {
-                remove(ref(database, `guests/${id}`));
+        // Add delete functionality
+        window.deleteGuest = function(guestId) {
+            if (confirm('¿Estás seguro de que deseas eliminar este huésped?')) {
+                const guestRef = ref(database, `guests/${guestId}`);
+                set(guestRef, null)
+                    .then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('detailsModal')).hide();
+                        alert('Huésped eliminado exitosamente');
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting guest:', error);
+                        alert('Error al eliminar huésped');
+                    });
             }
         };
 
-        // Add the changeStatus function
-        window.changeStatus = function(id, newStatus) {
-            const guestRef = ref(database, `guests/${id}`);
-            
-            update(guestRef, {
-                status: newStatus
-            })
-            .then(() => {
-                alert('Estado actualizado exitosamente');
-            })
-            .catch((error) => {
-                console.error("Error updating status: ", error);
-                alert('Error al actualizar el estado');
-            });
+        // Add save edit functionality
+        window.saveEdit = function() {
+            const guestId = document.getElementById('editGuestForm').dataset.guestId;
+            const editedGuest = {
+                roomNumber: document.getElementById('editRoomNumber').value,
+                guestName: document.getElementById('editGuestName').value,
+                checkIn: document.getElementById('editCheckIn').value,
+                checkOut: document.getElementById('editCheckOut').value,
+                nationality: document.getElementById('editNationality').value,
+                status: document.getElementById('editStatus').value,
+                observation: document.getElementById('editObservation').value
+            };
+
+            const guestRef = ref(database, `guests/${guestId}`);
+            set(guestRef, editedGuest)
+                .then(() => {
+                    // Properly close both modals
+                    const editModal = bootstrap.Modal.getInstance(document.getElementById('editGuestModal'));
+                    const detailsModal = bootstrap.Modal.getInstance(document.getElementById('detailsModal'));
+                    
+                    if (editModal) {
+                        editModal.hide();
+                    }
+                    
+                    if (detailsModal) {
+                        detailsModal.hide();
+                    }
+                    
+                    // Clear any modal backdrops
+                    const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+                    modalBackdrops.forEach(backdrop => backdrop.remove());
+                    
+                    // Remove modal-open class from body
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                    
+                    // Refresh the rooms display
+                    loadRooms();
+                    
+                    alert('Huésped actualizado exitosamente');
+                })
+                .catch((error) => {
+                    console.error('Error updating guest:', error);
+                    alert('Error al actualizar huésped');
+                });
         };
+
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
