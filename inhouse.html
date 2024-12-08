@@ -702,7 +702,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDUirwoSQgvcMZn7uLjKMAxlTA15Jkl2BM",
@@ -845,91 +845,110 @@
             const now = new Date();
             const today = now.toDateString();
             
-            // Check if we need to reset counters
-            const lastUpdate = localStorage.getItem('lastVisitUpdate');
-            if (lastUpdate !== today) {
-                localStorage.setItem('morningVisits', '0');
-                localStorage.setItem('eveningVisits', '0');
-                localStorage.setItem('lastVisitUpdate', today);
-                localStorage.removeItem('visitedRooms');
+            // Create a Firebase reference for visits
+            const visitsRef = ref(database, 'visits');
+            const todayVisitsRef = ref(database, `visits/${today.replace(/\s/g, '_')}`);
+            
+            // Check if this room has already been visited during this time period
+            const roomKey = `${roomNumber}-${timeOfDay}`;
+            
+            get(todayVisitsRef).then((snapshot) => {
+                const visits = snapshot.val() || {};
                 
-                // Reset all buttons to unverified state
+                if (visits[roomKey]) {
+                    alert('Esta habitación ya fue visitada en este periodo');
+                    return;
+                }
+                
+                // Mark room as visited in Firebase
+                set(ref(database, `visits/${today.replace(/\s/g, '_')}/${roomKey}`), {
+                    roomNumber,
+                    timeOfDay,
+                    timestamp: now.toISOString()
+                }).then(() => {
+                    // Update button appearance
+                    const button = event.target.closest('.visit-btn');
+                    button.classList.remove('unverified');
+                    button.classList.add('verified');
+                    
+                    // Update local counters
+                    if (timeOfDay === 'morning') {
+                        const current = parseInt(localStorage.getItem('morningVisits') || '0');
+                        localStorage.setItem('morningVisits', (current + 1).toString());
+                    } else {
+                        const current = parseInt(localStorage.getItem('eveningVisits') || '0');
+                        localStorage.setItem('eveningVisits', (current + 1).toString());
+                    }
+                    
+                    updateVisitCounters();
+                });
+            });
+        };
+
+        // Add function to restore visit status from Firebase
+        function restoreVisitsFromFirebase() {
+            const now = new Date();
+            const today = now.toDateString();
+            const todayVisitsRef = ref(database, `visits/${today.replace(/\s/g, '_')}`);
+            
+            get(todayVisitsRef).then((snapshot) => {
+                const visits = snapshot.val() || {};
+                
+                // Reset all buttons to unverified state first
                 document.querySelectorAll('.visit-btn').forEach(btn => {
                     btn.classList.remove('verified');
                     btn.classList.add('unverified');
                 });
-            }
-            
-            // Check if this room has already been visited during this time period
-            const visitedRooms = JSON.parse(localStorage.getItem('visitedRooms') || '{}');
-            const roomKey = `${roomNumber}-${timeOfDay}`;
-            
-            if (visitedRooms[roomKey]) {
-                alert('Esta habitación ya fue visitada en este periodo');
-                return;
-            }
-            
-            // Mark room as visited
-            visitedRooms[roomKey] = true;
-            localStorage.setItem('visitedRooms', JSON.stringify(visitedRooms));
-            
-            // Update button appearance
-            const button = event.target.closest('.visit-btn');
-            button.classList.remove('unverified');
-            button.classList.add('verified');
-            
-            // Increment counter
-            if (timeOfDay === 'morning') {
-                const current = parseInt(localStorage.getItem('morningVisits') || '0');
-                localStorage.setItem('morningVisits', (current + 1).toString());
-            } else {
-                const current = parseInt(localStorage.getItem('eveningVisits') || '0');
-                localStorage.setItem('eveningVisits', (current + 1).toString());
-            }
-            
-            updateVisitCounters();
-        }
-
-        // Function to check verified status on page load
-        function restoreVisitedStatus() {
-            const visitedRooms = JSON.parse(localStorage.getItem('visitedRooms') || '{}');
-            Object.keys(visitedRooms).forEach(roomKey => {
-                const [roomNumber, timeOfDay] = roomKey.split('-');
-                const selector = `.visit-btn.${timeOfDay}[data-room="${roomNumber}"]`;
-                const button = document.querySelector(selector);
-                if (button) {
-                    button.classList.remove('unverified');
-                    button.classList.add('verified');
-                }
+                
+                // Mark verified visits
+                Object.keys(visits).forEach(roomKey => {
+                    const [roomNumber, timeOfDay] = roomKey.split('-');
+                    const button = document.querySelector(`.visit-btn.${timeOfDay}[onclick*="${roomNumber}"]`);
+                    if (button) {
+                        button.classList.remove('unverified');
+                        button.classList.add('verified');
+                    }
+                });
+                
+                // Update counters
+                let morningCount = 0;
+                let eveningCount = 0;
+                
+                Object.values(visits).forEach(visit => {
+                    if (visit.timeOfDay === 'morning') morningCount++;
+                    if (visit.timeOfDay === 'evening') eveningCount++;
+                });
+                
+                localStorage.setItem('morningVisits', morningCount.toString());
+                localStorage.setItem('eveningVisits', eveningCount.toString());
+                updateVisitCounters();
             });
         }
 
-        // Add this to your DOMContentLoaded event
+        // Modify the initialization to include Firebase visit restoration
         window.addEventListener('DOMContentLoaded', () => {
+            cleanupOldVisits();
             initializeDailyVisits();
             loadRooms();
-            restoreVisitedStatus();
+            restoreVisitsFromFirebase();
         });
 
-        // Filter functionality
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filter = btn.dataset.filter;
+        // Add cleanup function for old visit data
+        function cleanupOldVisits() {
+            const visitsRef = ref(database, 'visits');
+            get(visitsRef).then((snapshot) => {
+                const visits = snapshot.val() || {};
+                const now = new Date();
+                const today = now.toDateString().replace(/\s/g, '_');
                 
-                // Update active button
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                // Filter rooms
-                document.querySelectorAll('.room-table tr').forEach(row => {
-                    if (filter === 'all' || row.dataset.status === filter) {
-                        row.style.display = 'table-row';
-                    } else {
-                        row.style.display = 'none';
+                // Remove visits older than today
+                Object.keys(visits).forEach(date => {
+                    if (date !== today) {
+                        set(ref(database, `visits/${date}`), null);
                     }
                 });
             });
-        });
+        }
 
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -945,12 +964,6 @@
                     row.style.display = 'none';
                 }
             });
-        });
-
-        // Initialize daily visits when the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            initializeDailyVisits();
-            loadRooms();
         });
 
         // Mobile menu functionality
