@@ -118,6 +118,50 @@
             margin-right: auto;
         }
 
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: #666;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+
         .room-table {
             width: 100%;
             background: white;
@@ -193,37 +237,68 @@
 
         @media (max-width: 768px) {
             .room-table {
-                overflow-x: auto;
-            }
-            
-            .room-table .mobile-hide {
-                display: none;
+                margin: 0 -1rem;
+                width: calc(100% + 2rem);
             }
 
-            .room-table th:not(:first-child):not(:last-child), 
-            .room-table td:not(:first-child):not(:last-child) {
-                display: none;
-            }
-            
-            .room-table .actions {
-                flex-direction: column;
-                gap: 0.5rem !important;
+            .room-table table {
+                font-size: 0.9rem;
             }
 
-            .visit-btn {
-                width: 100%;
+            .room-table td, .room-table th {
+                padding: 0.5rem;
+            }
+
+            .observation-cell {
+                max-width: 100px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .actions {
                 display: flex;
-                justify-content: center;
-                align-items: center;
+                flex-wrap: wrap;
+                gap: 0.2rem !important;
             }
 
-            .daily-visits {
-                flex-direction: column;
+            .btn-action {
+                padding: 0.3rem !important;
+                font-size: 1rem !important;
             }
 
-            .visit-counter {
-                margin-bottom: 1rem;
+            .status-badge {
+                padding: 0.3rem 0.6rem !important;
+                font-size: 0.75rem !important;
             }
+
+            /* Show all important columns on mobile */
+            .room-table th:not(.mobile-hide),
+            .room-table td:not(.mobile-hide) {
+                display: table-cell !important;
+            }
+        }
+
+        /* Additional styles for better table appearance */
+        .room-table td {
+            vertical-align: middle;
+        }
+
+        .observation-cell {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.3rem !important;
+            flex-wrap: nowrap;
+        }
+
+        .btn-action {
+            white-space: nowrap;
         }
 
         .search-bar {
@@ -325,18 +400,6 @@
             color: var(--text-color);
         }
 
-        .form-control, .form-select {
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            border: 2px solid var(--secondary-color);
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.1);
-        }
-
         textarea.form-control {
             resize: vertical;
             min-height: 100px;
@@ -428,6 +491,29 @@
             </button>
         </div>
 
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <i class="ri-home-smile-fill"></i>
+                <h3 id="guestsInHouse">0</h3>
+                <p>Huéspedes En Casa</p>
+            </div>
+            <div class="stat-card">
+                <i class="ri-login-circle-fill"></i>
+                <h3 id="arrivalsToday">0</h3>
+                <p>Llegadas Hoy</p>
+            </div>
+            <div class="stat-card">
+                <i class="ri-logout-circle-fill"></i>
+                <h3 id="departuresTotal">0</h3>
+                <p>Salidas Hoy</p>
+            </div>
+            <div class="stat-card">
+                <i class="ri-group-fill"></i>
+                <h3 id="totalVisited">0</h3>
+                <p>Total Visitados</p>
+            </div>
+        </div>
+
         <div class="daily-visits">
             <div class="visit-counter">
                 <h3 id="morningVisits">0</h3>
@@ -446,10 +532,9 @@
                         <tr>
                             <th>Hab.</th>
                             <th>Huésped</th>
-                            <th>Check-in</th>
                             <th>Check-out</th>
                             <th>Estado</th>
-                            <th>Nacionalidad</th>
+                            <th>Observaciones</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -782,6 +867,9 @@
                     const row = createTableRow(guest, guest.id);
                     roomTableBody.appendChild(row);
                 });
+
+                // Update dashboard stats
+                updateDashboardStats();
             });
         }
 
@@ -799,33 +887,31 @@
             tr.innerHTML = `
                 <td class="fw-bold">${guest.roomNumber}</td>
                 <td>${guest.guestName}</td>
-                <td>${guest.checkIn}</td>
                 <td>${guest.checkOut}</td>
                 <td>
                     <span class="status-badge status-${guest.status}">
                         ${statusIcons[guest.status] || ''} ${getStatusText(guest.status)}
                     </span>
                 </td>
-                <td class="mobile-hide">${guest.nationality || '-'}</td>
+                <td class="observation-cell">${guest.observation || '-'}</td>
                 <td>
                     <div class="actions">
                         <button class="btn-action btn-sm btn-success visit-btn morning unverified" onclick="event.stopPropagation(); markVisit('morning', ${guest.roomNumber})">
                             <i class="ri-sun-line"></i>
-                            <span class="mobile-hide">Matutina</span>
+                            <span class="d-none d-md-inline">Matutina</span>
                         </button>
                         <button class="btn-action btn-sm btn-info visit-btn evening unverified" onclick="event.stopPropagation(); markVisit('evening', ${guest.roomNumber})">
                             <i class="ri-moon-line"></i>
-                            <span class="mobile-hide">Vespertina</span>
+                            <span class="d-none d-md-inline">Vespertina</span>
                         </button>
                         <button class="btn-action btn-primary" onclick="event.stopPropagation(); addFollowUp('${guestId}')">
                             <i class="ri-add-line"></i>
-                            <span class="mobile-hide">Seguimiento</span>
+                            <span class="d-none d-md-inline">Seguimiento</span>
                         </button>
                     </div>
                 </td>
             `;
             
-            // Add click handler for the entire row
             tr.addEventListener('click', () => viewDetails(guestId));
             
             return tr;
@@ -838,6 +924,45 @@
                 case 'salida': return 'Salida';
                 default: return status;
             }
+        }
+
+        // Add function to update dashboard stats
+        function updateDashboardStats() {
+            const guestsRef = ref(database, 'guests');
+            get(guestsRef).then((snapshot) => {
+                let inHouseCount = 0;
+                let arrivalsCount = 0;
+                let departuresCount = 0;
+                
+                const today = new Date().toISOString().split('T')[0];
+                
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    
+                    if (guest.status === 'encasa') {
+                        inHouseCount++;
+                    }
+                    
+                    if (guest.checkIn === today) {
+                        arrivalsCount++;
+                    }
+                    
+                    if (guest.checkOut === today) {
+                        departuresCount++;
+                    }
+                });
+                
+                // Get total visited from localStorage
+                const morningVisits = parseInt(localStorage.getItem('morningVisits') || '0');
+                const eveningVisits = parseInt(localStorage.getItem('eveningVisits') || '0');
+                const totalVisited = morningVisits + eveningVisits;
+                
+                // Update the dashboard
+                document.getElementById('guestsInHouse').textContent = inHouseCount;
+                document.getElementById('arrivalsToday').textContent = arrivalsCount;
+                document.getElementById('departuresTotal').textContent = departuresCount;
+                document.getElementById('totalVisited').textContent = totalVisited;
+            });
         }
 
         // Add marking visit functionality
@@ -881,6 +1006,9 @@
                     }
                     
                     updateVisitCounters();
+
+                    // Update dashboard stats
+                    updateDashboardStats();
                 });
             });
         };
