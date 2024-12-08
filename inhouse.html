@@ -166,14 +166,16 @@
             width: 100%;
             background: white;
             border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            max-width: 100%;
             margin-top: 2rem;
         }
 
         .room-table table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 800px; /* Ensures table doesn't compress too much */
         }
 
         .room-table th {
@@ -182,6 +184,9 @@
             padding: 1rem;
             text-align: left;
             font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 10; /* Keep header cells visible */
         }
 
         .room-table td {
@@ -237,12 +242,9 @@
 
         @media (max-width: 768px) {
             .room-table {
-                margin: 0 -1rem;
-                width: calc(100% + 2rem);
-            }
-
-            .room-table table {
-                font-size: 0.9rem;
+                margin: 1rem -1rem;
+                padding: 0;
+                border-radius: 0; /* Remove border radius on mobile for full-width appearance */
             }
 
             .room-table td, .room-table th {
@@ -452,6 +454,29 @@
 
         .actions {
             gap: 0.3rem !important;
+        }
+
+        /* Add scrollbar styling for better visibility */
+        .room-table::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .room-table::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .room-table::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .room-table::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        .room-grid {
+            scroll-behavior: smooth;
         }
     </style>
 </head>
