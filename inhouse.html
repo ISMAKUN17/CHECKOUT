@@ -5,7 +5,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <style>
         * {
             margin: 0;
@@ -147,7 +147,7 @@
         }
 
         .room-table tr:hover {
-            background: var(--secondary-color);
+            background: rgba(74, 144, 226, 0.1) !important;
         }
 
         .room-table .status-badge {
@@ -155,12 +155,29 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .room-table .status-encasa {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .room-table .status-llegada {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .room-table .status-salida {
+            background-color: var(--danger-color);
+            color: white;
         }
 
         .room-table .actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.3rem !important;
         }
 
         .room-table .btn-action {
@@ -214,6 +231,33 @@
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .daily-visits {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .visit-counter {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .visit-counter h3 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .visit-counter p {
+            color: var(--text-color);
+            margin: 0;
+            font-size: 0.9rem;
         }
 
         .modal-content {
@@ -278,6 +322,31 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
+
+        .visit-btn {
+            padding: 0.3rem 0.6rem !important;
+            font-size: 0.8rem !important;
+        }
+
+        .visit-btn.morning {
+            background-color: #ffd43b !important;
+            border-color: #ffd43b !important;
+            color: #000 !important;
+        }
+
+        .visit-btn.evening {
+            background-color: #339af0 !important;
+            border-color: #339af0 !important;
+            color: white !important;
+        }
+
+        .room-table tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .actions {
+            gap: 0.3rem !important;
+        }
     </style>
 </head>
 <body>
@@ -314,6 +383,17 @@
             <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addGuestModal">
                 <i class="ri-add-line"></i> Agregar Huésped
             </button>
+        </div>
+
+        <div class="daily-visits">
+            <div class="visit-counter">
+                <h3 id="morningVisits">0</h3>
+                <p>Visitas Matutinas</p>
+            </div>
+            <div class="visit-counter">
+                <h3 id="eveningVisits">0</h3>
+                <p>Visitas Vespertinas</p>
+            </div>
         </div>
 
         <div class="room-grid" id="roomGrid">
@@ -594,6 +674,45 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // Daily visits counter functionality
+        function initializeDailyVisits() {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            // Check if we need to reset counters
+            const lastUpdate = localStorage.getItem('lastVisitUpdate');
+            if (lastUpdate !== today) {
+                localStorage.setItem('morningVisits', '0');
+                localStorage.setItem('eveningVisits', '0');
+                localStorage.setItem('lastVisitUpdate', today);
+                localStorage.removeItem('visitedRooms');
+            }
+            
+            // Update counters display
+            updateVisitCounters();
+        }
+
+        function updateVisitCounters() {
+            document.getElementById('morningVisits').textContent = localStorage.getItem('morningVisits') || '0';
+            document.getElementById('eveningVisits').textContent = localStorage.getItem('eveningVisits') || '0';
+        }
+
+        function incrementVisit() {
+            const now = new Date();
+            const hour = now.getHours();
+            
+            // Morning is considered 6 AM to 5:59 PM
+            if (hour >= 6 && hour < 18) {
+                const current = parseInt(localStorage.getItem('morningVisits') || '0');
+                localStorage.setItem('morningVisits', (current + 1).toString());
+            } else {
+                const current = parseInt(localStorage.getItem('eveningVisits') || '0');
+                localStorage.setItem('eveningVisits', (current + 1).toString());
+            }
+            
+            updateVisitCounters();
+        }
+
         // Load and display rooms
         function loadRooms() {
             const guestsRef = ref(database, 'guests');
@@ -626,6 +745,13 @@
         function createTableRow(guest, guestId) {
             const tr = document.createElement('tr');
             tr.setAttribute('data-status', guest.status);
+            tr.style.cursor = 'pointer';
+            
+            const statusIcons = {
+                'encasa': '<i class="ri-home-smile-fill"></i>',
+                'llegada': '<i class="ri-login-circle-fill"></i>',
+                'salida': '<i class="ri-logout-circle-fill"></i>'
+            };
             
             tr.innerHTML = `
                 <td class="fw-bold">${guest.roomNumber}</td>
@@ -634,23 +760,30 @@
                 <td>${guest.checkOut}</td>
                 <td>
                     <span class="status-badge status-${guest.status}">
-                        ${getStatusText(guest.status)}
+                        ${statusIcons[guest.status] || ''} ${getStatusText(guest.status)}
                     </span>
                 </td>
                 <td class="mobile-hide">${guest.nationality || '-'}</td>
                 <td>
                     <div class="actions">
-                        <button class="btn-action btn-primary" onclick="addFollowUp('${guestId}')">
+                        <button class="btn-action btn-sm btn-success visit-btn morning" onclick="event.stopPropagation(); markVisit('morning', ${guest.roomNumber})">
+                            <i class="ri-sun-line"></i>
+                            <span class="mobile-hide">Matutina</span>
+                        </button>
+                        <button class="btn-action btn-sm btn-info visit-btn evening" onclick="event.stopPropagation(); markVisit('evening', ${guest.roomNumber})">
+                            <i class="ri-moon-line"></i>
+                            <span class="mobile-hide">Vespertina</span>
+                        </button>
+                        <button class="btn-action btn-primary" onclick="event.stopPropagation(); addFollowUp('${guestId}')">
                             <i class="ri-add-line"></i>
                             <span class="mobile-hide">Seguimiento</span>
-                        </button>
-                        <button class="btn-action btn-secondary" onclick="viewDetails('${guestId}')">
-                            <i class="ri-eye-line"></i>
-                            <span class="mobile-hide">Detalles</span>
                         </button>
                     </div>
                 </td>
             `;
+            
+            // Add click handler for the entire row
+            tr.addEventListener('click', () => viewDetails(guestId));
             
             return tr;
         }
@@ -662,6 +795,45 @@
                 case 'salida': return 'Salida';
                 default: return status;
             }
+        }
+
+        // Add marking visit functionality
+        window.markVisit = function(timeOfDay, roomNumber) {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            // Check if we need to reset counters
+            const lastUpdate = localStorage.getItem('lastVisitUpdate');
+            if (lastUpdate !== today) {
+                localStorage.setItem('morningVisits', '0');
+                localStorage.setItem('eveningVisits', '0');
+                localStorage.setItem('lastVisitUpdate', today);
+                localStorage.removeItem('visitedRooms');
+            }
+            
+            // Check if this room has already been visited during this time period
+            const visitedRooms = JSON.parse(localStorage.getItem('visitedRooms') || '{}');
+            const roomKey = `${roomNumber}-${timeOfDay}`;
+            
+            if (visitedRooms[roomKey]) {
+                alert('Esta habitación ya fue visitada en este periodo');
+                return;
+            }
+            
+            // Mark room as visited
+            visitedRooms[roomKey] = true;
+            localStorage.setItem('visitedRooms', JSON.stringify(visitedRooms));
+            
+            // Increment counter
+            if (timeOfDay === 'morning') {
+                const current = parseInt(localStorage.getItem('morningVisits') || '0');
+                localStorage.setItem('morningVisits', (current + 1).toString());
+            } else {
+                const current = parseInt(localStorage.getItem('eveningVisits') || '0');
+                localStorage.setItem('eveningVisits', (current + 1).toString());
+            }
+            
+            updateVisitCounters();
         }
 
         // Filter functionality
@@ -700,8 +872,11 @@
             });
         });
 
-        // Initialize room display
-        window.addEventListener('DOMContentLoaded', loadRooms);
+        // Initialize daily visits when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeDailyVisits();
+            loadRooms();
+        });
 
         // Mobile menu functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -963,6 +1138,7 @@
             const followUpsRef = ref(database, `followups/${guestId}`);
             push(followUpsRef, followUp)
                 .then(() => {
+                    incrementVisit();  // Increment visit counter when follow-up is saved
                     const modal = bootstrap.Modal.getInstance(document.getElementById('followUpModal'));
                     modal.hide();
                     document.getElementById('followUpForm').reset();
