@@ -199,6 +199,31 @@
             .room-table .mobile-hide {
                 display: none;
             }
+
+            .room-table th:not(:first-child):not(:last-child), 
+            .room-table td:not(:first-child):not(:last-child) {
+                display: none;
+            }
+            
+            .room-table .actions {
+                flex-direction: column;
+                gap: 0.5rem !important;
+            }
+
+            .visit-btn {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .daily-visits {
+                flex-direction: column;
+            }
+
+            .visit-counter {
+                margin-bottom: 1rem;
+            }
         }
 
         .search-bar {
@@ -335,6 +360,24 @@
         }
 
         .visit-btn.evening {
+            background-color: #339af0 !important;
+            border-color: #339af0 !important;
+            color: white !important;
+        }
+
+        .visit-btn.unverified {
+            background-color: #e9ecef !important;
+            border-color: #dee2e6 !important;
+            color: #6c757d !important;
+        }
+
+        .visit-btn.morning.verified {
+            background-color: #ffd43b !important;
+            border-color: #ffd43b !important;
+            color: #000 !important;
+        }
+
+        .visit-btn.evening.verified {
             background-color: #339af0 !important;
             border-color: #339af0 !important;
             color: white !important;
@@ -766,11 +809,11 @@
                 <td class="mobile-hide">${guest.nationality || '-'}</td>
                 <td>
                     <div class="actions">
-                        <button class="btn-action btn-sm btn-success visit-btn morning" onclick="event.stopPropagation(); markVisit('morning', ${guest.roomNumber})">
+                        <button class="btn-action btn-sm btn-success visit-btn morning unverified" onclick="event.stopPropagation(); markVisit('morning', ${guest.roomNumber})">
                             <i class="ri-sun-line"></i>
                             <span class="mobile-hide">Matutina</span>
                         </button>
-                        <button class="btn-action btn-sm btn-info visit-btn evening" onclick="event.stopPropagation(); markVisit('evening', ${guest.roomNumber})">
+                        <button class="btn-action btn-sm btn-info visit-btn evening unverified" onclick="event.stopPropagation(); markVisit('evening', ${guest.roomNumber})">
                             <i class="ri-moon-line"></i>
                             <span class="mobile-hide">Vespertina</span>
                         </button>
@@ -809,6 +852,12 @@
                 localStorage.setItem('eveningVisits', '0');
                 localStorage.setItem('lastVisitUpdate', today);
                 localStorage.removeItem('visitedRooms');
+                
+                // Reset all buttons to unverified state
+                document.querySelectorAll('.visit-btn').forEach(btn => {
+                    btn.classList.remove('verified');
+                    btn.classList.add('unverified');
+                });
             }
             
             // Check if this room has already been visited during this time period
@@ -824,6 +873,11 @@
             visitedRooms[roomKey] = true;
             localStorage.setItem('visitedRooms', JSON.stringify(visitedRooms));
             
+            // Update button appearance
+            const button = event.target.closest('.visit-btn');
+            button.classList.remove('unverified');
+            button.classList.add('verified');
+            
             // Increment counter
             if (timeOfDay === 'morning') {
                 const current = parseInt(localStorage.getItem('morningVisits') || '0');
@@ -835,6 +889,27 @@
             
             updateVisitCounters();
         }
+
+        // Function to check verified status on page load
+        function restoreVisitedStatus() {
+            const visitedRooms = JSON.parse(localStorage.getItem('visitedRooms') || '{}');
+            Object.keys(visitedRooms).forEach(roomKey => {
+                const [roomNumber, timeOfDay] = roomKey.split('-');
+                const selector = `.visit-btn.${timeOfDay}[data-room="${roomNumber}"]`;
+                const button = document.querySelector(selector);
+                if (button) {
+                    button.classList.remove('unverified');
+                    button.classList.add('verified');
+                }
+            });
+        }
+
+        // Add this to your DOMContentLoaded event
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeDailyVisits();
+            loadRooms();
+            restoreVisitedStatus();
+        });
 
         // Filter functionality
         document.querySelectorAll('.filter-btn').forEach(btn => {
