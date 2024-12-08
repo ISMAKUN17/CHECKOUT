@@ -118,147 +118,70 @@
             margin-right: auto;
         }
 
-        .room-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+        .room-table {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-top: 2rem;
         }
 
-        .room-card {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+        .room-table table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .room-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        .room-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
         }
 
-        .room-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--secondary-color);
+        .room-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--secondary-color);
+            vertical-align: middle;
         }
 
-        .room-number {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
+        .room-table tr:hover {
+            background: var(--secondary-color);
         }
 
-        .room-status {
+        .room-table .status-badge {
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
+            display: inline-block;
         }
 
-        .status-encasa {
-            background: rgba(0, 184, 148, 0.1);
-            color: var(--success-color);
+        .room-table .actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
-        .status-llegada {
-            background: rgba(253, 203, 110, 0.1);
-            color: var(--warning-color);
-        }
-
-        .status-salida {
-            background: rgba(214, 48, 49, 0.1);
-            color: var(--danger-color);
-        }
-
-        .guest-info {
-            margin: 1rem 0;
-        }
-
-        .guest-name {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .guest-details {
+        .room-table .btn-action {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             font-size: 0.9rem;
-            color: #666;
         }
 
-        .guest-details p {
-            margin: 0.3rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .guest-details i {
-            color: var(--primary-color);
-            font-size: 1.1rem;
-        }
-
-        .room-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 2px solid var(--secondary-color);
-        }
-
-        .room-actions button {
-            flex: 1;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 8px;
-            background: var(--primary-color);
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .room-actions button:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
-
-        .room-actions button.secondary {
-            background: var(--secondary-color);
-            color: var(--text-color);
-        }
-
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            background: white;
-            color: var(--text-color);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
+        @media (max-width: 768px) {
+            .room-table {
+                overflow-x: auto;
+            }
+            
+            .room-table .mobile-hide {
+                display: none;
+            }
         }
 
         .search-bar {
@@ -316,12 +239,6 @@
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
-        }
-
-        @media (max-width: 768px) {
-            .room-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         .modal-header {
@@ -399,15 +316,25 @@
             </button>
         </div>
 
-        <div class="filters">
-            <button class="filter-btn active" data-filter="all">Todos</button>
-            <button class="filter-btn" data-filter="encasa">En Casa</button>
-            <button class="filter-btn" data-filter="llegada">Llegadas</button>
-            <button class="filter-btn" data-filter="salida">Salidas</button>
-        </div>
-
         <div class="room-grid" id="roomGrid">
-            <!-- Rooms will be populated dynamically -->
+            <div class="room-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hab.</th>
+                            <th>Huésped</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Estado</th>
+                            <th>Nacionalidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roomTableBody">
+                        <!-- Rows will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
@@ -671,47 +598,61 @@
         function loadRooms() {
             const guestsRef = ref(database, 'guests');
             onValue(guestsRef, (snapshot) => {
-                const roomGrid = document.getElementById('roomGrid');
-                roomGrid.innerHTML = '';
+                const roomTableBody = document.getElementById('roomTableBody');
+                roomTableBody.innerHTML = '';
                 
+                // Convert snapshot to array and sort by room number
+                const guests = [];
                 snapshot.forEach((childSnapshot) => {
-                    const guest = childSnapshot.val();
-                    const guestId = childSnapshot.key; // Get the guest ID
-                    const roomCard = createRoomCard(guest, guestId); // Pass both guest data and ID
-                    roomGrid.appendChild(roomCard);
+                    guests.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+
+                // Sort guests array by room number
+                guests.sort((a, b) => {
+                    return parseInt(a.roomNumber) - parseInt(b.roomNumber);
+                });
+                
+                // Create table rows with sorted data
+                guests.forEach((guest) => {
+                    const row = createTableRow(guest, guest.id);
+                    roomTableBody.appendChild(row);
                 });
             });
         }
 
-        function createRoomCard(guest, guestId) {
-            const div = document.createElement('div');
-            div.className = 'room-card';
-            div.setAttribute('data-status', guest.status);
+        function createTableRow(guest, guestId) {
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-status', guest.status);
             
-            div.innerHTML = `
-                <div class="room-header">
-                    <span class="room-number">Habitación ${guest.roomNumber}</span>
-                    <span class="room-status status-${guest.status}">${getStatusText(guest.status)}</span>
-                </div>
-                <div class="guest-info">
-                    <h3 class="guest-name">${guest.guestName}</h3>
-                    <div class="guest-details">
-                        <p><i class="ri-calendar-line"></i> Check-in: ${guest.checkIn}</p>
-                        <p><i class="ri-calendar-line"></i> Check-out: ${guest.checkOut}</p>
-                        <p><i class="ri-flag-line"></i> Nacionalidad: ${guest.nationality || 'No especificada'}</p>
+            tr.innerHTML = `
+                <td class="fw-bold">${guest.roomNumber}</td>
+                <td>${guest.guestName}</td>
+                <td>${guest.checkIn}</td>
+                <td>${guest.checkOut}</td>
+                <td>
+                    <span class="status-badge status-${guest.status}">
+                        ${getStatusText(guest.status)}
+                    </span>
+                </td>
+                <td class="mobile-hide">${guest.nationality || '-'}</td>
+                <td>
+                    <div class="actions">
+                        <button class="btn-action btn-primary" onclick="addFollowUp('${guestId}')">
+                            <i class="ri-add-line"></i>
+                            <span class="mobile-hide">Seguimiento</span>
+                        </button>
+                        <button class="btn-action btn-secondary" onclick="viewDetails('${guestId}')">
+                            <i class="ri-eye-line"></i>
+                            <span class="mobile-hide">Detalles</span>
+                        </button>
                     </div>
-                </div>
-                <div class="room-actions">
-                    <button onclick="addFollowUp('${guestId}')">
-                        <i class="ri-add-line"></i> Seguimiento
-                    </button>
-                    <button class="secondary" onclick="viewDetails('${guestId}')">
-                        <i class="ri-eye-line"></i> Detalles
-                    </button>
-                </div>
+                </td>
             `;
             
-            return div;
+            return tr;
         }
 
         function getStatusText(status) {
@@ -733,11 +674,11 @@
                 btn.classList.add('active');
                 
                 // Filter rooms
-                document.querySelectorAll('.room-card').forEach(card => {
-                    if (filter === 'all' || card.dataset.status === filter) {
-                        card.style.display = 'block';
+                document.querySelectorAll('.room-table tr').forEach(row => {
+                    if (filter === 'all' || row.dataset.status === filter) {
+                        row.style.display = 'table-row';
                     } else {
-                        card.style.display = 'none';
+                        row.style.display = 'none';
                     }
                 });
             });
@@ -747,14 +688,14 @@
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             
-            document.querySelectorAll('.room-card').forEach(card => {
-                const roomNumber = card.querySelector('.room-number').textContent.toLowerCase();
-                const guestName = card.querySelector('.guest-name').textContent.toLowerCase();
+            document.querySelectorAll('.room-table tr').forEach(row => {
+                const roomNumber = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                const guestName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
                 
                 if (roomNumber.includes(searchTerm) || guestName.includes(searchTerm)) {
-                    card.style.display = 'block';
+                    row.style.display = 'table-row';
                 } else {
-                    card.style.display = 'none';
+                    row.style.display = 'none';
                 }
             });
         });
