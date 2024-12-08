@@ -478,6 +478,18 @@
         .room-grid {
             scroll-behavior: smooth;
         }
+
+        .special-request-icon {
+            margin-left: 0.5rem;
+            font-size: 1.2rem;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 768px) {
+            .special-request-icon {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -615,6 +627,21 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="specialRequest" class="form-label">
+                                    <i class="ri-gift-line"></i>
+                                    Solicitud Especial
+                                </label>
+                                <select class="form-select" id="specialRequest">
+                                    <option value="">Seleccionar solicitud</option>
+                                    <option value="birthday">🎂 Cumpleaños</option>
+                                    <option value="honeymoon">💑 Luna de Miel</option>
+                                    <option value="anniversary">💝 Aniversario</option>
+                                    <option value="vacation">🌴 Vacaciones</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label for="observation" class="form-label">Observación</label>
                             <textarea class="form-control" id="observation" rows="3"></textarea>
@@ -685,6 +712,21 @@
                                     <option value="encasa">En Casa</option>
                                     <option value="llegada">Llegada</option>
                                     <option value="salida">Salida</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editSpecialRequest" class="form-label">
+                                    <i class="ri-gift-line"></i>
+                                    Solicitud Especial
+                                </label>
+                                <select class="form-select" id="editSpecialRequest">
+                                    <option value="">Seleccionar solicitud</option>
+                                    <option value="birthday">🎂 Cumpleaños</option>
+                                    <option value="honeymoon">💑 Luna de Miel</option>
+                                    <option value="anniversary">💝 Aniversario</option>
+                                    <option value="vacation">🌴 Vacaciones</option>
                                 </select>
                             </div>
                         </div>
@@ -899,23 +941,27 @@
         }
 
         function createTableRow(guest, guestId) {
+            const specialRequestIcons = {
+                'birthday': '🎂',
+                'honeymoon': '💑',
+                'anniversary': '💝',
+                'vacation': '🌴'
+            };
+
             const tr = document.createElement('tr');
             tr.setAttribute('data-status', guest.status);
             tr.style.cursor = 'pointer';
             
-            const statusIcons = {
-                'encasa': '<i class="ri-home-smile-fill"></i>',
-                'llegada': '<i class="ri-login-circle-fill"></i>',
-                'salida': '<i class="ri-logout-circle-fill"></i>'
-            };
-            
+            const specialRequestIcon = guest.specialRequest ? 
+                `<span class="special-request-icon" title="${guest.specialRequest}">${specialRequestIcons[guest.specialRequest]}</span>` : '';
+
             tr.innerHTML = `
                 <td class="fw-bold">${guest.roomNumber}</td>
-                <td>${guest.guestName}</td>
+                <td>${guest.guestName} ${specialRequestIcon}</td>
                 <td>${guest.checkOut}</td>
                 <td>
                     <span class="status-badge status-${guest.status}">
-                        ${statusIcons[guest.status] || ''} ${getStatusText(guest.status)}
+                        ${getStatusIcon(guest.status)} ${getStatusText(guest.status)}
                     </span>
                 </td>
                 <td class="observation-cell">${guest.observation || '-'}</td>
@@ -940,6 +986,15 @@
             tr.addEventListener('click', () => viewDetails(guestId));
             
             return tr;
+        }
+
+        function getStatusIcon(status) {
+            const statusIcons = {
+                'encasa': '<i class="ri-home-smile-fill"></i>',
+                'llegada': '<i class="ri-login-circle-fill"></i>',
+                'salida': '<i class="ri-logout-circle-fill"></i>'
+            };
+            return statusIcons[status] || '';
         }
 
         function getStatusText(status) {
@@ -1149,6 +1204,7 @@
             const nationality = document.getElementById('nationality').value;
             const status = document.getElementById('status').value;
             const observation = document.getElementById('observation').value;
+            const specialRequest = document.getElementById('specialRequest').value;
 
             if (!roomNumber || !guestName || !checkIn || !checkOut || !nationality || !status) {
                 alert('Por favor complete todos los campos requeridos');
@@ -1162,7 +1218,8 @@
                 checkOut,
                 nationality,
                 status,
-                observation
+                observation,
+                specialRequest // Add this field
             };
 
             const guestsRef = ref(database, 'guests');
@@ -1236,6 +1293,14 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="detail-group">
+                                            <h6 class="text-primary mb-3"><i class="ri-gift-line"></i> Solicitud Especial</h6>
+                                            <p>${guest.specialRequest ? getSpecialRequestText(guest.specialRequest) : 'Sin solicitud especial'}</p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row mt-4">
                                     <div class="col-6">
                                         <button class="btn btn-warning w-100" onclick="editGuest('${id}')">
@@ -1271,6 +1336,7 @@
                 document.getElementById('editCheckOut').value = guest.checkOut;
                 document.getElementById('editNationality').value = guest.nationality;
                 document.getElementById('editStatus').value = guest.status;
+                document.getElementById('editSpecialRequest').value = guest.specialRequest || '';
                 document.getElementById('editObservation').value = guest.observation || '';
                 
                 // Store the guest ID for the save function
@@ -1319,7 +1385,8 @@
                 checkOut: document.getElementById('editCheckOut').value,
                 nationality: document.getElementById('editNationality').value,
                 status: document.getElementById('editStatus').value,
-                observation: document.getElementById('editObservation').value
+                observation: document.getElementById('editObservation').value,
+                specialRequest: document.getElementById('editSpecialRequest').value,
             };
 
             const guestRef = ref(database, `guests/${guestId}`);
@@ -1405,6 +1472,16 @@
                 onlyOnce: true
             });
         };
+
+        function getSpecialRequestText(request) {
+            const texts = {
+                'birthday': '🎂 Cumpleaños',
+                'honeymoon': '💑 Luna de Miel',
+                'anniversary': '💝 Aniversario',
+                'vacation': '🌴 Vacaciones'
+            };
+            return texts[request] || request;
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
