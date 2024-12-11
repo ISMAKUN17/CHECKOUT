@@ -131,11 +131,21 @@
             border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .stat-card::after {
+            content: '👆 Click para ver detalles';
+            display: block;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
         }
 
         .stat-card i {
@@ -488,6 +498,55 @@
         @media (max-width: 768px) {
             .special-request-icon {
                 font-size: 1rem;
+            }
+        }
+
+        .guest-details-card {
+            background: white;
+            border-radius: 15px;
+        }
+
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-group h6 {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-group p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .guest-details-card {
+                padding: 1rem !important;
+            }
+            
+            .detail-group {
+                margin-bottom: 1rem;
+            }
+            
+            .detail-group h6 {
+                font-size: 0.9rem;
+            }
+            
+            .detail-group p {
+                font-size: 1rem;
+            }
+            
+            .badge {
+                padding: 0.3rem 0.6rem;
             }
         }
     </style>
@@ -869,9 +928,18 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // Helper function for timezone conversion
+        function getLocalDateTime() {
+          const now = new Date();
+          // Adjust for GMT-4
+          const offset = -4;
+          const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+          return new Date(utc + (3600000 * offset));
+        }
+
         // Daily visits counter functionality
         function initializeDailyVisits() {
-            const now = new Date();
+            const now = getLocalDateTime();
             const today = now.toDateString();
             
             // Check if we need to reset counters
@@ -893,7 +961,7 @@
         }
 
         function incrementVisit() {
-            const now = new Date();
+            const now = getLocalDateTime();
             const hour = now.getHours();
             
             // Morning is considered 6 AM to 5:59 PM
@@ -1014,7 +1082,7 @@
                 let arrivalsCount = 0;
                 let departuresCount = 0;
                 
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateTime().toISOString().split('T')[0];
                 
                 snapshot.forEach((childSnapshot) => {
                     const guest = childSnapshot.val();
@@ -1045,57 +1113,137 @@
             });
         }
 
-        // Add marking visit functionality
-        window.markVisit = function(timeOfDay, roomNumber) {
-            const now = new Date();
-            const today = now.toDateString();
-            
-            // Create a Firebase reference for visits
-            const visitsRef = ref(database, 'visits');
-            const todayVisitsRef = ref(database, `visits/${today.replace(/\s/g, '_')}`);
-            
-            // Check if this room has already been visited during this time period
-            const roomKey = `${roomNumber}-${timeOfDay}`;
-            
-            get(todayVisitsRef).then((snapshot) => {
-                const visits = snapshot.val() || {};
+        // Show stat details
+        function showStatDetails(statType) {
+            const guestsRef = ref(database, 'guests');
+            get(guestsRef).then((snapshot) => {
+                const guests = [];
+                const today = getLocalDateTime().toISOString().split('T')[0];
                 
-                if (visits[roomKey]) {
-                    alert('Esta habitación ya fue visitada en este periodo');
-                    return;
-                }
-                
-                // Mark room as visited in Firebase
-                set(ref(database, `visits/${today.replace(/\s/g, '_')}/${roomKey}`), {
-                    roomNumber,
-                    timeOfDay,
-                    timestamp: now.toISOString()
-                }).then(() => {
-                    // Update button appearance
-                    const button = event.target.closest('.visit-btn');
-                    button.classList.remove('unverified');
-                    button.classList.add('verified');
-                    
-                    // Update local counters
-                    if (timeOfDay === 'morning') {
-                        const current = parseInt(localStorage.getItem('morningVisits') || '0');
-                        localStorage.setItem('morningVisits', (current + 1).toString());
-                    } else {
-                        const current = parseInt(localStorage.getItem('eveningVisits') || '0');
-                        localStorage.setItem('eveningVisits', (current + 1).toString());
-                    }
-                    
-                    updateVisitCounters();
+                snapshot.forEach((childSnapshot) => {
+                    guests.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
 
-                    // Update dashboard stats
-                    updateDashboardStats();
+                let modalContent = '';
+                let modalTitle = '';
+
+                switch(statType) {
+                    case 'inHouse':
+                        modalTitle = 'Huéspedes En Casa';
+                        modalContent = guests
+                            .filter(g => g.status === 'encasa')
+                            .map(g => `
+                                <div class="guest-details-card p-3 mb-2">
+                                    <div class="row">
+                                        <div class="col-md-4"><strong>Hab ${g.roomNumber}</strong></div>
+                                        <div class="col-md-4">${g.guestName}</div>
+                                        <div class="col-md-4">Check-out: ${g.checkOut}</div>
+                                    </div>
+                                </div>
+                            `).join('') || 'No hay huéspedes en casa';
+                        break;
+                    case 'arrivals':
+                        modalTitle = 'Llegadas de Hoy';
+                        modalContent = guests
+                            .filter(g => g.checkIn === today)
+                            .map(g => `
+                                <div class="guest-details-card p-3 mb-2">
+                                    <div class="row">
+                                        <div class="col-md-4"><strong>Hab ${g.roomNumber}</strong></div>
+                                        <div class="col-md-4">${g.guestName}</div>
+                                        <div class="col-md-4">Check-in: ${g.checkIn}</div>
+                                    </div>
+                                </div>
+                            `).join('') || 'No hay llegadas hoy';
+                        break;
+                    case 'departures':
+                        modalTitle = 'Salidas de Hoy';
+                        modalContent = guests
+                            .filter(g => g.checkOut === today)
+                            .map(g => `
+                                <div class="guest-details-card p-3 mb-2">
+                                    <div class="row">
+                                        <div class="col-md-4"><strong>Hab ${g.roomNumber}</strong></div>
+                                        <div class="col-md-4">${g.guestName}</div>
+                                        <div class="col-md-4">Check-out: ${g.checkOut}</div>
+                                    </div>
+                                </div>
+                            `).join('') || 'No hay salidas hoy';
+                        break;
+                    case 'visited':
+                        modalTitle = 'Visitas del Día';
+                        const morningVisits = parseInt(localStorage.getItem('morningVisits') || '0');
+                        const eveningVisits = parseInt(localStorage.getItem('eveningVisits') || '0');
+                        modalContent = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="alert alert-warning">
+                                        <h4 class="alert-heading">Visitas Matutinas</h4>
+                                        <p class="display-4 text-center">${morningVisits}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h4 class="alert-heading">Visitas Vespertinas</h4>
+                                        <p class="display-4 text-center">${eveningVisits}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                }
+
+                const detailsContent = document.getElementById('guestDetailsContent');
+                detailsContent.innerHTML = modalContent;
+                document.getElementById('detailsModalLabel').textContent = modalTitle;
+                const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+                modal.show();
+            });
+        }
+
+        // Check and update checkout status
+        function checkAndUpdateCheckouts() {
+            const guestsRef = ref(database, 'guests');
+            get(guestsRef).then((snapshot) => {
+                const tomorrow = getLocalDateTime();
+                tomorrow.setDate(tomorrow.getDate() + 1); 
+                const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                
+                snapshot.forEach((childSnapshot) => {
+                    const guest = childSnapshot.val();
+                    const guestId = childSnapshot.key;
+                    
+                    if (guest.checkOut === tomorrowStr && guest.status !== 'salida') {
+                        // Update status to 'salida'
+                        set(ref(database, `guests/${guestId}/status`), 'salida');
+                    }
                 });
             });
-        };
+        }
+
+        // Modify the initialization to include the checkout check
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeDailyVisits();
+            loadRooms();
+            checkAndUpdateCheckouts(); // Initial check
+            setInterval(checkAndUpdateCheckouts, 3600000); // Check every hour
+            
+            // Add click handlers to stat cards
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    const types = ['inHouse', 'arrivals', 'departures', 'visited'];
+                    showStatDetails(types[index]);
+                });
+            });
+        });
 
         // Add function to restore visit status from Firebase
         function restoreVisitsFromFirebase() {
-            const now = new Date();
+            const now = getLocalDateTime();
             const today = now.toDateString();
             const todayVisitsRef = ref(database, `visits/${today.replace(/\s/g, '_')}`);
             
@@ -1133,32 +1281,7 @@
             });
         }
 
-        // Modify the initialization to include Firebase visit restoration
-        window.addEventListener('DOMContentLoaded', () => {
-            cleanupOldVisits();
-            initializeDailyVisits();
-            loadRooms();
-            restoreVisitsFromFirebase();
-        });
-
-        // Add cleanup function for old visit data
-        function cleanupOldVisits() {
-            const visitsRef = ref(database, 'visits');
-            get(visitsRef).then((snapshot) => {
-                const visits = snapshot.val() || {};
-                const now = new Date();
-                const today = now.toDateString().replace(/\s/g, '_');
-                
-                // Remove visits older than today
-                Object.keys(visits).forEach(date => {
-                    if (date !== today) {
-                        set(ref(database, `visits/${date}`), null);
-                    }
-                });
-            });
-        }
-
-        // Search functionality
+        // Add function to search functionality
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             
