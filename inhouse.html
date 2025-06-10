@@ -1,1611 +1,386 @@
-<html><head><base href="." />
+<!DOCTYPE html>
+<html lang="es">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InHouse Manager - InHouse</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <title>Visualizador de Encuestas - Secrets Royal Beach</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
         :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #f5f6fa;
-            --text-color: #2d3436;
-            --accent-color: #6c5ce7;
-            --success-color: #00b894;
-            --warning-color: #fdcb6e;
-            --danger-color: #d63031;
+            --primary-color: #5cb85c;
+            --text-color: #333;
+            --light-text-color: #666;
+            --background-color: #f0f2f5;
+            --card-background: #ffffff;
+            --border-color: #e0e0e0;
+            --header-bg: #4CAF50; /* Un verde más oscuro para el encabezado */
+            --header-text: #ffffff;
+            --table-row-hover: #f5f5f5;
+            --button-bg: #007bff;
+            --button-hover-bg: #0056b3;
+            --export-button-bg: #28a745;
+            --export-button-hover-bg: #218838;
         }
 
-        .navbar {
-            background: white;
-            padding: 0.8rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            transition: color 0.3s ease;
-            cursor: pointer;
-        }
-
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-links a {
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-decoration: none;
-            color: var(--text-color);
-            padding: 0.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
-        .nav-links a:hover {
-            background: var(--secondary-color);
-            color: var(--primary-color);
-        }
-
-        .nav-links i {
-            font-size: 1.5rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .nav-links span {
-            font-size: 0.7rem;
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: white;
-                padding: 0.5rem;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-                justify-content: space-around;
-            }
-            
-            .nav-links span {
-                display: block;
-            }
-        }
-
-        .main-content {
-            margin-top: 100px;
-            padding: 2rem;
+        .container {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
             max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        }
-
-        .stat-card::after {
-            content: '👆 Click para ver detalles';
-            display: block;
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 0.5rem;
-        }
-
-        .stat-card i {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .stat-card h3 {
-            font-size: 2rem;
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-card p {
-            color: #666;
-            margin: 0;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-stats {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-        }
-
-        .room-table {
             width: 100%;
-            background: white;
-            border-radius: 15px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-            max-width: 100%;
-            margin-top: 2rem;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        .room-table table {
+        h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+
+        p.subtitle {
+            color: var(--light-text-color);
+            font-weight: 300;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            background-color: var(--export-button-bg);
+            color: var(--header-text);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls button:hover {
+            background-color: var(--export-button-hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+            margin-top: 20px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px; /* Ensures table doesn't compress too much */
-        }
-
-        .room-table th {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem;
             text-align: left;
+        }
+
+        thead {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap; /* Evita que el texto se envuelva */
+        }
+
+        th {
             font-weight: 500;
-            position: sticky;
-            top: 0;
-            z-index: 10; /* Keep header cells visible */
+            text-transform: uppercase;
+            font-size: 0.9em;
         }
 
-        .room-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--secondary-color);
-            vertical-align: middle;
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
 
-        .room-table tr:hover {
-            background: rgba(74, 144, 226, 0.1) !important;
+        tbody tr:hover {
+            background-color: var(--table-row-hover);
         }
 
-        .room-table .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .room-table .status-encasa {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .room-table .status-llegada {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .room-table .status-salida {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .room-table .actions {
-            display: flex;
-            gap: 0.3rem !important;
-        }
-
-        .room-table .btn-action {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .room-table {
-                margin: 1rem -1rem;
-                padding: 0;
-                border-radius: 0; /* Remove border radius on mobile for full-width appearance */
-            }
-
-            .room-table td, .room-table th {
-                padding: 0.5rem;
-            }
-
-            .observation-cell {
-                max-width: 100px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .actions {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.2rem !important;
-            }
-
-            .btn-action {
-                padding: 0.3rem !important;
-                font-size: 1rem !important;
-            }
-
-            .status-badge {
-                padding: 0.3rem 0.6rem !important;
-                font-size: 0.75rem !important;
-            }
-
-            /* Show all important columns on mobile */
-            .room-table th:not(.mobile-hide),
-            .room-table td:not(.mobile-hide) {
-                display: table-cell !important;
-            }
-        }
-
-        /* Additional styles for better table appearance */
-        .room-table td {
-            vertical-align: middle;
-        }
-
-        .observation-cell {
-            max-width: 200px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .actions {
-            display: flex;
-            gap: 0.3rem !important;
-            flex-wrap: nowrap;
-        }
-
-        .btn-action {
-            white-space: nowrap;
-        }
-
-        .search-bar {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .search-bar {
-                flex-direction: row;
-                align-items: center;
-            }
-            
-            .search-bar .btn {
-                white-space: nowrap;
-            }
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid var(--secondary-color);
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-
-        .daily-visits {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .visit-counter {
-            flex: 1;
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .no-data-message {
             text-align: center;
+            padding: 30px;
+            color: var(--light-text-color);
+            font-size: 1.1em;
         }
 
-        .visit-counter h3 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-        }
+        /* Colores de calificación */
+        .rating-excellent { color: #28a745; font-weight: 500; } /* Verde */
+        .rating-good { color: #28a745; font-weight: 500; } /* Verde */
+        .rating-regular { color: #ffc107; font-weight: 500; } /* Amarillo */
+        .rating-poor { color: #dc3545; font-weight: 500; } /* Rojo */
+        .rating-bad { color: #dc3545; font-weight: 500; } /* Rojo */
 
-        .visit-counter p {
-            color: var(--text-color);
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
-        .modal-content {
-            border-radius: 15px;
-        }
-
-        .modal-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .modal-header .btn-close {
-            filter: brightness(0) invert(1);
-        }
-
-        .form-control, .form-select {
-            border-radius: 8px;
-            border: 2px solid var(--secondary-color);
-            padding: 0.5rem 1rem;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
-        }
-
-        .modal-header {
-            border-bottom: none;
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            border-top: none;
-            padding: 1.5rem;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .modal-content {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .visit-btn {
-            padding: 0.3rem 0.6rem !important;
-            font-size: 0.8rem !important;
-        }
-
-        .visit-btn.morning {
-            background-color: #ffd43b !important;
-            border-color: #ffd43b !important;
-            color: #000 !important;
-        }
-
-        .visit-btn.evening {
-            background-color: #339af0 !important;
-            border-color: #339af0 !important;
-            color: white !important;
-        }
-
-        .visit-btn.unverified {
-            background-color: #e9ecef !important;
-            border-color: #dee2e6 !important;
-            color: #6c757d !important;
-        }
-
-        .visit-btn.morning.verified {
-            background-color: #ffd43b !important;
-            border-color: #ffd43b !important;
-            color: #000 !important;
-        }
-
-        .visit-btn.evening.verified {
-            background-color: #339af0 !important;
-            border-color: #339af0 !important;
-            color: white !important;
-        }
-
-        .room-table tr {
-            transition: background-color 0.2s ease;
-        }
-
-        .actions {
-            gap: 0.3rem !important;
-        }
-
-        /* Add scrollbar styling for better visibility */
-        .room-table::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .room-table::-webkit-scrollbar-track {
-            background: var(--secondary-color);
-            border-radius: 4px;
-        }
-
-        .room-table::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        .room-table::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-color);
-        }
-
-        .room-grid {
-            scroll-behavior: smooth;
-        }
-
-        .special-request-icon {
-            margin-left: 0.5rem;
-            font-size: 1.2rem;
-            vertical-align: middle;
-        }
-
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .special-request-icon {
-                font-size: 1rem;
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            p.subtitle {
+                font-size: 1em;
+            }
+            th, td {
+                padding: 10px;
+                font-size: 0.85em;
             }
         }
 
-        .guest-details-card {
-            background: white;
-            border-radius: 15px;
-        }
-
-        .detail-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .detail-group h6 {
-            color: var(--primary-color);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .detail-group p {
-            margin: 0;
-            font-size: 1.1rem;
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .guest-details-card {
-                padding: 1rem !important;
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
             }
-            
-            .detail-group {
-                margin-bottom: 1rem;
+            .container {
+                padding: 15px;
             }
-            
-            .detail-group h6 {
-                font-size: 0.9rem;
+            h1 {
+                font-size: 1.5em;
             }
-            
-            .detail-group p {
-                font-size: 1rem;
+            .controls button {
+                padding: 8px 15px;
+                font-size: 0.9em;
             }
-            
-            .badge {
-                padding: 0.3rem 0.6rem;
-            }
+            /* Puede ser necesario ocultar algunas columnas en pantallas muy pequeñas */
+            /* td:nth-child(n+7), th:nth-child(n+7) { display: none; } */
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">InHouse Manager</div>
-            <button class="menu-toggle" aria-label="Toggle menu">
-                <i class="ri-menu-line"></i>
-            </button>
-            <div class="nav-links">
-                <a href="index.html">
-                    <i class="ri-home-4-line"></i>
-                    <span>Home</span>
-                </a>
-                <a href="inhouse.html">
-                    <i class="ri-hotel-line"></i>
-                    <span>InHouse</span>
-                </a>
-                <a href="seguimientos.html">
-                    <i class="ri-file-list-3-line"></i>
-                    <span>Seguimientos</span>
-                </a>
-                <a href="ventas.html">
-                    <i class="ri-shopping-cart-line"></i>
-                    <span>Ventas</span>
-                </a>
-            </div>
-        </div>
-    </nav>
 
-    <main class="main-content">
-        <div class="search-bar">
-            <input type="text" class="search-input" placeholder="Buscar por número de habitación o nombre del huésped..." id="searchInput">
-            <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addGuestModal">
-                <i class="ri-add-line"></i> Agregar Huésped
-            </button>
+    <div class="container">
+        <h1>Dashboard de Encuestas</h1>
+        <p class="subtitle">Visualización en tiempo real de las encuestas de satisfacción de Secrets Royal Beach</p>
+
+        <div class="controls">
+            <button id="exportCsvBtn">Exportar a CSV</button>
+            <button id="refreshBtn">Refrescar Datos</button>
         </div>
 
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <i class="ri-home-smile-fill"></i>
-                <h3 id="guestsInHouse">0</h3>
-                <p>Huéspedes En Casa</p>
-            </div>
-            <div class="stat-card">
-                <i class="ri-login-circle-fill"></i>
-                <h3 id="arrivalsToday">0</h3>
-                <p>Llegadas Hoy</p>
-            </div>
-            <div class="stat-card">
-                <i class="ri-logout-circle-fill"></i>
-                <h3 id="departuresTotal">0</h3>
-                <p>Salidas Hoy</p>
-            </div>
-            <div class="stat-card">
-                <i class="ri-group-fill"></i>
-                <h3 id="totalVisited">0</h3>
-                <p>Total Visitados</p>
-            </div>
-        </div>
-
-        <div class="daily-visits">
-            <div class="visit-counter">
-                <h3 id="morningVisits">0</h3>
-                <p>Visitas Matutinas</p>
-            </div>
-            <div class="visit-counter">
-                <h3 id="eveningVisits">0</h3>
-                <p>Visitas Vespertinas</p>
-            </div>
-        </div>
-
-        <div class="room-grid" id="roomGrid">
-            <div class="room-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hab.</th>
-                            <th>Huésped</th>
-                            <th>Check-out</th>
-                            <th>Estado</th>
-                            <th>Observaciones</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="roomTableBody">
-                        <!-- Rows will be populated dynamically -->
+        <div class="table-container">
+            <table id="surveyTable">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>No. Habitación</th>
+                        <th>Nombre Huésped</th>
+                        <th>Email Huésped</th>
+                        <th>Butler</th>
+                        <th>Experiencia General</th>
+                        <th>Servicio del Personal</th>
+                        <th>Recomendación Hotel</th>
+                        <th>Experiencia Preferred Club</th>
+                        <th>Calificación Final</th>
+                    </tr>
+                </thead>
+                <tbody>
                     </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addGuestModalLabel">Agregar Nuevo Huésped</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addGuestForm">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="roomNumber" class="form-label">Número de Habitación</label>
-                                <input type="number" class="form-control" id="roomNumber" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="guestName" class="form-label">Nombre del Huésped</label>
-                                <input type="text" class="form-control" id="guestName" required>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="checkIn" class="form-label">Check-in</label>
-                                <input type="date" class="form-control" id="checkIn" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="checkOut" class="form-label">Check-out</label>
-                                <input type="date" class="form-control" id="checkOut" required>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="nationality" class="form-label">Nacionalidad</label>
-                                <input type="text" class="form-control" id="nationality" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="status" class="form-label">Estado</label>
-                                <select class="form-select" id="status" required>
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="encasa">En Casa</option>
-                                    <option value="llegada">Llegada</option>
-                                    <option value="salida">Salida</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="specialRequest" class="form-label">
-                                    <i class="ri-gift-line"></i>
-                                    Solicitud Especial
-                                </label>
-                                <select class="form-select" id="specialRequest">
-                                    <option value="">Seleccionar solicitud</option>
-                                    <option value="birthday">🎂 Cumpleaños</option>
-                                    <option value="honeymoon">💑 Luna de Miel</option>
-                                    <option value="anniversary">💝 Aniversario</option>
-                                    <option value="vacation">🌴 Vacaciones</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="observation" class="form-label">Observación</label>
-                            <textarea class="form-control" id="observation" rows="3"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveGuest()">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Details Modal -->
-    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="detailsModalLabel">Detalles del Huésped</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="guestDetailsContent">
-                    <!-- Content will be populated dynamically -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Guest Modal -->
-    <div class="modal fade" id="editGuestModal" tabindex="-1" aria-labelledby="editGuestModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title" id="editGuestModalLabel">Editar Huésped</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editGuestForm">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="editRoomNumber" class="form-label">Número de Habitación</label>
-                                <input type="number" class="form-control" id="editRoomNumber" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editGuestName" class="form-label">Nombre del Huésped</label>
-                                <input type="text" class="form-control" id="editGuestName" required>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="editCheckIn" class="form-label">Check-in</label>
-                                <input type="date" class="form-control" id="editCheckIn" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editCheckOut" class="form-label">Check-out</label>
-                                <input type="date" class="form-control" id="editCheckOut" required>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="editNationality" class="form-label">Nacionalidad</label>
-                                <input type="text" class="form-control" id="editNationality" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editStatus" class="form-label">Estado</label>
-                                <select class="form-select" id="editStatus" required>
-                                    <option value="encasa">En Casa</option>
-                                    <option value="llegada">Llegada</option>
-                                    <option value="salida">Salida</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="editSpecialRequest" class="form-label">
-                                    <i class="ri-gift-line"></i>
-                                    Solicitud Especial
-                                </label>
-                                <select class="form-select" id="editSpecialRequest">
-                                    <option value="">Seleccionar solicitud</option>
-                                    <option value="birthday">🎂 Cumpleaños</option>
-                                    <option value="honeymoon">💑 Luna de Miel</option>
-                                    <option value="anniversary">💝 Aniversario</option>
-                                    <option value="vacation">🌴 Vacaciones</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editObservation" class="form-label">Observación</label>
-                            <textarea class="form-control" id="editObservation" rows="3"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-warning" onclick="saveEdit()">Guardar Cambios</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Follow-up Modal -->
-    <div class="modal fade" id="followUpModal" tabindex="-1" aria-labelledby="followUpModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="followUpModalLabel">
-                        <i class="ri-file-list-3-line me-2"></i>
-                        Nuevo Seguimiento
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="followUpForm" class="needs-validation" novalidate>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="followUpRoom" class="form-label">
-                                    <i class="ri-home-4-line me-1"></i>
-                                    Habitación
-                                </label>
-                                <input type="text" class="form-control" id="followUpRoom" required readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="followUpDate" class="form-label">
-                                    <i class="ri-calendar-line me-1"></i>
-                                    Fecha
-                                </label>
-                                <input type="date" class="form-control" id="followUpDate" required>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="followUpMood" class="form-label">
-                                    <i class="ri-emotion-line me-1"></i>
-                                    Estado de Ánimo
-                                </label>
-                                <select class="form-select" id="followUpMood" required>
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="happy">😊 Feliz</option>
-                                    <option value="neutral">😐 Neutral</option>
-                                    <option value="upset">😟 Molesto</option>
-                                    <option value="angry">😠 Enojado</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="followUpCategory" class="form-label">
-                                    <i class="ri-folder-line me-1"></i>
-                                    Categoría
-                                </label>
-                                <select class="form-select" id="followUpCategory" required>
-                                    <option value="">Seleccionar categoría</option>
-                                    <option value="maintenance">Mantenimiento</option>
-                                    <option value="housekeeping">Limpieza</option>
-                                    <option value="service">Servicio</option>
-                                    <option value="complaint">Queja</option>
-                                    <option value="request">Solicitud</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="followUpNotes" class="form-label">
-                                <i class="ri-file-text-line me-1"></i>
-                                Notas del Seguimiento
-                            </label>
-                            <textarea class="form-control" id="followUpNotes" rows="4" required></textarea>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="followUpAction" class="form-label">
-                                    <i class="ri-error-warning-line me-1"></i>
-                                    Requiere Acción
-                                </label>
-                                <select class="form-select" id="followUpAction" required>
-                                    <option value="no">No</option>
-                                    <option value="yes">Sí</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="followUpPriority" class="form-label">
-                                    <i class="ri-flag-line me-1"></i>
-                                    Prioridad
-                                </label>
-                                <select class="form-select" id="followUpPriority" required>
-                                    <option value="low">Baja</option>
-                                    <option value="medium">Media</option>
-                                    <option value="high">Alta</option>
-                                    <option value="urgent">Urgente</option>
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="ri-close-line me-1"></i>
-                        Cancelar
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="saveFollowUp()">
-                        <i class="ri-save-line me-1"></i>
-                        Guardar Seguimiento
-                    </button>
-                </div>
+            </table>
+            <div id="noDataMessage" class="no-data-message" style="display: none;">
+                No hay encuestas para mostrar.
             </div>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Your web app's Firebase configuration (MISMA CONFIGURACIÓN QUE EN TU ENCUESTADOR)
         const firebaseConfig = {
-            apiKey: "AIzaSyDUirwoSQgvcMZn7uLjKMAxlTA15Jkl2BM",
-            authDomain: "ismakun-bf0fa.firebaseapp.com",
-            databaseURL: "https://ismakun-bf0fa-default-rtdb.firebaseio.com",
-            projectId: "ismakun-bf0fa",
-            storageBucket: "ismakun-bf0fa.appspot.com",
-            messagingSenderId: "1028877703945",
-            appId: "1:1028877703945:web:331de48acbcdf2234a51d8"
+            apiKey: "AIzaSyALR-b68phh_u92V3rw9B9Ei7FcexU2xc8",
+            authDomain: "proyectos17-98695.firebaseapp.com",
+            projectId: "proyectos17-98695",
+            storageBucket: "proyectos17-98695.firebasestorage.app",
+            messagingSenderId: "951673973410",
+            appId: "1:951673973410:web:4bc355e825cf86308645fb",
+            measurementId: "G-6YK06W16FZ"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const db = getFirestore(app);
 
-        // Helper function for timezone conversion
-        function getLocalDateTime() {
-          const now = new Date();
-          // Adjust for GMT-4
-          const offset = -4;
-          const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-          return new Date(utc + (3600000 * offset));
-        }
+        const surveyTableBody = document.querySelector('#surveyTable tbody');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
 
-        // Daily visits counter functionality
-        function initializeDailyVisits() {
-            const now = getLocalDateTime();
-            const today = now.toDateString();
-            
-            // Check if we need to reset counters
-            const lastUpdate = localStorage.getItem('lastVisitUpdate');
-            if (lastUpdate !== today) {
-                localStorage.setItem('morningVisits', '0');
-                localStorage.setItem('eveningVisits', '0');
-                localStorage.setItem('lastVisitUpdate', today);
-                localStorage.removeItem('visitedRooms');
+        let allSurveyData = []; // Para almacenar todos los datos y facilitar la exportación
+
+        // Función para formatear la fecha
+        function formatTimestamp(timestamp) {
+            if (timestamp && timestamp.toDate) {
+                const date = timestamp.toDate();
+                return date.toLocaleString('es-DO', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false // Formato 24 horas
+                });
             }
-            
-            // Update counters display
-            updateVisitCounters();
+            return 'N/A';
         }
 
-        function updateVisitCounters() {
-            document.getElementById('morningVisits').textContent = localStorage.getItem('morningVisits') || '0';
-            document.getElementById('eveningVisits').textContent = localStorage.getItem('eveningVisits') || '0';
-        }
-
-        function incrementVisit() {
-            const now = getLocalDateTime();
-            const hour = now.getHours();
-            
-            // Morning is considered 6 AM to 5:59 PM
-            if (hour >= 6 && hour < 18) {
-                const current = parseInt(localStorage.getItem('morningVisits') || '0');
-                localStorage.setItem('morningVisits', (current + 1).toString());
-            } else {
-                const current = parseInt(localStorage.getItem('eveningVisits') || '0');
-                localStorage.setItem('eveningVisits', (current + 1).toString());
-            }
-            
-            updateVisitCounters();
-        }
-
-        // Load and display rooms
-        function loadRooms() {
-            const guestsRef = ref(database, 'guests');
-            onValue(guestsRef, (snapshot) => {
-                const roomTableBody = document.getElementById('roomTableBody');
-                roomTableBody.innerHTML = '';
-                
-                // Convert snapshot to array and sort by room number
-                const guests = [];
-                snapshot.forEach((childSnapshot) => {
-                    guests.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-
-                // Sort guests array by room number
-                guests.sort((a, b) => {
-                    return parseInt(a.roomNumber) - parseInt(b.roomNumber);
-                });
-                
-                // Create table rows with sorted data
-                guests.forEach((guest) => {
-                    const row = createTableRow(guest, guest.id);
-                    roomTableBody.appendChild(row);
-                });
-
-                // Update dashboard stats
-                updateDashboardStats();
-            });
-        }
-
-        function createTableRow(guest, guestId) {
-            const specialRequestIcons = {
-                'birthday': '🎂',
-                'honeymoon': '💑',
-                'anniversary': '💝',
-                'vacation': '🌴'
-            };
-
-            const tr = document.createElement('tr');
-            tr.setAttribute('data-status', guest.status);
-            tr.style.cursor = 'pointer';
-            
-            const specialRequestIcon = guest.specialRequest ? 
-                `<span class="special-request-icon" title="${guest.specialRequest}">${specialRequestIcons[guest.specialRequest]}</span>` : '';
-
-            tr.innerHTML = `
-                <td class="fw-bold">${guest.roomNumber}</td>
-                <td>${guest.guestName} ${specialRequestIcon}</td>
-                <td>${guest.checkOut}</td>
-                <td>
-                    <span class="status-badge status-${guest.status}">
-                        ${getStatusIcon(guest.status)} ${getStatusText(guest.status)}
-                    </span>
-                </td>
-                <td class="observation-cell">${guest.observation || '-'}</td>
-                <td>
-                    <div class="actions">
-                        <button class="btn-action btn-sm btn-success visit-btn morning unverified" onclick="event.stopPropagation(); markVisit('morning', ${guest.roomNumber})">
-                            <i class="ri-sun-line"></i>
-                            <span class="d-none d-md-inline">Matutina</span>
-                        </button>
-                        <button class="btn-action btn-sm btn-info visit-btn evening unverified" onclick="event.stopPropagation(); markVisit('evening', ${guest.roomNumber})">
-                            <i class="ri-moon-line"></i>
-                            <span class="d-none d-md-inline">Vespertina</span>
-                        </button>
-                        <button class="btn-action btn-primary" onclick="event.stopPropagation(); addFollowUp('${guestId}')">
-                            <i class="ri-add-line"></i>
-                            <span class="d-none d-md-inline">Seguimiento</span>
-                        </button>
-                    </div>
-                </td>
-            `;
-            
-            tr.addEventListener('click', () => viewDetails(guestId));
-            
-            return tr;
-        }
-
-        function getStatusIcon(status) {
-            const statusIcons = {
-                'encasa': '<i class="ri-home-smile-fill"></i>',
-                'llegada': '<i class="ri-login-circle-fill"></i>',
-                'salida': '<i class="ri-logout-circle-fill"></i>'
-            };
-            return statusIcons[status] || '';
-        }
-
-        function getStatusText(status) {
-            switch(status) {
-                case 'encasa': return 'En Casa';
-                case 'llegada': return 'Llegada';
-                case 'salida': return 'Salida';
-                default: return status;
+        // Función para aplicar color a la calificación
+        function getRatingClass(rating) {
+            switch (rating) {
+                case 'excellent':
+                case 'good':
+                    return 'rating-good'; // Usamos good para ambos casos de verde
+                case 'regular':
+                    return 'rating-regular'; // Amarillo
+                case 'poor':
+                case 'bad':
+                    return 'rating-bad'; // Usamos bad para ambos casos de rojo
+                default:
+                    return '';
             }
         }
 
-        // Add function to update dashboard stats
-        function updateDashboardStats() {
-            const guestsRef = ref(database, 'guests');
-            get(guestsRef).then((snapshot) => {
-                let inHouseCount = 0;
-                let arrivalsCount = 0;
-                let departuresCount = 0;
-                
-                const today = getLocalDateTime().toISOString().split('T')[0];
-                
-                snapshot.forEach((childSnapshot) => {
-                    const guest = childSnapshot.val();
-                    
-                    if (guest.status === 'encasa') {
-                        inHouseCount++;
-                    }
-                    
-                    if (guest.checkIn === today) {
-                        arrivalsCount++;
-                    }
-                    
-                    if (guest.checkOut === today) {
-                        departuresCount++;
-                    }
-                });
-                
-                // Get total visited from localStorage
-                const morningVisits = parseInt(localStorage.getItem('morningVisits') || '0');
-                const eveningVisits = parseInt(localStorage.getItem('eveningVisits') || '0');
-                const totalVisited = morningVisits + eveningVisits;
-                
-                // Update the dashboard
-                document.getElementById('guestsInHouse').textContent = inHouseCount;
-                document.getElementById('arrivalsToday').textContent = arrivalsCount;
-                document.getElementById('departuresTotal').textContent = departuresCount;
-                document.getElementById('totalVisited').textContent = totalVisited;
-            });
+        // Función para obtener el texto de la calificación en mayúsculas
+        function getRatingText(rating) {
+            return rating ? rating.toUpperCase() : '';
         }
 
-        // Show stat details
-        function showStatDetails(statType) {
-            const guestsRef = ref(database, 'guests');
-            get(guestsRef).then((snapshot) => {
-                const guests = [];
-                const today = getLocalDateTime().toISOString().split('T')[0];
-                
-                snapshot.forEach((childSnapshot) => {
-                    guests.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
+        // Escucha en tiempo real los cambios en la colección 'survey_responses'
+        function setupRealtimeListener() {
+            const q = query(collection(db, "survey_responses"), orderBy("timestamp", "desc")); // Ordenar por fecha descendente
 
-                let modalContent = '';
-                let modalTitle = '';
+            onSnapshot(q, (snapshot) => {
+                surveyTableBody.innerHTML = ''; // Limpiar la tabla antes de agregar los datos
+                allSurveyData = []; // Limpiar los datos para exportación
 
-                switch(statType) {
-                    case 'inHouse':
-                        modalTitle = 'Huéspedes En Casa';
-                        modalContent = guests
-                            .filter(g => g.status === 'encasa')
-                            .map(g => `
-                                <div class="guest-details-card p-3 mb-2">
-                                    <div class="row">
-                                        <div class="col-md-4"><strong>Hab ${g.roomNumber}</strong></div>
-                                        <div class="col-md-4">${g.guestName}</div>
-                                        <div class="col-md-4">Check-out: ${g.checkOut}</div>
-                                    </div>
-                                </div>
-                            `).join('') || 'No hay huéspedes en casa';
-                        break;
-                    case 'arrivals':
-                        modalTitle = 'Llegadas de Hoy';
-                        modalContent = guests
-                            .filter(g => g.checkIn === today)
-                            .map(g => `
-                                <div class="guest-details-card p-3 mb-2">
-                                    <div class="row">
-                                        <div class="col-md-4"><strong>Hab ${g.roomNumber}</strong></div>
-                                        <div class="col-md-4">${g.guestName}</div>
-                                        <div class="col-md-4">Check-in: ${g.checkIn}</div>
-                                    </div>
-                                </div>
-                            `).join('') || 'No hay llegadas hoy';
-                        break;
-                    case 'departures':
-                        modalTitle = 'Salidas de Hoy';
-                        modalContent = guests
-                            .filter(g => g.checkOut === today)
-                            .map(g => `
-                                <div class="guest-details-card p-3 mb-2">
-                                    <div class="row">
-                                        <div class="col-md-4"><strong>Hab ${g.roomNumber}</strong></div>
-                                        <div class="col-md-4">${g.guestName}</div>
-                                        <div class="col-md-4">Check-out: ${g.checkOut}</div>
-                                    </div>
-                                </div>
-                            `).join('') || 'No hay salidas hoy';
-                        break;
-                    case 'visited':
-                        modalTitle = 'Visitas del Día';
-                        const morningVisits = parseInt(localStorage.getItem('morningVisits') || '0');
-                        const eveningVisits = parseInt(localStorage.getItem('eveningVisits') || '0');
-                        modalContent = `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="alert alert-warning">
-                                        <h4 class="alert-heading">Visitas Matutinas</h4>
-                                        <p class="display-4 text-center">${morningVisits}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="alert alert-info">
-                                        <h4 class="alert-heading">Visitas Vespertinas</h4>
-                                        <p class="display-4 text-center">${eveningVisits}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        break;
-                }
-
-                const detailsContent = document.getElementById('guestDetailsContent');
-                detailsContent.innerHTML = modalContent;
-                document.getElementById('detailsModalLabel').textContent = modalTitle;
-                const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
-                modal.show();
-            });
-        }
-
-        // Check and update checkout status
-        function checkAndUpdateCheckouts() {
-            const guestsRef = ref(database, 'guests');
-            get(guestsRef).then((snapshot) => {
-                const tomorrow = getLocalDateTime();
-                tomorrow.setDate(tomorrow.getDate() + 1); 
-                const tomorrowStr = tomorrow.toISOString().split('T')[0];
-                
-                snapshot.forEach((childSnapshot) => {
-                    const guest = childSnapshot.val();
-                    const guestId = childSnapshot.key;
-                    
-                    if (guest.checkOut === tomorrowStr && guest.status !== 'salida') {
-                        // Update status to 'salida'
-                        set(ref(database, `guests/${guestId}/status`), 'salida');
-                    }
-                });
-            });
-        }
-
-        // Modify the initialization to include the checkout check
-        window.addEventListener('DOMContentLoaded', () => {
-            initializeDailyVisits();
-            loadRooms();
-            checkAndUpdateCheckouts(); // Initial check
-            setInterval(checkAndUpdateCheckouts, 3600000); // Check every hour
-            
-            // Add click handlers to stat cards
-            document.querySelectorAll('.stat-card').forEach((card, index) => {
-                card.style.cursor = 'pointer';
-                card.addEventListener('click', () => {
-                    const types = ['inHouse', 'arrivals', 'departures', 'visited'];
-                    showStatDetails(types[index]);
-                });
-            });
-        });
-
-        // Add function to restore visit status from Firebase
-        function restoreVisitsFromFirebase() {
-            const now = getLocalDateTime();
-            const today = now.toDateString();
-            const todayVisitsRef = ref(database, `visits/${today.replace(/\s/g, '_')}`);
-            
-            get(todayVisitsRef).then((snapshot) => {
-                const visits = snapshot.val() || {};
-                
-                // Reset all buttons to unverified state first
-                document.querySelectorAll('.visit-btn').forEach(btn => {
-                    btn.classList.remove('verified');
-                    btn.classList.add('unverified');
-                });
-                
-                // Mark verified visits
-                Object.keys(visits).forEach(roomKey => {
-                    const [roomNumber, timeOfDay] = roomKey.split('-');
-                    const button = document.querySelector(`.visit-btn.${timeOfDay}[onclick*="${roomNumber}"]`);
-                    if (button) {
-                        button.classList.remove('unverified');
-                        button.classList.add('verified');
-                    }
-                });
-                
-                // Update counters
-                let morningCount = 0;
-                let eveningCount = 0;
-                
-                Object.values(visits).forEach(visit => {
-                    if (visit.timeOfDay === 'morning') morningCount++;
-                    if (visit.timeOfDay === 'evening') eveningCount++;
-                });
-                
-                localStorage.setItem('morningVisits', morningCount.toString());
-                localStorage.setItem('eveningVisits', eveningCount.toString());
-                updateVisitCounters();
-            });
-        }
-
-        // Add function to search functionality
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            document.querySelectorAll('.room-table tr').forEach(row => {
-                const roomNumber = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-                const guestName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                
-                if (roomNumber.includes(searchTerm) || guestName.includes(searchTerm)) {
-                    row.style.display = 'table-row';
+                if (snapshot.empty) {
+                    noDataMessage.style.display = 'block';
+                    exportCsvBtn.disabled = true;
                 } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
+                    noDataMessage.style.display = 'none';
+                    exportCsvBtn.disabled = false;
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        allSurveyData.push(data); // Guardar para exportación
 
-        // Mobile menu functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const navLinks = document.querySelector('.nav-links');
+                        const row = surveyTableBody.insertRow();
 
-            menuToggle.addEventListener('click', function() {
-                navLinks.classList.toggle('active');
-            });
+                        row.insertCell().textContent = formatTimestamp(data.timestamp);
+                        row.insertCell().textContent = data.room_number || 'N/A';
+                        row.insertCell().textContent = data.guest_name || 'N/A';
+                        row.insertCell().textContent = data.guest_email || 'N/A';
+                        row.insertCell().textContent = data.butler || 'N/A';
 
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.nav-container')) {
-                    navLinks.classList.remove('active');
-                }
-            });
+                        // Celdas de calificación con estilo
+                        const overallExpCell = row.insertCell();
+                        overallExpCell.textContent = getRatingText(data.overall_experience);
+                        overallExpCell.className = getRatingClass(data.overall_experience);
 
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    navLinks.classList.remove('active');
-                }
-            });
-        });
+                        const staffServiceCell = row.insertCell();
+                        staffServiceCell.textContent = getRatingText(data.staff_service);
+                        staffServiceCell.className = getRatingClass(data.staff_service);
 
-        window.saveGuest = function() {
-            const roomNumber = document.getElementById('roomNumber').value;
-            const guestName = document.getElementById('guestName').value;
-            const checkIn = document.getElementById('checkIn').value;
-            const checkOut = document.getElementById('checkOut').value;
-            const nationality = document.getElementById('nationality').value;
-            const status = document.getElementById('status').value;
-            const observation = document.getElementById('observation').value;
-            const specialRequest = document.getElementById('specialRequest').value;
+                        const recommendHotelCell = row.insertCell();
+                        recommendHotelCell.textContent = getRatingText(data.recommend_hotel);
+                        recommendHotelCell.className = getRatingClass(data.recommend_hotel);
 
-            if (!roomNumber || !guestName || !checkIn || !checkOut || !nationality || !status) {
-                alert('Por favor complete todos los campos requeridos');
-                return;
-            }
+                        const preferredClubCell = row.insertCell();
+                        preferredClubCell.textContent = getRatingText(data.preferred_club);
+                        preferredClubCell.className = getRatingClass(data.preferred_club);
 
-            const newGuest = {
-                roomNumber,
-                guestName,
-                checkIn,
-                checkOut,
-                nationality,
-                status,
-                observation,
-                specialRequest // Add this field
-            };
-
-            const guestsRef = ref(database, 'guests');
-            const newGuestRef = push(guestsRef);
-            
-            set(newGuestRef, newGuest)
-                .then(() => {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addGuestModal'));
-                    modal.hide();
-                    document.getElementById('addGuestForm').reset();
-                    alert('Huésped agregado exitosamente');
-                })
-                .catch((error) => {
-                    console.error('Error adding guest:', error);
-                    alert('Error al agregar huésped');
-                });
-        };
-
-        // View details functionality
-        window.viewDetails = function(guestId) {
-            const guestsRef = ref(database, 'guests');
-            onValue(guestsRef, (snapshot) => {
-                snapshot.forEach((childSnapshot) => {
-                    const guest = childSnapshot.val();
-                    const id = childSnapshot.key; // Get the guest ID for editing/deleting
-                    if (id === guestId) {
-                        const detailsContent = document.getElementById('guestDetailsContent');
-                        detailsContent.innerHTML = `
-                            <div class="guest-details-card p-4">
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <div class="detail-group">
-                                            <h6 class="text-primary mb-3"><i class="ri-home-4-line"></i> Habitación</h6>
-                                            <p class="lead fw-bold">${guest.roomNumber}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-group">
-                                            <h6 class="text-primary mb-3"><i class="ri-user-line"></i> Huésped</h6>
-                                            <p class="lead fw-bold">${guest.guestName}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <div class="detail-group">
-                                            <h6 class="text-primary mb-3"><i class="ri-calendar-line"></i> Check-in</h6>
-                                            <p class="badge bg-success fs-6">${guest.checkIn}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-group">
-                                            <h6 class="text-primary mb-3"><i class="ri-calendar-line"></i> Check-out</h6>
-                                            <p class="badge bg-danger fs-6">${guest.checkOut}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <div class="detail-group">
-                                            <h6 class="text-primary mb-3"><i class="ri-flag-line"></i> Nacionalidad</h6>
-                                            <p>${guest.nationality}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <div class="detail-group">
-                                            <h6 class="text-primary mb-3"><i class="ri-file-text-line"></i> Observaciones</h6>
-                                            <p class="bg-light p-3 rounded">${guest.observation || 'Sin observaciones'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <div class="detail-group">
-                                            <h6 class="text-primary mb-3"><i class="ri-gift-line"></i> Solicitud Especial</h6>
-                                            <p>${guest.specialRequest ? getSpecialRequestText(guest.specialRequest) : 'Sin solicitud especial'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mt-4">
-                                    <div class="col-6">
-                                        <button class="btn btn-warning w-100" onclick="editGuest('${id}')">
-                                            <i class="ri-edit-line"></i> Editar
-                                        </button>
-                                    </div>
-                                    <div class="col-6">
-                                        <button class="btn btn-danger w-100" onclick="deleteGuest('${id}')">
-                                            <i class="ri-delete-bin-line"></i> Eliminar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
-                        modal.show();
-                    }
-                });
-            });
-        };
-
-        // Add edit functionality
-        window.editGuest = function(guestId) {
-            const guestRef = ref(database, `guests/${guestId}`);
-            onValue(guestRef, (snapshot) => {
-                const guest = snapshot.val();
-                
-                // Populate the edit form
-                document.getElementById('editGuestForm').reset();
-                document.getElementById('editRoomNumber').value = guest.roomNumber;
-                document.getElementById('editGuestName').value = guest.guestName;
-                document.getElementById('editCheckIn').value = guest.checkIn;
-                document.getElementById('editCheckOut').value = guest.checkOut;
-                document.getElementById('editNationality').value = guest.nationality;
-                document.getElementById('editStatus').value = guest.status;
-                document.getElementById('editSpecialRequest').value = guest.specialRequest || '';
-                document.getElementById('editObservation').value = guest.observation || '';
-                
-                // Store the guest ID for the save function
-                document.getElementById('editGuestForm').dataset.guestId = guestId;
-                
-                // Properly handle modal transitions
-                const detailsModal = bootstrap.Modal.getInstance(document.getElementById('detailsModal'));
-                if (detailsModal) {
-                    detailsModal.hide();
-                }
-                
-                // Small timeout to ensure smooth transition between modals
-                setTimeout(() => {
-                    const editModal = new bootstrap.Modal(document.getElementById('editGuestModal'));
-                    editModal.show();
-                }, 150);
-                
-            }, {
-                onlyOnce: true
-            });
-        };
-
-        // Add delete functionality
-        window.deleteGuest = function(guestId) {
-            if (confirm('¿Estás seguro de que deseas eliminar este huésped?')) {
-                const guestRef = ref(database, `guests/${guestId}`);
-                set(guestRef, null)
-                    .then(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('detailsModal')).hide();
-                        alert('Huésped eliminado exitosamente');
-                    })
-                    .catch((error) => {
-                        console.error('Error deleting guest:', error);
-                        alert('Error al eliminar huésped');
+                        const overallExp2Cell = row.insertCell();
+                        overallExp2Cell.textContent = getRatingText(data.overall_experience_2);
+                        overallExp2Cell.className = getRatingClass(data.overall_experience_2);
                     });
-            }
-        };
+                }
+            }, (error) => {
+                console.error("Error al escuchar documentos de Firestore:", error);
+                surveyTableBody.innerHTML = `<tr><td colspan="10" style="color: red; text-align: center;">Error al cargar los datos: ${error.message}</td></tr>`;
+            });
+        }
 
-        // Add save edit functionality
-        window.saveEdit = function() {
-            const guestId = document.getElementById('editGuestForm').dataset.guestId;
-            const editedGuest = {
-                roomNumber: document.getElementById('editRoomNumber').value,
-                guestName: document.getElementById('editGuestName').value,
-                checkIn: document.getElementById('editCheckIn').value,
-                checkOut: document.getElementById('editCheckOut').value,
-                nationality: document.getElementById('editNationality').value,
-                status: document.getElementById('editStatus').value,
-                observation: document.getElementById('editObservation').value,
-                specialRequest: document.getElementById('editSpecialRequest').value,
-            };
-
-            const guestRef = ref(database, `guests/${guestId}`);
-            set(guestRef, editedGuest)
-                .then(() => {
-                    // Properly close both modals
-                    const editModal = bootstrap.Modal.getInstance(document.getElementById('editGuestModal'));
-                    const detailsModal = bootstrap.Modal.getInstance(document.getElementById('detailsModal'));
-                    
-                    if (editModal) {
-                        editModal.hide();
-                    }
-                    
-                    if (detailsModal) {
-                        detailsModal.hide();
-                    }
-                    
-                    // Clear any modal backdrops
-                    const modalBackdrops = document.querySelectorAll('.modal-backdrop');
-                    modalBackdrops.forEach(backdrop => backdrop.remove());
-                    
-                    // Remove modal-open class from body
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                    
-                    // Refresh the rooms display
-                    loadRooms();
-                    
-                    alert('Huésped actualizado exitosamente');
-                })
-                .catch((error) => {
-                    console.error('Error updating guest:', error);
-                    alert('Error al actualizar huésped');
-                });
-        };
-
-        window.saveFollowUp = function() {
-            const guestId = document.getElementById('followUpForm').dataset.guestId;
-            const followUp = {
-                room: document.getElementById('followUpRoom').value,
-                date: document.getElementById('followUpDate').value,
-                mood: document.getElementById('followUpMood').value,
-                category: document.getElementById('followUpCategory').value,
-                notes: document.getElementById('followUpNotes').value,
-                requiresAction: document.getElementById('followUpAction').value,
-                priority: document.getElementById('followUpPriority').value,
-                status: 'pending',
-                createdAt: new Date().toISOString()
-            };
-
-            if (!followUp.date || !followUp.mood || !followUp.category || !followUp.notes) {
-                alert('Por favor complete todos los campos requeridos');
+        // Función para exportar a CSV
+        function exportToCsv() {
+            if (allSurveyData.length === 0) {
+                alert("No hay datos para exportar.");
                 return;
             }
 
-            const followUpsRef = ref(database, `followups/${guestId}`);
-            push(followUpsRef, followUp)
-                .then(() => {
-                    incrementVisit();  // Increment visit counter when follow-up is saved
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('followUpModal'));
-                    modal.hide();
-                    document.getElementById('followUpForm').reset();
-                    alert('Seguimiento guardado exitosamente');
-                })
-                .catch((error) => {
-                    console.error('Error saving follow-up:', error);
-                    alert('Error al guardar el seguimiento');
-                });
-        };
+            const headers = [
+                "Fecha y Hora", "No. Habitación", "Nombre Huésped", "Email Huésped", "Butler",
+                "Experiencia General", "Servicio del Personal", "Recomendación Hotel",
+                "Experiencia Preferred Club", "Calificación Final"
+            ];
 
-        // Update the addFollowUp function to populate the room number:
-        window.addFollowUp = function(guestId) {
-            const guestRef = ref(database, `guests/${guestId}`);
-            onValue(guestRef, (snapshot) => {
-                const guest = snapshot.val();
-                document.getElementById('followUpRoom').value = guest.roomNumber;
-                document.getElementById('followUpForm').dataset.guestId = guestId;
-                
-                const modal = new bootstrap.Modal(document.getElementById('followUpModal'));
-                modal.show();
-            }, {
-                onlyOnce: true
-            });
-        };
+            const rows = allSurveyData.map(data => [
+                `"${formatTimestamp(data.timestamp)}"`,
+                `"${data.room_number || ''}"`,
+                `"${data.guest_name || ''}"`,
+                `"${data.guest_email || ''}"`,
+                `"${data.butler || ''}"`,
+                `"${getRatingText(data.overall_experience) || ''}"`,
+                `"${getRatingText(data.staff_service) || ''}"`,
+                `"${getRatingText(data.recommend_hotel) || ''}"`,
+                `"${getRatingText(data.preferred_club) || ''}"`,
+                `"${getRatingText(data.overall_experience_2) || ''}"`
+            ].join(','));
 
-        function getSpecialRequestText(request) {
-            const texts = {
-                'birthday': '🎂 Cumpleaños',
-                'honeymoon': '💑 Luna de Miel',
-                'anniversary': '💝 Aniversario',
-                'vacation': '🌴 Vacaciones'
-            };
-            return texts[request] || request;
+            const csvContent = [
+                headers.join(','),
+                ...rows
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `encuestas_secrets_royal_beach_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
+
+        // Event Listeners
+        exportCsvBtn.addEventListener('click', exportToCsv);
+        refreshBtn.addEventListener('click', setupRealtimeListener); // Puedes añadir un botón de refrescar manualmente
+
+        // Iniciar la escucha en tiempo real al cargar la página
+        document.addEventListener('DOMContentLoaded', setupRealtimeListener);
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
