@@ -232,6 +232,9 @@
         .rating-regular { background-color: var(--rating-regular); color: var(--text-color); } /* Texto oscuro para amarillo */
         .rating-poor { background-color: var(--rating-poor); }
         .rating-bad { background-color: var(--rating-bad); }
+        /* Add more specific N/A class if desired */
+        .rating-na { background-color: var(--border-color); color: var(--light-text-color); }
+
 
         /* Estilos para la barra de progreso general */
         .progress-bar-container {
@@ -275,6 +278,8 @@
         .nps-promoter { background-color: var(--nps-promoter); }
         .nps-passive { background-color: var(--nps-passive); color: var(--text-color); } /* Texto oscuro para pasivos */
         .nps-detractor { background-color: var(--nps-detractor); }
+        .nps-na { background-color: var(--border-color); color: var(--light-text-color); } /* For N/A NPS */
+
 
         /* Responsive adjustments */
         @media (max-width: 1200px) {
@@ -379,7 +384,9 @@
                         <th>Recomendación Hotel</th>
                         <th>Exp. Preferred Club</th>
                         <th>Calificación Final</th>
-                        <th>Puntuación General</th> <th>NPS Individual</th> </tr>
+                        <th>Puntuación General</th>
+                        <th>NPS Individual</th>
+                    </tr>
                 </thead>
                 <tbody>
                     </tbody>
@@ -418,65 +425,94 @@
         const averageNPSBox = document.getElementById('averageNPSBox');
 
 
-        let allSurveyData = []; // Para almacenar todos los datos y facilitar la exportación
+        let allSurveyData = [];
 
-        // Mapeo de calificaciones a valores numéricos (0-100 para la barra de progreso general)
-        // Y a valores NPS (0-10) para la pregunta de recomendación
+        // --- Mapeos para calificar términos en múltiples idiomas a valores numéricos y clases CSS ---
+        // Estos mapeos deben incluir TODAS las posibles cadenas que tu encuesta podría guardar en Firebase.
+
         const ratingToValue = {
-            'bad': 0, // 0-6 Detractor
-            'poor': 25, // 0-6 Detractor
-            'regular': 50, // 7-8 Pasivo
-            'good': 75, // 9-10 Promotor
-            'excellent': 100 // 9-10 Promotor
+            // English
+            'bad': 0, 'poor': 25, 'regular': 50, 'good': 75, 'excellent': 100,
+            'n/a': 50, // Treat N/A as neutral for overall score calculation if it's a field in average
+
+            // Spanish
+            'malo': 0, 'pobre': 25, 'regular': 50, 'bueno': 75, 'excelente': 100,
+            'no aplica': 50,
+
+            // French
+            'mauvais': 0, 'médiocre': 25, 'moyen': 50, 'bon': 75, 'excellent': 100,
+            's/o': 50 // Sans Objet (Not Applicable)
         };
 
-        // Mapeo específico para NPS de la pregunta "recommend_hotel"
-        // Asignamos una puntuación de 0 a 10 a las respuestas de recomendación
-        const recommendRatingToNPS = {
-            'bad': 0, // Detractor
-            'poor': 4, // Detractor
-            'regular': 7, // Pasivo
-            'good': 9, // Promotor
-            'excellent': 10 // Promotor
+        // Mapeo específico para el cálculo del NPS (0-10) de la pregunta de recomendación
+        const recommendRatingToNPSValue = {
+            // English
+            'bad': 0, 'poor': 4, 'regular': 7, 'good': 9, 'excellent': 10,
+            'n/a': null, // N/A should not count for NPS calculation
+
+            // Spanish
+            'malo': 0, 'pobre': 4, 'regular': 7, 'bueno': 9, 'excelente': 10,
+            'no aplica': null,
+
+            // French
+            'mauvais': 0, 'médiocre': 4, 'moyen': 7, 'bon': 9, 'excellent': 10,
+            's/o': null
         };
 
-        // Función para formatear la fecha
+        // Mapeo de términos estandarizados en inglés para mostrar texto y clases CSS
+        // Esto es para que el visualizador siempre muestre los términos consistentes (ej. "EXCELLENT")
+        // y aplique los colores correctos, independientemente del idioma de entrada.
+        const standardizedRatingToDisplay = {
+            'excellent': { text: 'EXCELLENT', class: 'rating-excellent' },
+            'good': { text: 'GOOD', class: 'rating-good' },
+            'regular': { text: 'REGULAR', class: 'rating-regular' },
+            'poor': { text: 'POOR', class: 'rating-poor' },
+            'bad': { text: 'BAD', class: 'rating-bad' },
+            'n/a': { text: 'N/A', class: 'rating-na' }
+        };
+
+        // Helper para obtener el término estandarizado en inglés de cualquier entrada de idioma
+        function getStandardizedTerm(localizedRating) {
+            // Convierte a minúsculas y recorta espacios en blanco para una coincidencia robusta
+            const lowerCaseRating = localizedRating ? localizedRating.toLowerCase().trim() : '';
+
+            // Busca el término localizado en las claves de ratingToValue
+            if (ratingToValue.hasOwnProperty(lowerCaseRating)) {
+                // Si lo encuentra, devuelve el término estándar en inglés que se mapea a ese valor
+                // Esto asume que hay una relación 1:1 de valor numérico a término estándar en inglés
+                const numericValue = ratingToValue[lowerCaseRating];
+                for (const key in standardizedRatingToDisplay) {
+                    if (ratingToValue[key] === numericValue) { // Checks if the standard English term maps to the same numeric value
+                        return key; // Returns the English standardized term (e.g., 'excellent', 'good')
+                    }
+                }
+            }
+            return 'n/a'; // Predeterminado si el término no es reconocido
+        }
+
+        // Función para obtener el texto de visualización y la clase CSS para una calificación
+        function getRatingDisplay(localizedRating) {
+            const standardizedTerm = getStandardizedTerm(localizedRating);
+            return standardizedRatingToDisplay[standardizedTerm] || { text: 'N/A', class: 'rating-na' };
+        }
+
+        // Función para formatear la fecha y hora
         function formatTimestamp(timestamp) {
             if (timestamp && timestamp.toDate) {
                 const date = timestamp.toDate();
+                // Usa 'es-DO' para el formato de República Dominicana
                 return date.toLocaleString('es-DO', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
                     hour12: false
                 });
             }
             return 'N/A';
         }
 
-        // Función para aplicar color y clase a la calificación de la encuesta (bad, poor, etc.)
-        function getRatingClass(rating) {
-            switch (rating) {
-                case 'excellent': return 'rating-excellent';
-                case 'good': return 'rating-good';
-                case 'regular': return 'rating-regular';
-                case 'poor': return 'rating-poor';
-                case 'bad': return 'rating-bad';
-                default: return '';
-            }
-        }
-
-        // Función para obtener el texto de la calificación en mayúsculas
-        function getRatingText(rating) {
-            return rating ? rating.toUpperCase() : '';
-        }
-
         // Función para calcular la puntuación general promedio (0-100)
         function calculateOverallScore(data) {
-            const relevantRatings = [
+            const relevantRatingFields = [
                 data.overall_experience,
                 data.staff_service,
                 data.recommend_hotel,
@@ -487,9 +523,10 @@
             let sum = 0;
             let count = 0;
 
-            relevantRatings.forEach(rating => {
-                if (ratingToValue.hasOwnProperty(rating)) {
-                    sum += ratingToValue[rating];
+            relevantRatingFields.forEach(localizedRating => {
+                const lowerCaseRating = localizedRating ? localizedRating.toLowerCase().trim() : '';
+                if (ratingToValue.hasOwnProperty(lowerCaseRating) && lowerCaseRating !== 'n/a' && lowerCaseRating !== 'no aplica' && lowerCaseRating !== 's/o') {
+                    sum += ratingToValue[lowerCaseRating];
                     count++;
                 }
             });
@@ -505,10 +542,12 @@
         }
 
         // Función para calcular y clasificar el NPS individual (Detractor, Pasivo, Promotor)
-        function calculateIndividualNPS(recommendRating) {
-            const score = recommendRatingToNPS[recommendRating];
-            if (score === undefined) {
-                return { category: 'N/A', class: '' };
+        function calculateIndividualNPS(localizedRecommendRating) {
+            const lowerCaseRating = localizedRecommendRating ? localizedRecommendRating.toLowerCase().trim() : '';
+            const score = recommendRatingToNPSValue[lowerCaseRating];
+
+            if (score === null || score === undefined) {
+                return { category: 'N/A', class: 'nps-na' }; // Si es N/A o no reconocido
             }
             if (score >= 9) {
                 return { category: 'PROMOTOR', class: 'nps-promoter' };
@@ -519,7 +558,7 @@
             return { category: 'DETRACTOR', class: 'nps-detractor' };
         }
 
-        // Escucha en tiempo real los cambios en la colección 'survey_responses'
+        // Función principal para escuchar cambios en tiempo real
         function setupRealtimeListener() {
             const q = query(collection(db, "survey_responses"), orderBy("timestamp", "desc"));
 
@@ -535,7 +574,7 @@
                     exportCsvBtn.disabled = true;
                     totalSurveysElement.textContent = '0';
                     averageNPSElement.textContent = '0';
-                    averageNPSBox.className = 'summary-box'; // Reset class
+                    averageNPSBox.className = 'summary-box'; // Restablece la clase
                 } else {
                     noDataMessage.style.display = 'none';
                     exportCsvBtn.disabled = false;
@@ -546,12 +585,12 @@
                         allSurveyData.push(data);
 
                         // Calcular NPS global para el resumen
-                        if (data.recommend_hotel) {
+                        const npsScore = recommendRatingToNPSValue[data.recommend_hotel ? data.recommend_hotel.toLowerCase().trim() : ''];
+                        if (npsScore !== null && npsScore !== undefined) {
                             recommendResponsesCount++;
-                            const npsCategory = calculateIndividualNPS(data.recommend_hotel);
-                            if (npsCategory.category === 'PROMOTOR') {
+                            if (npsScore >= 9) {
                                 totalPromoters++;
-                            } else if (npsCategory.category === 'DETRACTOR') {
+                            } else if (npsScore <= 6) { // Rango de detractor es 0-6
                                 totalDetractors++;
                             }
                         }
@@ -564,20 +603,26 @@
                         row.insertCell().textContent = data.guest_email || 'N/A';
                         row.insertCell().textContent = data.butler || 'N/A';
 
+                        // Celdas de calificación usando la nueva función getRatingDisplay
+                        const overallExpDisplay = getRatingDisplay(data.overall_experience);
                         const overallExpCell = row.insertCell();
-                        overallExpCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.overall_experience)}">${getRatingText(data.overall_experience)}</span>`;
+                        overallExpCell.innerHTML = `<span class="rating-cell ${overallExpDisplay.class}">${overallExpDisplay.text}</span>`;
 
+                        const staffServiceDisplay = getRatingDisplay(data.staff_service);
                         const staffServiceCell = row.insertCell();
-                        staffServiceCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.staff_service)}">${getRatingText(data.staff_service)}</span>`;
+                        staffServiceCell.innerHTML = `<span class="rating-cell ${staffServiceDisplay.class}">${staffServiceDisplay.text}</span>`;
 
+                        const recommendHotelDisplay = getRatingDisplay(data.recommend_hotel);
                         const recommendHotelCell = row.insertCell();
-                        recommendHotelCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.recommend_hotel)}">${getRatingText(data.recommend_hotel)}</span>`;
+                        recommendHotelCell.innerHTML = `<span class="rating-cell ${recommendHotelDisplay.class}">${recommendHotelDisplay.text}</span>`;
 
+                        const preferredClubDisplay = getRatingDisplay(data.preferred_club);
                         const preferredClubCell = row.insertCell();
-                        preferredClubCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.preferred_club)}">${getRatingText(data.preferred_club)}</span>`;
+                        preferredClubCell.innerHTML = `<span class="rating-cell ${preferredClubDisplay.class}">${preferredClubDisplay.text}</span>`;
 
+                        const overallExp2Display = getRatingDisplay(data.overall_experience_2);
                         const overallExp2Cell = row.insertCell();
-                        overallExp2Cell.innerHTML = `<span class="rating-cell ${getRatingClass(data.overall_experience_2)}">${getRatingText(data.overall_experience_2)}</span>`;
+                        overallExp2Cell.innerHTML = `<span class="rating-cell ${overallExp2Display.class}">${overallExp2Display.text}</span>`;
 
                         // Celda para la Puntuación General
                         const calculatedScore = calculateOverallScore(data);
@@ -598,11 +643,11 @@
                     // Calcular y mostrar NPS promedio general
                     if (recommendResponsesCount > 0) {
                         const nps = ((totalPromoters - totalDetractors) / recommendResponsesCount) * 100;
-                        averageNPSElement.textContent = Math.round(nps); // Redondear a entero
-                        averageNPSElement.classList.remove('detractor', 'passive', 'promoter'); // Limpiar clases anteriores
-                        if (nps <= 0) {
+                        averageNPSElement.textContent = Math.round(nps);
+                        averageNPSBox.classList.remove('detractor', 'passive', 'promoter');
+                        if (nps < 0) { // NPS puede ser negativo
                             averageNPSBox.classList.add('detractor');
-                        } else if (nps > 0 && nps < 50) { // Umbrales comunes para NPS (0-50 pasivo/bueno, 50-100 excelente)
+                        } else if (nps >= 0 && nps < 50) {
                             averageNPSBox.classList.add('passive');
                         } else {
                             averageNPSBox.classList.add('promoter');
@@ -637,19 +682,28 @@
             const rows = allSurveyData.map(data => {
                 const calculatedScore = calculateOverallScore(data);
                 const individualNPS = calculateIndividualNPS(data.recommend_hotel);
+
+                // Obtener el texto de visualización para CSV
+                const overallExpDisplay = getRatingDisplay(data.overall_experience);
+                const staffServiceDisplay = getRatingDisplay(data.staff_service);
+                const recommendHotelDisplay = getRatingDisplay(data.recommend_hotel);
+                const preferredClubDisplay = getRatingDisplay(data.preferred_club);
+                const overallExp2Display = getRatingDisplay(data.overall_experience_2);
+
+
                 return [
                     `"${formatTimestamp(data.timestamp)}"`,
                     `"${data.room_number || ''}"`,
                     `"${data.guest_name || ''}"`,
                     `"${data.guest_email || ''}"`,
                     `"${data.butler || ''}"`,
-                    `"${getRatingText(data.overall_experience) || ''}"`,
-                    `"${getRatingText(data.staff_service) || ''}"`,
-                    `"${getRatingText(data.recommend_hotel) || ''}"`,
-                    `"${getRatingText(data.preferred_club) || ''}"`,
-                    `"${getRatingText(data.overall_experience_2) || ''}"`,
+                    `"${overallExpDisplay.text}"`,
+                    `"${staffServiceDisplay.text}"`,
+                    `"${recommendHotelDisplay.text}"`,
+                    `"${preferredClubDisplay.text}"`,
+                    `"${overallExp2Display.text}"`,
                     `"${calculatedScore}%"`,
-                    `"${individualNPS.category}"` // Añadir el NPS individual al CSV
+                    `"${individualNPS.category}"`
                 ].map(field => field.replace(/"/g, '""')).join(',');
             });
 
@@ -673,9 +727,8 @@
         exportCsvBtn.addEventListener('click', exportToCsv);
         refreshBtn.addEventListener('click', setupRealtimeListener);
 
-        // Iniciar la escucha en tiempo real al cargar la página
+        // Carga inicial
         document.addEventListener('DOMContentLoaded', setupRealtimeListener);
     </script>
-
 </body>
 </html>
