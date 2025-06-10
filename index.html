@@ -90,7 +90,7 @@
             padding-bottom: 0;
             margin-bottom: 0;
         }
-        .question:nth-last-child(2) { /* Para manejar el caso del duplicado al final */
+        .question:nth-last-child(2) {
              border-bottom: none;
              padding-bottom: 0;
              margin-bottom: 0;
@@ -119,7 +119,7 @@
         .rating-option {
             text-align: center;
             flex-basis: calc(20% - 15px); /* 5 opciones por fila */
-            min-width: 100px; /* Asegura un ancho mínimo para cada opción */
+            min-width: 100px;
         }
 
         .rating-option input[type="radio"] {
@@ -136,7 +136,7 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             transition: all 0.3s ease;
-            font-size: 1.8em; /* Tamaño grande para los emojis */
+            font-size: 1.8em;
             line-height: 1;
             position: relative;
         }
@@ -197,7 +197,7 @@
         }
 
 
-        /* Submit Button (optional) */
+        /* Submit Button */
         .submit-button {
             margin-top: 40px;
         }
@@ -224,13 +224,21 @@
             transform: translateY(0);
         }
 
+        /* Mensajes de feedback */
+        #feedback-message {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
                 padding: 30px 20px;
             }
             .rating-option {
-                flex-basis: calc(33.33% - 15px); /* 3 opciones por fila en tablets */
+                flex-basis: calc(33.33% - 15px);
             }
         }
 
@@ -243,7 +251,7 @@
                 margin-bottom: 20px;
             }
             .rating-option {
-                flex-basis: calc(50% - 15px); /* 2 opciones por fila en móviles */
+                flex-basis: calc(50% - 15px);
                 min-width: unset;
             }
             .rating-option label {
@@ -273,12 +281,12 @@
         <h1>Encuesta de Satisfacción</h1>
         <h2>Punta Cana, República Dominicana</h2>
 
-        <form action="#" method="post">
+        <form id="surveyForm">
             <div class="question">
                 <p>¿Cómo calificaría su experiencia general con nosotros?</p>
                 <div class="rating-options">
                     <div class="rating-option">
-                        <input type="radio" id="overall_bad" name="overall_experience" value="bad">
+                        <input type="radio" id="overall_bad" name="overall_experience" value="bad" required>
                         <label for="overall_bad">☹️<span class="rating-text">MALA</span></label>
                     </div>
                     <div class="rating-option">
@@ -304,7 +312,7 @@
                 <p>¿Cómo calificaría el nivel general de servicio proporcionado por nuestro personal?</p>
                 <div class="rating-options">
                     <div class="rating-option">
-                        <input type="radio" id="staff_bad" name="staff_service" value="bad">
+                        <input type="radio" id="staff_bad" name="staff_service" value="bad" required>
                         <label for="staff_bad">☹️<span class="rating-text">MALA</span></label>
                     </div>
                     <div class="rating-option">
@@ -330,7 +338,7 @@
                 <p>¿Recomendaría este hotel a su familia y amigos?</p>
                 <div class="rating-options">
                     <div class="rating-option">
-                        <input type="radio" id="recommend_bad" name="recommend_hotel" value="bad">
+                        <input type="radio" id="recommend_bad" name="recommend_hotel" value="bad" required>
                         <label for="recommend_bad">☹️<span class="rating-text">MALA</span></label>
                     </div>
                     <div class="rating-option">
@@ -356,7 +364,7 @@
                 <p>¿Cómo calificaría su experiencia como huésped del Preferred Club?</p>
                 <div class="rating-options">
                     <div class="rating-option">
-                        <input type="radio" id="preferred_bad" name="preferred_club" value="bad">
+                        <input type="radio" id="preferred_bad" name="preferred_club" value="bad" required>
                         <label for="preferred_bad">☹️<span class="rating-text">MALA</span></label>
                     </div>
                     <div class="rating-option">
@@ -382,7 +390,7 @@
                 <p>¡Gracias por su visita! ¿Cuál es su calificación final?</p>
                 <div class="rating-options">
                     <div class="rating-option">
-                        <input type="radio" id="overall_experience_2_bad" name="overall_experience_2" value="bad">
+                        <input type="radio" id="overall_experience_2_bad" name="overall_experience_2" value="bad" required>
                         <label for="overall_experience_2_bad">☹️<span class="rating-text">MALA</span></label>
                     </div>
                     <div class="rating-option">
@@ -399,7 +407,7 @@
                     </div>
                     <div class="rating-option">
                         <input type="radio" id="overall_experience_2_excellent" name="overall_experience_2" value="excellent">
-                        <label for="overall_experience_2_excellent">😁<span class="rating-text">EXCELENTE</span></label>
+                        <label for="overall_excellent">😁<span class="rating-text">EXCELENTE</span></label>
                     </div>
                 </div>
             </div>
@@ -407,8 +415,64 @@
             <div class="submit-button">
                 <button type="submit">Enviar Encuesta</button>
             </div>
+            <div id="feedback-message"></div>
         </form>
     </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyALR-b68phh_u92V3rw9B9Ei7FcexU2xc8",
+            authDomain: "proyectos17-98695.firebaseapp.com",
+            projectId: "proyectos17-98695",
+            storageBucket: "proyectos17-98695.firebasestorage.app",
+            messagingSenderId: "951673973410",
+            appId: "1:951673973410:web:4bc355e825cf86308645fb",
+            measurementId: "G-6YK06W16FZ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app); // Opcional, solo si quieres usar Google Analytics con Firebase
+        const db = getFirestore(app); // Inicializa Cloud Firestore
+
+        // Get form and feedback message elements
+        const surveyForm = document.getElementById('surveyForm');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        surveyForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Previene el envío por defecto del formulario
+
+            const formData = new FormData(surveyForm);
+            const surveyData = {};
+
+            // Recopila los datos del formulario
+            for (let [name, value] of formData) {
+                surveyData[name] = value;
+            }
+
+            // Agrega la fecha y hora de la submission
+            surveyData.timestamp = serverTimestamp();
+
+            try {
+                // Guarda los datos en Cloud Firestore en una colección llamada 'survey_responses'
+                const docRef = await addDoc(collection(db, "survey_responses"), surveyData);
+                console.log("Document written with ID: ", docRef.id);
+                feedbackMessage.textContent = "¡Encuesta enviada con éxito! Gracias por su feedback.";
+                feedbackMessage.style.color = "var(--selected-good-excellent-border)"; // Verde de éxito
+                surveyForm.reset(); // Reinicia el formulario después de enviar
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                feedbackMessage.textContent = "Hubo un error al enviar la encuesta. Por favor, inténtelo de nuevo.";
+                feedbackMessage.style.color = "var(--selected-bad-poor-border)"; // Rojo de error
+            }
+        });
+    </script>
 
 </body>
 </html>
