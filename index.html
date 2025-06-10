@@ -1,1217 +1,414 @@
-<html><head><base href="." />
+<!DOCTYPE html>
+<html lang="es">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InHouse Manager - Seguimientos</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <title>Encuesta de Satisfacción - Secrets Royal Beach</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
         :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #f5f6fa;
-            --text-color: #2d3436;
-            --accent-color: #6c5ce7;
-            --success-color: #00b894;
-            --warning-color: #fdcb6e;
-            --danger-color: #d63031;
+            /* Colores generales */
+            --primary-color: #5cb85c; /* Un verde vibrante para acentos */
+            --text-color: #333;
+            --light-text-color: #666;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --border-color: #e0e0e0;
+            --hover-color: #f0f0f0;
+
+            /* Colores de selección por categoría */
+            --selected-bad-poor-bg: #ffe6e6; /* Rojo muy claro */
+            --selected-bad-poor-border: #dc3545; /* Rojo */
+            --selected-bad-poor-text: #dc3545;
+
+            --selected-regular-bg: #fffbe6; /* Amarillo muy claro */
+            --selected-regular-border: #ffc107; /* Amarillo */
+            --selected-regular-text: #ffc107;
+
+            --selected-good-excellent-bg: #e6ffe6; /* Verde muy claro */
+            --selected-good-excellent-border: #28a745; /* Verde */
+            --selected-good-excellent-text: #28a745;
         }
 
         body {
-            background-color: var(--secondary-color);
-        }
-
-        .navbar {
-            background: white;
-            padding: 0.8rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-container {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            max-width: 220px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        h1 {
             color: var(--primary-color);
-            transition: color 0.3s ease;
-            cursor: pointer;
-        }
-
-        .logo:hover {
-            color: #357abd;
-            transform: scale(1.02);
-        }
-
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-color);
             font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.3rem;
+            margin-bottom: 10px;
+            font-size: 1.8em;
         }
 
-        .nav-links a i {
-            font-size: 1.4rem;
-            color: var(--primary-color);
+        h2 {
+            color: var(--light-text-color);
+            font-weight: 300;
+            margin-top: 0;
+            margin-bottom: 40px;
+            font-size: 1.2em;
         }
 
-        .nav-links a span {
-            font-size: 0.8rem;
+        .question {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .nav-links a:hover {
-            color: var(--primary-color);
-            transform: translateY(-2px);
+        .question:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
         }
-
-        @media screen and (max-width: 768px) {
-            .menu-toggle {
-                display: block;
-            }
-
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                padding: 1rem;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                border-radius: 0 0 10px 10px;
-            }
-
-            .nav-links.active {
-                display: flex;
-            }
-
-            .nav-links a {
-                padding: 0.8rem 0;
-                width: 100%;
-                text-align: center;
-            }
-
-            .nav-links a:not(:last-child) {
-                border-bottom: 1px solid rgba(0,0,0,0.1);
-            }
+        .question:nth-last-child(2) { /* Para manejar el caso del duplicado al final */
+             border-bottom: none;
+             padding-bottom: 0;
+             margin-bottom: 0;
         }
-
-        .main-content {
-            margin-top: 100px;
-            padding: 2rem;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .stat-icon {
-            background: var(--primary-color);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .stat-info h3 {
-            font-size: 1rem;
-            color: #666;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-info span {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-stats {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 1rem;
-            }
-            
-            .stat-card {
-                padding: 1.2rem;
-            }
-            
-            .stat-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-            
-            .stat-info h3 {
-                font-size: 0.9rem;
-            }
-            
-            .stat-info span {
-                font-size: 1.5rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .dashboard-stats {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .follow-up-history {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .timeline {
-            position: relative;
-            padding: 2rem 0;
-        }
-
-        .timeline-item {
-            position: relative;
-            padding: 1.5rem;
-            background: var(--secondary-color);
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .timeline-item[data-priority="high"] {
-            border-left: 4px solid var(--danger-color);
-            background: rgba(214, 48, 49, 0.1);
-        }
-
-        .timeline-item[data-priority="medium"] {
-            border-left: 4px solid var(--warning-color);
-            background: rgba(253, 203, 110, 0.1);
-        }
-
-        .timeline-item[data-priority="low"] {
-            border-left: 4px solid var(--success-color);
-            background: rgba(0, 184, 148, 0.1);
-        }
-
-        .timeline-date {
-            font-size: 0.9rem;
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-content {
-            font-size: 0.95rem;
-            color: var(--text-color);
-        }
-
-        .timeline-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1rem;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .follow-up-tags {
-            display: flex;
-            gap: 0.5rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-
-        .tag {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            background: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .tag:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .tag.selected {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .mood-selector {
-            display: flex;
-            gap: 1rem;
-            margin: 0.5rem 0;
-        }
-
-        .mood-option {
-            flex: 1;
-            padding: 0.8rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid rgba(0,0,0,0.1);
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .mood-option:hover {
-            background: rgba(74, 144, 226, 0.1);
-            border-color: var(--primary-color);
-        }
-
-        .mood-option.selected {
-            border-color: var(--primary-color);
-            background: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
-        }
-
-        .mood-option i {
-            font-size: 1.2rem;
-        }
-
-        .stat-details {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .stat-details p {
-            color: var(--primary-color);
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 2px solid rgba(74, 144, 226, 0.2);
-        }
-
-        .stat-details ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .stat-details li {
-            padding: 1rem;
-            margin-bottom: 0.8rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .stat-details li:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .stat-details li:last-child {
+        .question:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
             margin-bottom: 0;
         }
 
-        .stat-details li::before {
-            content: '•';
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            line-height: 0;
-        }
-        
-        .modal-header {
-            background: linear-gradient(135deg, var(--primary-color), #357abd);
-            color: white;
-            padding: 1.5rem;
+
+        .question p {
+            font-size: 1.15em;
+            margin-bottom: 25px;
+            font-weight: 400;
+            color: var(--text-color);
         }
 
-        .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        .rating-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .list-group-item {
-            border-left: 4px solid var(--primary-color);
-            margin-bottom: 0.5rem;
+        .rating-option {
+            text-align: center;
+            flex-basis: calc(20% - 15px); /* 5 opciones por fila */
+            min-width: 100px; /* Asegura un ancho mínimo para cada opción */
+        }
+
+        .rating-option input[type="radio"] {
+            display: none;
+        }
+
+        .rating-option label {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             transition: all 0.3s ease;
+            font-size: 1.8em; /* Tamaño grande para los emojis */
+            line-height: 1;
+            position: relative;
         }
 
-        .list-group-item:hover {
-            transform: translateX(5px);
-            background-color: rgba(74, 144, 226, 0.05);
+        .rating-option label .rating-text {
+            font-size: 0.7em;
+            margin-top: 8px;
+            color: var(--light-text-color);
+            font-weight: 400;
+            transition: color 0.3s ease;
         }
 
-        .modal .bg-gradient {
-            background: linear-gradient(135deg, var(--primary-color), #357abd);
+        .rating-option label:hover {
+            background-color: var(--hover-color);
+            border-color: var(--primary-color);
         }
 
-        .follow-up-details {
-            font-size: 0.95rem;
-        }
+        /* --- Estilos de selección basados en el valor --- */
 
-        .follow-up-details .content {
-            font-size: 1rem;
-            line-height: 1.6;
+        /* Mala y Pobre */
+        .rating-option input[value="bad"]:checked + label,
+        .rating-option input[value="poor"]:checked + label {
+            background-color: var(--selected-bad-poor-bg);
+            border-color: var(--selected-bad-poor-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
         }
-
-        .follow-up-details .meta {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .badge {
-            padding: 0.5em 1em;
+        .rating-option input[value="bad"]:checked + label .rating-text,
+        .rating-option input[value="poor"]:checked + label .rating-text {
+            color: var(--selected-bad-poor-text);
             font-weight: 500;
-            text-transform: capitalize;
         }
 
-        .modal-content {
-            border-radius: 15px;
+        /* Regular */
+        .rating-option input[value="regular"]:checked + label {
+            background-color: var(--selected-regular-bg);
+            border-color: var(--selected-regular-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        .rating-option input[value="regular"]:checked + label .rating-text {
+            color: var(--selected-regular-text);
+            font-weight: 500;
+        }
+
+        /* Buena y Excelente */
+        .rating-option input[value="good"]:checked + label,
+        .rating-option input[value="excellent"]:checked + label {
+            background-color: var(--selected-good-excellent-bg);
+            border-color: var(--selected-good-excellent-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        .rating-option input[value="good"]:checked + label .rating-text,
+        .rating-option input[value="excellent"]:checked + label .rating-text {
+            color: var(--selected-good-excellent-text);
+            font-weight: 500;
+        }
+
+
+        /* Submit Button (optional) */
+        .submit-button {
+            margin-top: 40px;
+        }
+
+        .submit-button button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
             border: none;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-        }
-
-        .modal-header {
-            border-radius: 15px 15px 0 0;
-            padding: 1rem 1.5rem;
-        }
-
-        .modal-header .modal-title {
-            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
             font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .modal-body {
-            padding: 1.5rem;
+        .submit-button button:hover {
+            background-color: #4CAF50;
+            transform: translateY(-2px);
         }
 
-        .follow-up-details i {
-            font-size: 1.2rem;
+        .submit-button button:active {
+            transform: translateY(0);
         }
 
-        .stat-details .list-group-item {
-            padding: 1rem 1.5rem;
-        }
-        
-        .stat-details p {
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid rgba(0,0,0,0.1);
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            .rating-option {
+                flex-basis: calc(33.33% - 15px); /* 3 opciones por fila en tablets */
+            }
         }
 
-        .btn-outline-success:hover {
-            transform: scale(1.05);
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 15px;
+            }
+            .question p {
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
+            .rating-option {
+                flex-basis: calc(50% - 15px); /* 2 opciones por fila en móviles */
+                min-width: unset;
+            }
+            .rating-option label {
+                font-size: 1.5em;
+                padding: 10px 5px;
+            }
+            .rating-option label .rating-text {
+                font-size: 0.65em;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            h2 {
+                font-size: 1em;
+                margin-bottom: 30px;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo" onclick="goToHome()">InHouse Manager</div>
-            <button class="menu-toggle" aria-label="Toggle menu">
-                <i class="ri-menu-line"></i>
-            </button>
-            <div class="nav-links">
-                <a href="index.html">
-                    <i class="ri-home-4-line"></i>
-                    <span>Home</span>
-                </a>
-                <a href="inhouse.html">
-                    <i class="ri-hotel-line"></i>
-                    <span>InHouse</span>
-                </a>
-                <a href="seguimientos.html">
-                    <i class="ri-file-list-3-line"></i>
-                    <span>Seguimientos</span>
-                </a>
-                <a href="ventas.html">
-                    <i class="ri-shopping-cart-line"></i>
-                    <span>Ventas</span>
-                </a>
-            </div>
-        </div>
-    </nav>
 
-    <main class="main-content">
-        <div class="dashboard-stats">
-            <div class="stat-card" onclick="window.showStatDetails('currentGuests')">
-                <div class="stat-icon">
-                    <i class="ri-user-line"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Huéspedes Actuales</h3>
-                    <span id="currentGuestsCount">0</span>
-                </div>
-            </div>
-            
-            <div class="stat-card" onclick="window.showStatDetails('expectedArrivals')">
-                <div class="stat-icon">
-                    <i class="ri-flight-land-line"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Llegadas Esperadas</h3>
-                    <span id="expectedArrivalsCount">0</span>
-                </div>
-            </div>
-            
-            <div class="stat-card" onclick="window.showStatDetails('scheduledDepartures')">
-                <div class="stat-icon">
-                    <i class="ri-flight-takeoff-line"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Salidas Programadas</h3>
-                    <span id="scheduledDeparturesCount">0</span>
-                </div>
-            </div>
-            
-            <div class="stat-card" onclick="window.showStatDetails('pendingFollowUps')">
-                <div class="stat-icon">
-                    <i class="ri-notification-line"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Seguimientos Pendientes</h3>
-                    <span id="pendingFollowUpsCount">0</span>
-                </div>
-            </div>
+    <div class="container">
+        <div class="logo">
+            <img src="https://via.placeholder.com/220x60?text=SECRETS+Royal+Beach" alt="Secrets Royal Beach Logo">
         </div>
 
-        <div class="follow-up-history">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>Actividad Reciente</h2>
-            </div>
-            <div class="timeline" id="followUpTimeline">
-                <!-- Timeline items will be populated dynamically -->
-            </div>
-        </div>
-    </main>
+        <h1>Encuesta de Satisfacción</h1>
+        <h2>Punta Cana, República Dominicana</h2>
 
-    <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="statsModalLabel"></h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body" id="statsModalContent">
-          </div>
-        </div>
-      </div>
+        <form action="#" method="post">
+            <div class="question">
+                <p>¿Cómo calificaría su experiencia general con nosotros?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="overall_bad" name="overall_experience" value="bad">
+                        <label for="overall_bad">☹️<span class="rating-text">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_poor" name="overall_experience" value="poor">
+                        <label for="overall_poor">🙁<span class="rating-text">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_regular" name="overall_experience" value="regular">
+                        <label for="overall_regular">😐<span class="rating-text">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_good" name="overall_experience" value="good">
+                        <label for="overall_good">🙂<span class="rating-text">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_excellent" name="overall_experience" value="excellent">
+                        <label for="overall_excellent">😁<span class="rating-text">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>¿Cómo calificaría el nivel general de servicio proporcionado por nuestro personal?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="staff_bad" name="staff_service" value="bad">
+                        <label for="staff_bad">☹️<span class="rating-text">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_poor" name="staff_service" value="poor">
+                        <label for="staff_poor">🙁<span class="rating-text">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_regular" name="staff_service" value="regular">
+                        <label for="staff_regular">😐<span class="rating-text">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_good" name="staff_service" value="good">
+                        <label for="staff_good">🙂<span class="rating-text">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_excellent" name="staff_service" value="excellent">
+                        <label for="staff_excellent">😁<span class="rating-text">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>¿Recomendaría este hotel a su familia y amigos?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_bad" name="recommend_hotel" value="bad">
+                        <label for="recommend_bad">☹️<span class="rating-text">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_poor" name="recommend_hotel" value="poor">
+                        <label for="recommend_poor">🙁<span class="rating-text">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_regular" name="recommend_hotel" value="regular">
+                        <label for="recommend_regular">😐<span class="rating-text">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_good" name="recommend_hotel" value="good">
+                        <label for="recommend_good">🙂<span class="rating-text">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_excellent" name="recommend_hotel" value="excellent">
+                        <label for="recommend_excellent">😁<span class="rating-text">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>¿Cómo calificaría su experiencia como huésped del Preferred Club?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_bad" name="preferred_club" value="bad">
+                        <label for="preferred_bad">☹️<span class="rating-text">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_poor" name="preferred_club" value="poor">
+                        <label for="preferred_poor">🙁<span class="rating-text">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_regular" name="preferred_club" value="regular">
+                        <label for="preferred_regular">😐<span class="rating-text">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_good" name="preferred_club" value="good">
+                        <label for="preferred_good">🙂<span class="rating-text">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_excellent" name="preferred_club" value="excellent">
+                        <label for="preferred_excellent">😁<span class="rating-text">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>¡Gracias por su visita! ¿Cuál es su calificación final?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_bad" name="overall_experience_2" value="bad">
+                        <label for="overall_experience_2_bad">☹️<span class="rating-text">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_poor" name="overall_experience_2" value="poor">
+                        <label for="overall_experience_2_poor">🙁<span class="rating-text">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_regular" name="overall_experience_2" value="regular">
+                        <label for="overall_experience_2_regular">😐<span class="rating-text">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_good" name="overall_experience_2" value="good">
+                        <label for="overall_experience_2_good">🙂<span class="rating-text">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_excellent" name="overall_experience_2" value="excellent">
+                        <label for="overall_experience_2_excellent">😁<span class="rating-text">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-button">
+                <button type="submit">Enviar Encuesta</button>
+            </div>
+        </form>
     </div>
 
-    <div class="popup-overlay" id="followUpFormModal">
-        <div class="modal fade" id="followUpFormModal" tabindex="-1" aria-labelledby="followUpFormModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="followUpFormModalLabel">Nuevo Seguimiento</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="followUpForm" class="follow-up-grid">
-                            <div class="form-group">
-                                <label for="roomSelect">Habitación</label>
-                                <select id="roomSelect" required>
-                                    <option value="">Seleccionar habitación</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="followUpDate">Fecha</label>
-                                <input type="date" id="followUpDate" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="guestMood">Estado de ánimo del huésped</label>
-                                <div class="mood-selector">
-                                    <div class="mood-option" data-mood="happy">
-                                        <i class="ri-emotion-happy-line"></i> Feliz
-                                    </div>
-                                    <div class="mood-option" data-mood="neutral">
-                                        <i class="ri-emotion-normal-line"></i> Normal
-                                    </div>
-                                    <div class="mood-option" data-mood="unhappy">
-                                        <i class="ri-emotion-unhappy-line"></i> Insatisfecho
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label>Categorías</label>
-                                <div class="follow-up-tags">
-                                    <span class="tag">Limpieza</span>
-                                    <span class="tag">Mantenimiento</span>
-                                    <span class="tag">Servicio</span>
-                                    <span class="tag">Solicitud especial</span>
-                                    <span class="tag">Queja</span>
-                                    <span class="tag">Sugerencia</span>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="followUpNotes">Notas del seguimiento</label>
-                                <textarea id="followUpNotes" rows="4" required></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="actionRequired">¿Requiere acción?</label>
-                                <select id="actionRequired">
-                                    <option value="no">No</option>
-                                    <option value="yes">Sí</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="priority">Prioridad</label>
-                                <select id="priority">
-                                    <option value="low">Baja</option>
-                                    <option value="medium">Media</option>
-                                    <option value="high">Alta</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="ri-save-line"></i> Guardar Seguimiento
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="popup-overlay report-modal" id="reportModal">
-        <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="reportModalLabel">Reporte de Seguimientos</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="reportContent">
-                        <!-- Report content will be generated dynamically -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="popup-overlay" id="historyTableModal">
-        <div class="modal fade" id="historyTableModal" tabindex="-1" aria-labelledby="historyTableModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width: 90%; width: 1200px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="historyTableModalLabel">Historial de Seguimientos</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="history-table-container">
-                            <table class="history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Habitación</th>
-                                        <th>Notas</th>
-                                        <th>Estado de ánimo</th>
-                                        <th>Prioridad</th>
-                                        <th>Acción requerida</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyTableBody">
-                                    <!-- Table content will be populated dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="popup-overlay" id="roomStatsTableModal">
-        <div class="modal fade" id="roomStatsTableModal" tabindex="-1" aria-labelledby="roomStatsTableModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width: 90%; width: 1200px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="roomStatsTableModalLabel">Estadísticas por Habitación</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="history-table-container">
-                            <table class="history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Habitación</th>
-                                        <th>Huésped</th>
-                                        <th>Fecha de Salida</th>
-                                        <th>Seguimientos</th>
-                                        <th>Estado</th>
-                                        <th>Satisfacción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="roomStatsTableBody">
-                                    <!-- Table content will be populated dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, query, orderByChild, equalTo, update } 
-        from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUirwoSQgvcMZn7uLjKMAxlTA15Jkl2BM",
-            authDomain: "ismakun-bf0fa.firebaseapp.com",
-            databaseURL: "https://ismakun-bf0fa-default-rtdb.firebaseio.com",
-            projectId: "ismakun-bf0fa",
-            storageBucket: "ismakun-bf0fa.firebasestorage.app",
-            messagingSenderId: "1028877703945",
-            appId: "1:1028877703945:web:331de48acbcdf2234a51d8"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        function updateDashboardStats() {
-            const guestsRef = ref(database, 'guests');
-            
-            // Listen for changes in guests
-            onValue(guestsRef, (snapshot) => {
-                let currentGuests = 0;
-                let expectedArrivals = 0;
-                let scheduledDepartures = 0;
-                
-                const guestsList = {
-                    current: [],
-                    arrivals: [],
-                    departures: []
-                };
-                
-                snapshot.forEach((childSnapshot) => {
-                    const guest = childSnapshot.val();
-                    
-                    // Count guests based on their status
-                    switch(guest.status) {
-                        case 'encasa':
-                            currentGuests++;
-                            guestsList.current.push(guest);
-                            break;
-                        case 'llegada':
-                            expectedArrivals++;
-                            guestsList.arrivals.push(guest);
-                            break;
-                        case 'salida':
-                            scheduledDepartures++;
-                            guestsList.departures.push(guest);
-                            break;
-                    }
-                });
-                
-                // Update the dashboard counters
-                document.getElementById('currentGuestsCount').textContent = currentGuests;
-                document.getElementById('expectedArrivalsCount').textContent = expectedArrivals;
-                document.getElementById('scheduledDeparturesCount').textContent = scheduledDepartures;
-                
-                // Update the click handlers for the stat cards
-                window.showStatDetails = function(statType) {
-                    const followUpsRef = ref(database, 'followUps');
-                    let title = '';
-                    let content = '';
-                    
-                    switch(statType) {
-                        case 'currentGuests':
-                            title = 'Huéspedes Actuales';
-                            content = `
-                                <div class="stat-details">
-                                    <p class="fw-bold text-primary">Total de huéspedes actuales: ${guestsList.current.length}</p>
-                                    <div class="list-group">
-                                        ${guestsList.current.map(guest => `
-                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-primary border-3">
-                                                <div>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <i class="ri-user-line text-primary"></i>
-                                                        <h6 class="mb-1 fw-bold">Habitación ${guest.roomNumber}</h6>
-                                                    </div>
-                                                    <p class="mb-0 text-muted">${guest.guestName}</p>
-                                                </div>
-                                                <span class="badge bg-primary rounded-pill">En casa</span>
-                                            </div>
-                                        `).join('') || '<p class="text-center text-muted py-3">No hay huéspedes actuales</p>'}
-                                    </div>
-                                </div>
-                            `;
-                            break;
-                            
-                        case 'expectedArrivals':
-                            title = 'Llegadas Esperadas';
-                            content = `
-                                <div class="stat-details">
-                                    <p class="fw-bold text-success">Total de llegadas esperadas: ${guestsList.arrivals.length}</p>
-                                    <div class="list-group">
-                                        ${guestsList.arrivals.map(guest => `
-                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-success border-3">
-                                                <div>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <i class="ri-flight-land-line text-success"></i>
-                                                        <h6 class="mb-1 fw-bold">Habitación ${guest.roomNumber}</h6>
-                                                    </div>
-                                                    <p class="mb-0 text-muted">${guest.guestName}</p>
-                                                </div>
-                                                <span class="badge bg-success rounded-pill">Llegada</span>
-                                            </div>
-                                        `).join('') || '<p class="text-center text-muted py-3">No hay llegadas esperadas</p>'}
-                                    </div>
-                                </div>
-                            `;
-                            break;
-                            
-                        case 'scheduledDepartures':
-                            title = 'Salidas Programadas';
-                            content = `
-                                <div class="stat-details">
-                                    <p class="fw-bold text-warning">Total de salidas programadas: ${guestsList.departures.length}</p>
-                                    <div class="list-group">
-                                        ${guestsList.departures.map(guest => `
-                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-warning border-3">
-                                                <div>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <i class="ri-flight-takeoff-line text-warning"></i>
-                                                        <h6 class="mb-1 fw-bold">Habitación ${guest.roomNumber}</h6>
-                                                    </div>
-                                                    <p class="mb-0 text-muted">${guest.guestName}</p>
-                                                </div>
-                                                <span class="badge bg-warning rounded-pill">Salida</span>
-                                            </div>
-                                        `).join('') || '<p class="text-center text-muted py-3">No hay salidas programadas</p>'}
-                                    </div>
-                                </div>
-                            `;
-                            break;
-
-                        case 'pendingFollowUps':
-                            const pendingFollowUps = [];
-                            onValue(followUpsRef, (followUpsSnapshot) => {
-                                followUpsSnapshot.forEach(child => {
-                                    if (child.val().actionRequired === 'yes') {
-                                        pendingFollowUps.push({
-                                            id: child.key,
-                                            ...child.val()
-                                        });
-                                    }
-                                });
-
-                                title = 'Seguimientos Pendientes';
-                                content = `
-                                    <div class="stat-details">
-                                        <p class="fw-bold text-danger">Total de seguimientos pendientes: ${pendingFollowUps.length}</p>
-                                        <div class="list-group">
-                                            ${pendingFollowUps.map(f => `
-                                                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-start border-danger border-3">
-                                                    <div>
-                                                        <div class="d-flex align-items-center gap-2">
-                                                            <i class="ri-notification-line text-danger"></i>
-                                                            <h6 class="mb-1 fw-bold">Habitación ${f.roomNumber}</h6>
-                                                        </div>
-                                                        <p class="mb-0 text-muted">${f.notes}</p>
-                                                    </div>
-                                                    <button class="btn btn-outline-success btn-sm complete-follow-up" data-id="${f.id}">
-                                                        <i class="ri-check-line"></i> Completar
-                                                    </button>
-                                                </div>
-                                            `).join('') || '<p class="text-center text-muted py-3">No hay seguimientos pendientes</p>'}
-                                        </div>
-                                    </div>
-                                `;
-
-                                // Update and show Bootstrap modal
-                                document.getElementById('statsModalLabel').textContent = title;
-                                document.getElementById('statsModalContent').innerHTML = content;
-                                
-                                const modal = new bootstrap.Modal(document.getElementById('statsModal'));
-                                modal.show();
-
-                                // Add event listeners for complete buttons 
-                                document.querySelectorAll('.complete-follow-up').forEach(button => {
-                                    button.addEventListener('click', function() {
-                                        const followUpId = this.dataset.id;
-                                        const followUpRef = ref(database, `followUps/${followUpId}`);
-                                        
-                                        // Update the follow-up to mark it as not requiring action
-                                        update(followUpRef, {
-                                            actionRequired: 'no'
-                                        }).then(() => {
-                                            // Remove the list item
-                                            this.closest('div').remove();
-                                            
-                                            // Update the count
-                                            const countEl = document.querySelector('.stat-details p');
-                                            const currentCount = parseInt(countEl.textContent.match(/\d+/)[0]);
-                                            countEl.textContent = `Total de seguimientos pendientes: ${currentCount - 1}`;
-                                            
-                                            // Update the dashboard count
-                                            const dashboardCount = document.getElementById('pendingFollowUpsCount');
-                                            dashboardCount.textContent = currentCount - 1;
-
-                                            // Refresh dashboard stats and timeline
-                                            updateDashboardStats();
-                                            updateTimeline();
-                                            
-                                            // Show success message
-                                            const toast = new bootstrap.Toast(Object.assign(document.createElement('div'), {
-                                                className: 'toast position-fixed top-0 end-0 m-3',
-                                                innerHTML: `
-                                                    <div class="toast-header bg-success text-white">
-                                                        <strong class="me-auto">Éxito</strong>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-                                                    </div>
-                                                    <div class="toast-body">
-                                                        Seguimiento marcado como completado
-                                                    </div>
-                                                `
-                                            }));
-                                            document.body.appendChild(toast.element);
-                                            toast.show();
-
-                                            // Close the modal after completion
-                                            modal.hide();
-                                        }).catch(error => {
-                                            console.error("Error updating follow-up: ", error);
-                                            alert('Error al actualizar el seguimiento');
-                                        });
-                                    });
-                                });
-                            });
-                            return; // Prevent further execution
-                    }
-                    
-                    // Update and show Bootstrap modal
-                    document.getElementById('statsModalLabel').textContent = title;
-                    document.getElementById('statsModalContent').innerHTML = content;
-                    
-                    const modal = new bootstrap.Modal(document.getElementById('statsModal'));
-                    modal.show();
-                };
-            });
-        }
-
-        const guestsRef = ref(database, 'guests');
-        onValue(guestsRef, (snapshot) => {
-            const roomSelect = document.getElementById('roomSelect');
-            roomSelect.innerHTML = '<option value="">Seleccionar habitación</option>';
-            
-            snapshot.forEach((childSnapshot) => {
-                const guest = childSnapshot.val();
-                if (guest.status === 'encasa') {
-                    const option = document.createElement('option');
-                    option.value = guest.roomNumber;
-                    option.textContent = `Habitación ${guest.roomNumber} - ${guest.guestName}`;
-                    roomSelect.appendChild(option);
-                }
-            });
-        });
-
-        document.getElementById('followUpForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const followUp = {
-                roomNumber: document.getElementById('roomSelect').value,
-                date: document.getElementById('followUpDate').value,
-                notes: document.getElementById('followUpNotes').value,
-                mood: document.querySelector('.mood-option.selected')?.dataset.mood || 'neutral',
-                tags: Array.from(document.querySelectorAll('.tag.selected')).map(tag => tag.textContent),
-                actionRequired: document.getElementById('actionRequired').value,
-                priority: document.getElementById('priority').value,
-                timestamp: Date.now()
-            };
-            
-            push(ref(database, 'followUps'), followUp)
-                .then(() => {
-                    alert('Seguimiento guardado exitosamente');
-                    e.target.reset();
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('followUpFormModal'));
-                    modal.hide();
-                })
-                .catch((error) => {
-                    console.error("Error saving follow-up: ", error);
-                    alert('Error al guardar el seguimiento');
-                });
-        });
-
-        const followUpsRef = ref(database, 'followUps');
-        onValue(followUpsRef, (snapshot) => {
-            let pendingCount = 0;
-            snapshot.forEach((child) => {
-                if (child.val().actionRequired === 'yes') {
-                    pendingCount++;
-                }
-            });
-            document.getElementById('pendingFollowUpsCount').textContent = pendingCount;
-            
-            const timeline = document.getElementById('followUpTimeline');
-            timeline.innerHTML = '';
-            
-            const followUps = [];
-            snapshot.forEach((childSnapshot) => {
-                followUps.push({
-                    id: childSnapshot.key,
-                    ...childSnapshot.val()
-                });
-            });
-            
-            followUps.sort((a, b) => b.timestamp - a.timestamp);
-            
-            followUps.forEach(followUp => {
-                const timelineItem = document.createElement('div');
-                timelineItem.className = 'timeline-item';
-                timelineItem.setAttribute('data-priority', followUp.priority);
-                timelineItem.innerHTML = `
-                    <div class="timeline-date">${new Date(followUp.date).toLocaleDateString()}</div>
-                    <div class="timeline-content">
-                        <strong>Habitación ${followUp.roomNumber}</strong>
-                        <p>${followUp.notes}</p>
-                    </div>
-                    <div class="timeline-meta">
-                        <span>Prioridad: ${followUp.priority}</span>
-                        <span>Estado: ${followUp.actionRequired === 'yes' ? 'Requiere acción' : 'Completado'}</span>
-                    </div>
-                `;
-                timeline.appendChild(timelineItem);
-            });
-        });
-
-        document.querySelectorAll('.mood-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-            });
-        });
-
-        document.querySelectorAll('.tag').forEach(tag => {
-            tag.addEventListener('click', () => {
-                tag.classList.toggle('selected');
-            });
-        });
-
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.timeline-item')) {
-                const item = e.target.closest('.timeline-item');
-                const followUpData = {
-                    date: item.querySelector('.timeline-date').textContent,
-                    content: item.querySelector('.timeline-content').textContent,
-                    priority: item.dataset.priority,
-                    meta: item.querySelector('.timeline-meta').textContent
-                };
-                showFollowUpDetails(followUpData);
-            }
-        });
-
-        function showFollowUpDetails(data) {
-            const existingModal = document.getElementById('followUpDetailsModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
-
-            const modalDiv = document.createElement('div');
-            modalDiv.className = 'modal fade';
-            modalDiv.id = 'followUpDetailsModal';
-            modalDiv.tabIndex = '-1';
-            modalDiv.setAttribute('aria-labelledby', 'followUpDetailsModalLabel');
-            modalDiv.setAttribute('aria-hidden', 'true');
-
-            modalDiv.innerHTML = `
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-gradient">
-                            <h5 class="modal-title text-white" id="followUpDetailsModalLabel">
-                                <i class="ri-file-list-3-line me-2"></i>Detalles del Seguimiento
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body p-4">
-                            <div class="follow-up-details">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ri-calendar-line text-primary me-2"></i>
-                                        <h6 class="mb-0">${data.date}</h6>
-                                    </div>
-                                    <span class="badge ${getPriorityClass(data.priority)}">${data.priority}</span>
-                                </div>
-                                <div class="content border-start border-4 border-primary ps-3 py-2 mb-3">
-                                    ${data.content}
-                                </div>
-                                <div class="meta p-3 bg-light rounded">
-                                    <i class="ri-information-line text-primary me-2"></i>
-                                    ${data.meta}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modalDiv);
-            const modal = new bootstrap.Modal(modalDiv);
-            modal.show();
-        }
-
-        function getPriorityClass(priority) {
-            switch(priority.toLowerCase()) {
-                case 'high':
-                    return 'bg-danger';
-                case 'medium':
-                    return 'bg-warning';
-                case 'low':
-                    return 'bg-success';
-                default:
-                    return 'bg-primary';
-            }
-        }
-
-        // Call updateDashboardStats when the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            updateDashboardStats();
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const navLinks = document.querySelector('.nav-links');
-
-            menuToggle.addEventListener('click', function() {
-                navLinks.classList.toggle('active');
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.nav-container')) {
-                    navLinks.classList.remove('active');
-                }
-            });
-
-            // Close menu when window is resized above mobile breakpoint
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    navLinks.classList.remove('active');
-                }
-            });
-        });
-
-        // Add a new function to update the timeline
-        function updateTimeline() {
-            const followUpsRef = ref(database, 'followUps');
-            onValue(followUpsRef, (snapshot) => {
-                const timeline = document.getElementById('followUpTimeline');
-                timeline.innerHTML = '';
-                
-                const followUps = [];
-                snapshot.forEach((childSnapshot) => {
-                    followUps.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-                
-                followUps.sort((a, b) => b.timestamp - a.timestamp);
-                
-                followUps.forEach(followUp => {
-                    const timelineItem = document.createElement('div');
-                    timelineItem.className = 'timeline-item';
-                    timelineItem.setAttribute('data-priority', followUp.priority);
-                    timelineItem.innerHTML = `
-                        <div class="timeline-date">${new Date(followUp.date).toLocaleDateString()}</div>
-                        <div class="timeline-content">
-                            <strong>Habitación ${followUp.roomNumber}</strong>
-                            <p>${followUp.notes}</p>
-                        </div>
-                        <div class="timeline-meta">
-                            <span>Prioridad: ${followUp.priority}</span>
-                            <span>Estado: ${followUp.actionRequired === 'yes' ? 'Requiere acción' : 'Completado'}</span>
-                        </div>
-                    `;
-                    timeline.appendChild(timelineItem);
-                });
-            });
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
