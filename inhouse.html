@@ -3,23 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador de Encuestas - Secrets Royal Beach</title>
+    <title>Dashboard de Encuestas - Secrets Royal Beach</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #5cb85c;
+            /* Colores generales */
+            --primary-color: #5cb85c; /* Verde principal */
             --text-color: #333;
             --light-text-color: #666;
             --background-color: #f0f2f5;
             --card-background: #ffffff;
             --border-color: #e0e0e0;
-            --header-bg: #4CAF50; /* Un verde más oscuro para el encabezado */
+
+            /* Encabezado y botones */
+            --header-bg: #4CAF50; /* Verde más oscuro para el encabezado */
             --header-text: #ffffff;
-            --table-row-hover: #f5f5f5;
             --button-bg: #007bff;
             --button-hover-bg: #0056b3;
             --export-button-bg: #28a745;
             --export-button-hover-bg: #218838;
+
+            /* Tabla */
+            --table-header-bg: #e9ecef;
+            --table-header-text: #495057;
+            --table-row-hover: #f5f5f5;
+            --table-border: #dee2e6;
+
+            /* Colores de calificación */
+            --rating-excellent: #28a745; /* Verde fuerte */
+            --rating-good: #28a745; /* Verde fuerte */
+            --rating-regular: #ffc107; /* Amarillo */
+            --rating-poor: #dc3545; /* Rojo */
+            --rating-bad: #dc3545; /* Rojo */
+
+            /* Barra de progreso */
+            --progress-bg: #e9ecef;
+            --progress-bar-green: #28a745;
+            --progress-bar-yellow: #ffc107;
+            --progress-bar-red: #dc3545;
         }
 
         body {
@@ -40,7 +61,7 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            max-width: 1200px;
+            max-width: 1400px; /* Ancho un poco mayor */
             width: 100%;
             text-align: center;
             margin-bottom: 20px;
@@ -50,7 +71,7 @@
             color: var(--primary-color);
             font-weight: 700;
             margin-bottom: 10px;
-            font-size: 2.2em;
+            font-size: 2.5em;
         }
 
         p.subtitle {
@@ -89,7 +110,7 @@
 
         .table-container {
             width: 100%;
-            overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+            overflow-x: auto;
             margin-top: 20px;
             background-color: var(--card-background);
             border-radius: 8px;
@@ -101,27 +122,33 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
+            min-width: 900px; /* Asegura un ancho mínimo para la tabla */
         }
 
         thead {
-            background-color: var(--header-bg);
-            color: var(--header-text);
+            background-color: var(--table-header-bg);
+            color: var(--table-header-text);
+            position: sticky; /* Encabezado pegajoso */
+            top: 0;
+            z-index: 1; /* Asegura que esté sobre el contenido al hacer scroll */
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Sombra para efecto pegajoso */
         }
 
         th, td {
             padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap; /* Evita que el texto se envuelva */
+            border-bottom: 1px solid var(--table-border);
+            white-space: nowrap;
+            vertical-align: middle; /* Alineación vertical */
         }
 
         th {
-            font-weight: 500;
+            font-weight: 600; /* Más negrita para los encabezados */
             text-transform: uppercase;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f6f8fa; /* Un poco más oscuro para filas pares */
         }
 
         tbody tr:hover {
@@ -130,20 +157,84 @@
 
         .no-data-message {
             text-align: center;
-            padding: 30px;
+            padding: 50px;
             color: var(--light-text-color);
-            font-size: 1.1em;
+            font-size: 1.2em;
+            font-weight: 500;
         }
 
-        /* Colores de calificación */
-        .rating-excellent { color: #28a745; font-weight: 500; } /* Verde */
-        .rating-good { color: #28a745; font-weight: 500; } /* Verde */
-        .rating-regular { color: #ffc107; font-weight: 500; } /* Amarillo */
-        .rating-poor { color: #dc3545; font-weight: 500; } /* Rojo */
-        .rating-bad { color: #dc3545; font-weight: 500; } /* Rojo */
+        /* Estilos para las calificaciones */
+        .rating-cell {
+            font-weight: 500;
+            padding: 8px 15px; /* Ajustar padding */
+            border-radius: 4px;
+            display: inline-block; /* Para que el padding y border-radius funcionen bien */
+            min-width: 70px; /* Ancho mínimo para consistencia */
+            text-align: center;
+        }
+
+        .rating-excellent { background-color: var(--rating-excellent); color: white; }
+        .rating-good { background-color: var(--rating-good); color: white; }
+        .rating-regular { background-color: var(--rating-regular); color: var(--text-color); }
+        .rating-poor { background-color: var(--rating-poor); color: white; }
+        .rating-bad { background-color: var(--rating-bad); color: white; }
+
+        /* Estilos para la barra de progreso */
+        .progress-bar-container {
+            width: 100px; /* Ancho fijo para la barra */
+            height: 10px;
+            background-color: var(--progress-bg);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: auto; /* Centrar la barra en la celda */
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease-out;
+        }
+
+        .progress-score-text {
+            font-weight: 600;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        /* Colores para la barra de progreso según la puntuación */
+        .progress-bar-green { background-color: var(--progress-bar-green); }
+        .progress-bar-yellow { background-color: var(--progress-bar-yellow); }
+        .progress-bar-red { background-color: var(--progress-bar-red); }
+
 
         /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .container {
+                padding: 25px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .table-container {
+                border-radius: 4px;
+            }
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.8em;
+            }
+            .rating-cell {
+                min-width: 60px;
+                font-size: 0.8em;
+            }
+            .progress-bar-container {
+                width: 80px;
+            }
+        }
+
         @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
             .container {
                 padding: 20px;
             }
@@ -151,11 +242,15 @@
                 font-size: 1.8em;
             }
             p.subtitle {
-                font-size: 1em;
+                font-size: 0.95em;
             }
-            th, td {
-                padding: 10px;
-                font-size: 0.85em;
+            .controls button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+            /* Min-width para la tabla puede ser necesario ajustarlo o usar un scroll mas agresivo */
+            table {
+                min-width: 700px;
             }
         }
 
@@ -169,12 +264,32 @@
             h1 {
                 font-size: 1.5em;
             }
-            .controls button {
-                padding: 8px 15px;
+            p.subtitle {
                 font-size: 0.9em;
             }
-            /* Puede ser necesario ocultar algunas columnas en pantallas muy pequeñas */
-            /* td:nth-child(n+7), th:nth-child(n+7) { display: none; } */
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .controls button {
+                width: 100%;
+            }
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.75em;
+            }
+            .rating-cell {
+                min-width: 50px;
+                font-size: 0.7em;
+                padding: 6px 8px;
+            }
+            .progress-bar-container {
+                width: 60px;
+                height: 8px;
+            }
+            .progress-score-text {
+                font-size: 0.8em;
+            }
         }
     </style>
 </head>
@@ -182,7 +297,7 @@
 
     <div class="container">
         <h1>Dashboard de Encuestas</h1>
-        <p class="subtitle">Visualización en tiempo real de las encuestas de satisfacción de Secrets Royal Beach</p>
+        <p class="subtitle">Visualización en tiempo real y análisis de satisfacción de Secrets Royal Beach</p>
 
         <div class="controls">
             <button id="exportCsvBtn">Exportar a CSV</button>
@@ -202,8 +317,8 @@
                         <th>Servicio del Personal</th>
                         <th>Recomendación Hotel</th>
                         <th>Experiencia Preferred Club</th>
-                        <th>Calificación Final</th>
-                    </tr>
+                        <th>Calificación Final Encuesta</th>
+                        <th>Puntuación Calculada</th> </tr>
                 </thead>
                 <tbody>
                     </tbody>
@@ -240,6 +355,15 @@
 
         let allSurveyData = []; // Para almacenar todos los datos y facilitar la exportación
 
+        // Mapeo de calificaciones a valores numéricos (0-100 para la barra de progreso)
+        const ratingToValue = {
+            'bad': 0,
+            'poor': 25,
+            'regular': 50,
+            'good': 75,
+            'excellent': 100
+        };
+
         // Función para formatear la fecha
         function formatTimestamp(timestamp) {
             if (timestamp && timestamp.toDate) {
@@ -257,19 +381,15 @@
             return 'N/A';
         }
 
-        // Función para aplicar color a la calificación
+        // Función para aplicar color y clase a la calificación
         function getRatingClass(rating) {
             switch (rating) {
-                case 'excellent':
-                case 'good':
-                    return 'rating-good'; // Usamos good para ambos casos de verde
-                case 'regular':
-                    return 'rating-regular'; // Amarillo
-                case 'poor':
-                case 'bad':
-                    return 'rating-bad'; // Usamos bad para ambos casos de rojo
-                default:
-                    return '';
+                case 'excellent': return 'rating-excellent';
+                case 'good': return 'rating-good';
+                case 'regular': return 'rating-regular';
+                case 'poor': return 'rating-poor';
+                case 'bad': return 'rating-bad';
+                default: return '';
             }
         }
 
@@ -278,13 +398,43 @@
             return rating ? rating.toUpperCase() : '';
         }
 
+        // Función para calcular la puntuación final promedio
+        function calculateOverallScore(data) {
+            const relevantRatings = [
+                data.overall_experience,
+                data.staff_service,
+                data.recommend_hotel,
+                data.preferred_club,
+                data.overall_experience_2
+            ];
+
+            let sum = 0;
+            let count = 0;
+
+            relevantRatings.forEach(rating => {
+                if (ratingToValue.hasOwnProperty(rating)) {
+                    sum += ratingToValue[rating];
+                    count++;
+                }
+            });
+
+            return count > 0 ? Math.round(sum / count) : 0; // Redondea al entero más cercano
+        }
+
+        // Función para obtener la clase de color para la barra de progreso
+        function getProgressBarColor(score) {
+            if (score >= 70) return 'progress-bar-green';
+            if (score >= 40) return 'progress-bar-yellow';
+            return 'progress-bar-red';
+        }
+
         // Escucha en tiempo real los cambios en la colección 'survey_responses'
         function setupRealtimeListener() {
-            const q = query(collection(db, "survey_responses"), orderBy("timestamp", "desc")); // Ordenar por fecha descendente
+            const q = query(collection(db, "survey_responses"), orderBy("timestamp", "desc"));
 
             onSnapshot(q, (snapshot) => {
-                surveyTableBody.innerHTML = ''; // Limpiar la tabla antes de agregar los datos
-                allSurveyData = []; // Limpiar los datos para exportación
+                surveyTableBody.innerHTML = '';
+                allSurveyData = [];
 
                 if (snapshot.empty) {
                     noDataMessage.style.display = 'block';
@@ -306,29 +456,34 @@
 
                         // Celdas de calificación con estilo
                         const overallExpCell = row.insertCell();
-                        overallExpCell.textContent = getRatingText(data.overall_experience);
-                        overallExpCell.className = getRatingClass(data.overall_experience);
+                        overallExpCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.overall_experience)}">${getRatingText(data.overall_experience)}</span>`;
 
                         const staffServiceCell = row.insertCell();
-                        staffServiceCell.textContent = getRatingText(data.staff_service);
-                        staffServiceCell.className = getRatingClass(data.staff_service);
+                        staffServiceCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.staff_service)}">${getRatingText(data.staff_service)}</span>`;
 
                         const recommendHotelCell = row.insertCell();
-                        recommendHotelCell.textContent = getRatingText(data.recommend_hotel);
-                        recommendHotelCell.className = getRatingClass(data.recommend_hotel);
+                        recommendHotelCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.recommend_hotel)}">${getRatingText(data.recommend_hotel)}</span>`;
 
                         const preferredClubCell = row.insertCell();
-                        preferredClubCell.textContent = getRatingText(data.preferred_club);
-                        preferredClubCell.className = getRatingClass(data.preferred_club);
+                        preferredClubCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.preferred_club)}">${getRatingText(data.preferred_club)}</span>`;
 
                         const overallExp2Cell = row.insertCell();
-                        overallExp2Cell.textContent = getRatingText(data.overall_experience_2);
-                        overallExp2Cell.className = getRatingClass(data.overall_experience_2);
+                        overallExp2Cell.innerHTML = `<span class="rating-cell ${getRatingClass(data.overall_experience_2)}">${getRatingText(data.overall_experience_2)}</span>`;
+
+                        // Nueva celda para la puntuación calculada
+                        const calculatedScore = calculateOverallScore(data);
+                        const scoreCell = row.insertCell();
+                        scoreCell.innerHTML = `
+                            <div class="progress-bar-container">
+                                <div class="progress-bar ${getProgressBarColor(calculatedScore)}" style="width: ${calculatedScore}%;"></div>
+                            </div>
+                            <div class="progress-score-text">${calculatedScore}%</div>
+                        `;
                     });
                 }
             }, (error) => {
                 console.error("Error al escuchar documentos de Firestore:", error);
-                surveyTableBody.innerHTML = `<tr><td colspan="10" style="color: red; text-align: center;">Error al cargar los datos: ${error.message}</td></tr>`;
+                surveyTableBody.innerHTML = `<tr><td colspan="11" style="color: var(--rating-bad); text-align: center; padding: 20px;">Error al cargar los datos: ${error.message}</td></tr>`;
             });
         }
 
@@ -340,23 +495,27 @@
             }
 
             const headers = [
-                "Fecha y Hora", "No. Habitación", "Nombre Huésped", "Email Huésped", "Butler",
-                "Experiencia General", "Servicio del Personal", "Recomendación Hotel",
-                "Experiencia Preferred Club", "Calificación Final"
+                "Fecha y Hora", "No. Habitacion", "Nombre Huesped", "Email Huesped", "Butler",
+                "Experiencia General", "Servicio del Personal", "Recomendacion Hotel",
+                "Experiencia Preferred Club", "Calificacion Final Encuesta", "Puntuacion Calculada"
             ];
 
-            const rows = allSurveyData.map(data => [
-                `"${formatTimestamp(data.timestamp)}"`,
-                `"${data.room_number || ''}"`,
-                `"${data.guest_name || ''}"`,
-                `"${data.guest_email || ''}"`,
-                `"${data.butler || ''}"`,
-                `"${getRatingText(data.overall_experience) || ''}"`,
-                `"${getRatingText(data.staff_service) || ''}"`,
-                `"${getRatingText(data.recommend_hotel) || ''}"`,
-                `"${getRatingText(data.preferred_club) || ''}"`,
-                `"${getRatingText(data.overall_experience_2) || ''}"`
-            ].join(','));
+            const rows = allSurveyData.map(data => {
+                const calculatedScore = calculateOverallScore(data);
+                return [
+                    `"${formatTimestamp(data.timestamp)}"`,
+                    `"${data.room_number || ''}"`,
+                    `"${data.guest_name || ''}"`,
+                    `"${data.guest_email || ''}"`,
+                    `"${data.butler || ''}"`,
+                    `"${getRatingText(data.overall_experience) || ''}"`,
+                    `"${getRatingText(data.staff_service) || ''}"`,
+                    `"${getRatingText(data.recommend_hotel) || ''}"`,
+                    `"${getRatingText(data.preferred_club) || ''}"`,
+                    `"${getRatingText(data.overall_experience_2) || ''}"`,
+                    `"${calculatedScore}%"` // Añadir la puntuación calculada al CSV
+                ].map(field => field.replace(/"/g, '""')).join(','); // Escapa comillas dobles
+            });
 
             const csvContent = [
                 headers.join(','),
@@ -376,7 +535,7 @@
 
         // Event Listeners
         exportCsvBtn.addEventListener('click', exportToCsv);
-        refreshBtn.addEventListener('click', setupRealtimeListener); // Puedes añadir un botón de refrescar manualmente
+        refreshBtn.addEventListener('click', setupRealtimeListener);
 
         // Iniciar la escucha en tiempo real al cargar la página
         document.addEventListener('DOMContentLoaded', setupRealtimeListener);
