@@ -155,8 +155,6 @@
         }
 
         /* --- Estilos de selección basados en el valor --- */
-
-        /* Mala y Pobre */
         .rating-option input[value="bad"]:checked + label,
         .rating-option input[value="poor"]:checked + label {
             background-color: var(--selected-bad-poor-bg);
@@ -169,8 +167,6 @@
             color: var(--selected-bad-poor-text);
             font-weight: 500;
         }
-
-        /* Regular */
         .rating-option input[value="regular"]:checked + label {
             background-color: var(--selected-regular-bg);
             border-color: var(--selected-regular-border);
@@ -181,8 +177,6 @@
             color: var(--selected-regular-text);
             font-weight: 500;
         }
-
-        /* Buena y Excelente */
         .rating-option input[value="good"]:checked + label,
         .rating-option input[value="excellent"]:checked + label {
             background-color: var(--selected-good-excellent-bg);
@@ -195,7 +189,6 @@
             color: var(--selected-good-excellent-text);
             font-weight: 500;
         }
-
 
         /* Submit Button */
         .submit-button {
@@ -232,6 +225,109 @@
             color: var(--primary-color);
         }
 
+        /* --- Estilos del Popup --- */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background-color: var(--card-background);
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            text-align: left;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-content h3 {
+            color: var(--primary-color);
+            font-size: 1.6em;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .popup-field {
+            margin-bottom: 20px;
+        }
+
+        .popup-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95em;
+        }
+
+        .popup-field input[type="text"],
+        .popup-field input[type="email"] {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .popup-field input[type="text"]:focus,
+        .popup-field input[type="email"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.2);
+        }
+
+        .popup-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .popup-actions button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup-actions button:hover {
+            background-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .popup-actions button:active {
+            transform: translateY(0);
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
@@ -239,6 +335,9 @@
             }
             .rating-option {
                 flex-basis: calc(33.33% - 15px);
+            }
+            .popup-content {
+                padding: 25px 30px;
             }
         }
 
@@ -267,6 +366,12 @@
             h2 {
                 font-size: 1em;
                 margin-bottom: 30px;
+            }
+            .popup-content {
+                padding: 20px 25px;
+            }
+            .popup-content h3 {
+                font-size: 1.4em;
             }
         }
     </style>
@@ -413,10 +518,37 @@
             </div>
 
             <div class="submit-button">
-                <button type="submit">Enviar Encuesta</button>
+                <button type="submit" id="openPopupButton">Enviar Encuesta</button>
             </div>
             <div id="feedback-message"></div>
         </form>
+    </div>
+
+    <div class="popup-overlay" id="infoPopup">
+        <div class="popup-content">
+            <h3>Información Adicional</h3>
+            <form id="infoForm">
+                <div class="popup-field">
+                    <label for="roomNumber">Número de Habitación:</label>
+                    <input type="text" id="roomNumber" name="room_number" required>
+                </div>
+                <div class="popup-field">
+                    <label for="guestName">Nombre del Huésped:</label>
+                    <input type="text" id="guestName" name="guest_name" required>
+                </div>
+                <div class="popup-field">
+                    <label for="butler">Butler (Opcional):</label>
+                    <input type="text" id="butler" name="butler">
+                </div>
+                <div class="popup-field">
+                    <label for="guestEmail">Email:</label>
+                    <input type="email" id="guestEmail" name="guest_email" required>
+                </div>
+                <div class="popup-actions">
+                    <button type="submit">Enviar Información</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script type="module">
@@ -438,40 +570,110 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app); // Opcional, solo si quieres usar Google Analytics con Firebase
+        const analytics = getAnalytics(app); // Opcional
         const db = getFirestore(app); // Inicializa Cloud Firestore
 
-        // Get form and feedback message elements
+        // Constantes para localStorage
+        const SURVEY_COMPLETED_KEY = 'secrets_royal_beach_survey_completed';
+
+        // Get elements
         const surveyForm = document.getElementById('surveyForm');
+        const openPopupButton = document.getElementById('openPopupButton');
         const feedbackMessage = document.getElementById('feedback-message');
+        const infoPopup = document.getElementById('infoPopup');
+        const infoForm = document.getElementById('infoForm');
 
-        surveyForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Previene el envío por defecto del formulario
-
-            const formData = new FormData(surveyForm);
-            const surveyData = {};
-
-            // Recopila los datos del formulario
-            for (let [name, value] of formData) {
-                surveyData[name] = value;
+        // --- Función para verificar si la encuesta ya fue enviada desde este dispositivo ---
+        function checkSurveyStatus() {
+            if (localStorage.getItem(SURVEY_COMPLETED_KEY) === 'true') {
+                feedbackMessage.textContent = "¡Ya hemos recibido una encuesta de este dispositivo! Gracias por su feedback.";
+                feedbackMessage.style.color = "#007bff"; /* Color informativo */
+                surveyForm.style.display = 'none'; // Oculta el formulario si ya se envió
+                openPopupButton.style.display = 'none'; // Oculta el botón también
+                return true;
             }
+            return false;
+        }
 
-            // Agrega la fecha y hora de la submission
-            surveyData.timestamp = serverTimestamp();
+        // Ejecutar la verificación al cargar la página
+        if (checkSurveyStatus()) {
+            // No hacer nada más si ya fue enviada
+        } else {
+            // --- Manejar la apertura del popup cuando se presiona el botón de enviar encuesta ---
+            openPopupButton.addEventListener('click', (e) => {
+                e.preventDefault(); // Previene el envío del formulario principal por ahora
 
-            try {
-                // Guarda los datos en Cloud Firestore en una colección llamada 'survey_responses'
-                const docRef = await addDoc(collection(db, "survey_responses"), surveyData);
-                console.log("Document written with ID: ", docRef.id);
-                feedbackMessage.textContent = "¡Encuesta enviada con éxito! Gracias por su feedback.";
-                feedbackMessage.style.color = "var(--selected-good-excellent-border)"; // Verde de éxito
-                surveyForm.reset(); // Reinicia el formulario después de enviar
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                feedbackMessage.textContent = "Hubo un error al enviar la encuesta. Por favor, inténtelo de nuevo.";
-                feedbackMessage.style.color = "var(--selected-bad-poor-border)"; // Rojo de error
-            }
-        });
+                // Validar que todas las preguntas de la encuesta estén respondidas
+                const questions = surveyForm.querySelectorAll('.question');
+                let allQuestionsAnswered = true;
+                questions.forEach(question => {
+                    const radioButtons = question.querySelectorAll('input[type="radio"]');
+                    const isAnswered = Array.from(radioButtons).some(radio => radio.checked);
+                    if (!isAnswered) {
+                        allQuestionsAnswered = false;
+                    }
+                });
+
+                if (!allQuestionsAnswered) {
+                    feedbackMessage.textContent = "Por favor, responda todas las preguntas de la encuesta antes de continuar.";
+                    feedbackMessage.style.color = "var(--selected-bad-poor-border)"; // Color de error
+                    return; // Detiene la apertura del popup
+                }
+
+                feedbackMessage.textContent = ""; // Limpia cualquier mensaje anterior
+                infoPopup.classList.add('show');
+            });
+
+            // --- Manejar el envío del formulario del popup ---
+            infoForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Previene el envío por defecto del formulario del popup
+
+                const surveyData = {};
+                const mainFormData = new FormData(surveyForm);
+                const infoFormData = new FormData(infoForm);
+
+                // Recopila los datos de la encuesta principal
+                for (let [name, value] of mainFormData) {
+                    surveyData[name] = value;
+                }
+
+                // Recopila los datos del popup y los añade a surveyData
+                for (let [name, value] of infoFormData) {
+                    surveyData[name] = value;
+                }
+
+                // Agrega la fecha y hora de la submission
+                surveyData.timestamp = serverTimestamp();
+
+                try {
+                    // Guarda los datos en Cloud Firestore en una colección llamada 'survey_responses'
+                    const docRef = await addDoc(collection(db, "survey_responses"), surveyData);
+                    console.log("Document written with ID: ", docRef.id);
+                    feedbackMessage.textContent = "¡Encuesta enviada con éxito! Gracias por su feedback.";
+                    feedbackMessage.style.color = "var(--selected-good-excellent-border)"; // Verde de éxito
+
+                    // Establece la bandera en localStorage para evitar más envíos desde este dispositivo
+                    localStorage.setItem(SURVEY_COMPLETED_KEY, 'true');
+
+                    // Oculta el popup y el formulario principal
+                    infoPopup.classList.remove('show');
+                    surveyForm.style.display = 'none';
+                    openPopupButton.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                    feedbackMessage.textContent = "Hubo un error al enviar la encuesta. Por favor, inténtelo de nuevo.";
+                    feedbackMessage.style.color = "var(--selected-bad-poor-border)"; // Rojo de error
+                }
+            });
+
+            // Opcional: Cerrar popup haciendo clic fuera del contenido
+            infoPopup.addEventListener('click', (e) => {
+                if (e.target === infoPopup) { // Solo cierra si el click es en el overlay, no en el contenido
+                    infoPopup.classList.remove('show');
+                }
+            });
+        }
     </script>
 
 </body>
