@@ -3,44 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Encuestas - Secrets Royal Beach</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title id="pageTitle">Encuesta de Satisfacción - Secrets Royal Beach</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             /* Colores generales */
-            --primary-color: #5cb85c; /* Verde principal */
+            --primary-color: #5cb85c; /* Un verde vibrante para acentos */
             --text-color: #333;
             --light-text-color: #666;
-            --background-color: #f0f2f5;
+            --background-color: #f8f9fa;
             --card-background: #ffffff;
             --border-color: #e0e0e0;
+            --hover-color: #f0f0f0;
 
-            /* Encabezado y botones */
-            --header-bg: #4CAF50; /* Verde más oscuro para el encabezado */
-            --header-text: #ffffff;
-            --button-bg: #007bff;
-            --button-hover-bg: #0056b3;
-            --export-button-bg: #28a745;
-            --export-button-hover-bg: #218838;
+            /* Colores de selección por categoría */
+            --selected-bad-poor-bg: #ffe6e6; /* Rojo muy claro */
+            --selected-bad-poor-border: #dc3545; /* Rojo */
+            --selected-bad-poor-text: #dc3545;
 
-            /* Tabla */
-            --table-header-bg: #e9ecef;
-            --table-header-text: #495057;
-            --table-row-hover: #f5f5f5;
-            --table-border: #dee2e6;
+            --selected-regular-bg: #fffbe6; /* Amarillo muy claro */
+            --selected-regular-border: #ffc107; /* Amarillo */
+            --selected-regular-text: #ffc107;
 
-            /* Colores de calificación */
-            --rating-excellent: #28a745; /* Verde fuerte */
-            --rating-good: #28a745; /* Verde fuerte */
-            --rating-regular: #ffc107; /* Amarillo */
-            --rating-poor: #dc3545; /* Rojo */
-            --rating-bad: #dc3545; /* Rojo */
-
-            /* Barra de progreso */
-            --progress-bg: #e9ecef;
-            --progress-bar-green: #28a745;
-            --progress-bar-yellow: #ffc107;
-            --progress-bar-red: #dc3545;
+            --selected-good-excellent-bg: #e6ffe6; /* Verde muy claro */
+            --selected-good-excellent-border: #28a745; /* Verde */
+            --selected-good-excellent-text: #28a745;
         }
 
         body {
@@ -50,7 +37,7 @@
             background-color: var(--background-color);
             color: var(--text-color);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
@@ -58,237 +45,350 @@
 
         .container {
             background-color: var(--card-background);
-            padding: 30px;
+            padding: 40px;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            max-width: 1400px; /* Ancho un poco mayor */
+            max-width: 700px;
             width: 100%;
             text-align: center;
+        }
+
+        .language-selector {
+            text-align: right;
             margin-bottom: 20px;
+        }
+
+        .language-selector select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        .logo {
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            max-width: 220px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
 
         h1 {
             color: var(--primary-color);
-            font-weight: 700;
+            font-weight: 500;
             margin-bottom: 10px;
-            font-size: 2.5em;
+            font-size: 1.8em;
         }
 
-        p.subtitle {
+        h2 {
             color: var(--light-text-color);
             font-weight: 300;
             margin-top: 0;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+            margin-bottom: 40px;
+            font-size: 1.2em;
         }
 
-        .controls {
-            margin-bottom: 20px;
+        .question {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .question:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .question:nth-last-child(2) {
+             border-bottom: none;
+             padding-bottom: 0;
+             margin-bottom: 0;
+        }
+        .question:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .question p {
+            font-size: 1.15em;
+            margin-bottom: 25px;
+            font-weight: 400;
+            color: var(--text-color);
+        }
+
+        .rating-options {
             display: flex;
             justify-content: center;
-            gap: 15px;
             flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .controls button {
-            background-color: var(--export-button-bg);
-            color: var(--header-text);
-            padding: 10px 20px;
+        .rating-option {
+            text-align: center;
+            flex-basis: calc(20% - 15px); /* 5 opciones por fila */
+            min-width: 100px;
+        }
+
+        .rating-option input[type="radio"] {
+            display: none;
+        }
+
+        .rating-option label {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 1.8em;
+            line-height: 1;
+            position: relative;
+        }
+
+        .rating-option label .rating-text {
+            font-size: 0.7em;
+            margin-top: 8px;
+            color: var(--light-text-color);
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .rating-option label:hover {
+            background-color: var(--hover-color);
+            border-color: var(--primary-color);
+        }
+
+        /* --- Estilos de selección basados en el valor --- */
+        .rating-option input[value="bad"]:checked + label,
+        .rating-option input[value="poor"]:checked + label {
+            background-color: var(--selected-bad-poor-bg);
+            border-color: var(--selected-bad-poor-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        .rating-option input[value="bad"]:checked + label .rating-text,
+        .rating-option input[value="poor"]:checked + label .rating-text {
+            color: var(--selected-bad-poor-text);
+            font-weight: 500;
+        }
+        .rating-option input[value="regular"]:checked + label {
+            background-color: var(--selected-regular-bg);
+            border-color: var(--selected-regular-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        .rating-option input[value="regular"]:checked + label .rating-text {
+            color: var(--selected-regular-text);
+            font-weight: 500;
+        }
+        .rating-option input[value="good"]:checked + label,
+        .rating-option input[value="excellent"]:checked + label {
+            background-color: var(--selected-good-excellent-bg);
+            border-color: var(--selected-good-excellent-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        .rating-option input[value="good"]:checked + label .rating-text,
+        .rating-option input[value="excellent"]:checked + label .rating-text {
+            color: var(--selected-good-excellent-text);
+            font-weight: 500;
+        }
+
+        /* Submit Button */
+        .submit-button {
+            margin-top: 40px;
+        }
+
+        .submit-button button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .submit-button button:hover {
+            background-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .submit-button button:active {
+            transform: translateY(0);
+        }
+
+        /* Mensajes de feedback */
+        #feedback-message {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--primary-color);
+            display: none; /* Hidden by default */
+        }
+
+        /* --- Estilos del Popup --- */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background-color: var(--card-background);
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            text-align: left;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-content h3 {
+            color: var(--primary-color);
+            font-size: 1.6em;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .popup-field {
+            margin-bottom: 20px;
+        }
+
+        .popup-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95em;
+        }
+
+        .popup-field input[type="text"],
+        .popup-field input[type="email"],
+        .popup-field input[type="number"] { /* Añadido tipo number para Room Number */
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .popup-field input[type="text"]:focus,
+        .popup-field input[type="email"]:focus,
+        .popup-field input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.2);
+        }
+
+        .popup-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .popup-actions button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 1em;
             font-weight: 500;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .controls button:hover {
-            background-color: var(--export-button-hover-bg);
+        .popup-actions button:hover {
+            background-color: #4CAF50;
             transform: translateY(-2px);
         }
 
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 20px;
-            background-color: var(--card-background);
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+        .popup-actions button:active {
+            transform: translateY(0);
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            min-width: 900px; /* Asegura un ancho mínimo para la tabla */
-        }
-
-        thead {
-            background-color: var(--table-header-bg);
-            color: var(--table-header-text);
-            position: sticky; /* Encabezado pegajoso */
-            top: 0;
-            z-index: 1; /* Asegura que esté sobre el contenido al hacer scroll */
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Sombra para efecto pegajoso */
-        }
-
-        th, td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--table-border);
-            white-space: nowrap;
-            vertical-align: middle; /* Alineación vertical */
-        }
-
-        th {
-            font-weight: 600; /* Más negrita para los encabezados */
-            text-transform: uppercase;
-            font-size: 0.85em;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f6f8fa; /* Un poco más oscuro para filas pares */
-        }
-
-        tbody tr:hover {
-            background-color: var(--table-row-hover);
-        }
-
-        .no-data-message {
-            text-align: center;
-            padding: 50px;
-            color: var(--light-text-color);
-            font-size: 1.2em;
-            font-weight: 500;
-        }
-
-        /* Estilos para las calificaciones */
-        .rating-cell {
-            font-weight: 500;
-            padding: 8px 15px; /* Ajustar padding */
-            border-radius: 4px;
-            display: inline-block; /* Para que el padding y border-radius funcionen bien */
-            min-width: 70px; /* Ancho mínimo para consistencia */
-            text-align: center;
-        }
-
-        .rating-excellent { background-color: var(--rating-excellent); color: white; }
-        .rating-good { background-color: var(--rating-good); color: white; }
-        .rating-regular { background-color: var(--rating-regular); color: var(--text-color); }
-        .rating-poor { background-color: var(--rating-poor); color: white; }
-        .rating-bad { background-color: var(--rating-bad); color: white; }
-
-        /* Estilos para la barra de progreso */
-        .progress-bar-container {
-            width: 100px; /* Ancho fijo para la barra */
-            height: 10px;
-            background-color: var(--progress-bg);
-            border-radius: 5px;
-            overflow: hidden;
-            margin: auto; /* Centrar la barra en la celda */
-        }
-
-        .progress-bar {
-            height: 100%;
-            border-radius: 5px;
-            transition: width 0.5s ease-out;
-        }
-
-        .progress-score-text {
-            font-weight: 600;
-            margin-top: 5px;
-            font-size: 0.9em;
-        }
-
-        /* Colores para la barra de progreso según la puntuación */
-        .progress-bar-green { background-color: var(--progress-bar-green); }
-        .progress-bar-yellow { background-color: var(--progress-bar-yellow); }
-        .progress-bar-red { background-color: var(--progress-bar-red); }
-
 
         /* Responsive adjustments */
-        @media (max-width: 992px) {
-            .container {
-                padding: 25px;
-            }
-            h1 {
-                font-size: 2em;
-            }
-            .table-container {
-                border-radius: 4px;
-            }
-            th, td {
-                padding: 10px 12px;
-                font-size: 0.8em;
-            }
-            .rating-cell {
-                min-width: 60px;
-                font-size: 0.8em;
-            }
-            .progress-bar-container {
-                width: 80px;
-            }
-        }
-
         @media (max-width: 768px) {
-            body {
-                padding: 15px;
-            }
             .container {
-                padding: 20px;
+                padding: 30px 20px;
             }
-            h1 {
-                font-size: 1.8em;
+            .rating-option {
+                flex-basis: calc(33.33% - 15px);
             }
-            p.subtitle {
-                font-size: 0.95em;
-            }
-            .controls button {
-                padding: 8px 15px;
-                font-size: 0.9em;
-            }
-            /* Min-width para la tabla puede ser necesario ajustarlo o usar un scroll mas agresivo */
-            table {
-                min-width: 700px;
+            .popup-content {
+                padding: 25px 30px;
             }
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
             .container {
-                padding: 15px;
+                padding: 25px 15px;
+            }
+            .question p {
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
+            .rating-option {
+                flex-basis: calc(50% - 15px);
+                min-width: unset;
+            }
+            .rating-option label {
+                font-size: 1.5em;
+                padding: 10px 5px;
+            }
+            .rating-option label .rating-text {
+                font-size: 0.65em;
             }
             h1 {
                 font-size: 1.5em;
             }
-            p.subtitle {
-                font-size: 0.9em;
+            h2 {
+                font-size: 1em;
+                margin-bottom: 30px;
             }
-            .controls {
-                flex-direction: column;
-                gap: 10px;
+            .popup-content {
+                padding: 20px 25px;
             }
-            .controls button {
-                width: 100%;
-            }
-            th, td {
-                padding: 8px 10px;
-                font-size: 0.75em;
-            }
-            .rating-cell {
-                min-width: 50px;
-                font-size: 0.7em;
-                padding: 6px 8px;
-            }
-            .progress-bar-container {
-                width: 60px;
-                height: 8px;
-            }
-            .progress-score-text {
-                font-size: 0.8em;
+            .popup-content h3 {
+                font-size: 1.4em;
             }
         }
     </style>
@@ -296,44 +396,192 @@
 <body>
 
     <div class="container">
-        <h1>Dashboard de Encuestas</h1>
-        <p class="subtitle">Visualización en tiempo real y análisis de satisfacción de Secrets Royal Beach</p>
-
-        <div class="controls">
-            <button id="exportCsvBtn">Exportar a CSV</button>
-            <button id="refreshBtn">Refrescar Datos</button>
+        <div class="language-selector">
+            <label for="languageSelect" class="sr-only">Select Language</label>
+            <select id="languageSelect">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
         </div>
 
-        <div class="table-container">
-            <table id="surveyTable">
-                <thead>
-                    <tr>
-                        <th>Fecha y Hora</th>
-                        <th>No. Habitación</th>
-                        <th>Nombre Huésped</th>
-                        <th>Email Huésped</th>
-                        <th>Butler</th>
-                        <th>Experiencia General</th>
-                        <th>Servicio del Personal</th>
-                        <th>Recomendación Hotel</th>
-                        <th>Experiencia Preferred Club</th>
-                        <th>Calificación Final Encuesta</th>
-                        <th>Puntuación Calculada</th> </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
-            <div id="noDataMessage" class="no-data-message" style="display: none;">
-                No hay encuestas para mostrar.
+        <div class="logo">
+            <img src="https://via.placeholder.com/220x60?text=SECRETS+Royal+Beach" alt="Secrets Royal Beach Logo">
+        </div>
+
+        <h1 id="mainTitle">Encuesta de Satisfacción</h1>
+        <h2 id="subtitle">Punta Cana, República Dominicana</h2>
+
+        <form id="surveyForm">
+            <div class="question">
+                <p id="q1">¿Cómo calificaría su experiencia general con nosotros?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="overall_bad" name="overall_experience" value="bad" required>
+                        <label for="overall_bad">☹️<span class="rating-text" data-lang-key="bad">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_poor" name="overall_experience" value="poor">
+                        <label for="overall_poor">🙁<span class="rating-text" data-lang-key="poor">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_regular" name="overall_experience" value="regular">
+                        <label for="overall_regular">😐<span class="rating-text" data-lang-key="regular">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_good" name="overall_experience" value="good">
+                        <label for="overall_good">🙂<span class="rating-text" data-lang-key="good">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_excellent" name="overall_experience" value="excellent">
+                        <label for="overall_excellent">😁<span class="rating-text" data-lang-key="excellent">EXCELENTE</span></label>
+                    </div>
+                </div>
             </div>
+
+            <div class="question">
+                <p id="q2">¿Cómo calificaría el nivel general de servicio proporcionado por nuestro personal?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="staff_bad" name="staff_service" value="bad" required>
+                        <label for="staff_bad">☹️<span class="rating-text" data-lang-key="bad">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_poor" name="staff_service" value="poor">
+                        <label for="staff_poor">🙁<span class="rating-text" data-lang-key="poor">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_regular" name="staff_service" value="regular">
+                        <label for="staff_regular">😐<span class="rating-text" data-lang-key="regular">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_good" name="staff_service" value="good">
+                        <label for="staff_good">🙂<span class="rating-text" data-lang-key="good">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_excellent" name="staff_service" value="excellent">
+                        <label for="staff_excellent">😁<span class="rating-text" data-lang-key="excellent">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p id="q3">¿Recomendaría este hotel a su familia y amigos?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_bad" name="recommend_hotel" value="bad" required>
+                        <label for="recommend_bad">☹️<span class="rating-text" data-lang-key="bad">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_poor" name="recommend_hotel" value="poor">
+                        <label for="recommend_poor">🙁<span class="rating-text" data-lang-key="poor">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_regular" name="recommend_hotel" value="regular">
+                        <label for="recommend_regular">😐<span class="rating-text" data-lang-key="regular">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_good" name="recommend_hotel" value="good">
+                        <label for="recommend_good">🙂<span class="rating-text" data-lang-key="good">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_excellent" name="recommend_hotel" value="excellent">
+                        <label for="recommend_excellent">😁<span class="rating-text" data-lang-key="excellent">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p id="q4">¿Cómo calificaría su experiencia como huésped del Preferred Club?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_bad" name="preferred_club" value="bad" required>
+                        <label for="preferred_bad">☹️<span class="rating-text" data-lang-key="bad">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_poor" name="preferred_club" value="poor">
+                        <label for="preferred_poor">🙁<span class="rating-text" data-lang-key="poor">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_regular" name="preferred_club" value="regular">
+                        <label for="preferred_regular">😐<span class="rating-text" data-lang-key="regular">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_good" name="preferred_club" value="good">
+                        <label for="preferred_good">🙂<span class="rating-text" data-lang-key="good">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_excellent" name="preferred_club" value="excellent">
+                        <label for="preferred_excellent">😁<span class="rating-text" data-lang-key="excellent">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p id="q5">¡Gracias por su visita! ¿Cuál es su calificación final?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_bad" name="overall_experience_2" value="bad" required>
+                        <label for="overall_experience_2_bad">☹️<span class="rating-text" data-lang-key="bad">MALA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_poor" name="overall_experience_2" value="poor">
+                        <label for="overall_experience_2_poor">🙁<span class="rating-text" data-lang-key="poor">POBRE</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_regular" name="overall_experience_2" value="regular">
+                        <label for="overall_experience_2_regular">😐<span class="rating-text" data-lang-key="regular">REGULAR</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_good" name="overall_experience_2" value="good">
+                        <label for="overall_experience_2_good">🙂<span class="rating-text" data-lang-key="good">BUENA</span></label>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_excellent" name="overall_experience_2" value="excellent">
+                        <label for="overall_excellent">😁<span class="rating-text" data-lang-key="excellent">EXCELENTE</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-button">
+                <button type="submit" id="openPopupButton" data-lang-key="send_survey_btn">Enviar Encuesta</button>
+            </div>
+            <div id="feedback-message"></div>
+        </form>
+    </div>
+
+    <div class="popup-overlay" id="infoPopup">
+        <div class="popup-content">
+            <h3 id="popupTitle">Información Adicional</h3>
+            <form id="infoForm">
+                <div class="popup-field">
+                    <label for="roomNumber" id="labelRoomNumber">Número de Habitación:</label>
+                    <input type="number" id="roomNumber" name="room_number" required>
+                </div>
+                <div class="popup-field">
+                    <label for="guestName" id="labelGuestName">Nombre del Huésped:</label>
+                    <input type="text" id="guestName" name="guest_name" required>
+                </div>
+                <div class="popup-field">
+                    <label for="butler" id="labelButler">Butler (Opcional):</label>
+                    <input type="text" id="butler" name="butler">
+                </div>
+                <div class="popup-field">
+                    <label for="guestEmail" id="labelGuestEmail">Email:</label>
+                    <input type="email" id="guestEmail" name="guest_email" required>
+                </div>
+                <div class="popup-actions">
+                    <button type="submit" id="sendInfoButton" data-lang-key="send_info_btn">Enviar Información</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Your web app's Firebase configuration (MISMA CONFIGURACIÓN QUE EN TU ENCUESTADOR)
         const firebaseConfig = {
             apiKey: "AIzaSyALR-b68phh_u92V3rw9B9Ei7FcexU2xc8",
             authDomain: "proyectos17-98695.firebaseapp.com",
@@ -344,201 +592,266 @@
             measurementId: "G-6YK06W16FZ"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app); // Opcional
         const db = getFirestore(app);
 
-        const surveyTableBody = document.querySelector('#surveyTable tbody');
-        const noDataMessage = document.getElementById('noDataMessage');
-        const exportCsvBtn = document.getElementById('exportCsvBtn');
-        const refreshBtn = document.getElementById('refreshBtn');
+        const SURVEY_COMPLETED_KEY = 'secrets_royal_beach_survey_completed';
+        const LANG_PREF_KEY = 'secrets_royal_beach_lang_pref'; // Nueva clave para la preferencia de idioma
 
-        let allSurveyData = []; // Para almacenar todos los datos y facilitar la exportación
+        const surveyForm = document.getElementById('surveyForm');
+        const openPopupButton = document.getElementById('openPopupButton');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const infoPopup = document.getElementById('infoPopup');
+        const infoForm = document.getElementById('infoForm');
+        const languageSelect = document.getElementById('languageSelect');
 
-        // Mapeo de calificaciones a valores numéricos (0-100 para la barra de progreso)
-        const ratingToValue = {
-            'bad': 0,
-            'poor': 25,
-            'regular': 50,
-            'good': 75,
-            'excellent': 100
+        // --- Definición de traducciones ---
+        const translations = {
+            es: {
+                page_title: "Encuesta de Satisfacción - Secrets Royal Beach",
+                main_title: "Encuesta de Satisfacción",
+                subtitle: "Punta Cana, República Dominicana",
+                q1: "¿Cómo calificaría su experiencia general con nosotros?",
+                q2: "¿Cómo calificaría el nivel general de servicio proporcionado por nuestro personal?",
+                q3: "¿Recomendaría este hotel a su familia y amigos?",
+                q4: "¿Cómo calificaría su experiencia como huésped del Preferred Club?",
+                q5: "¡Gracias por su visita! ¿Cuál es su calificación final?",
+                bad: "MALA",
+                poor: "POBRE",
+                regular: "REGULAR",
+                good: "BUENA",
+                excellent: "EXCELENTE",
+                send_survey_btn: "Enviar Encuesta",
+                popup_title: "Información Adicional",
+                label_room_number: "Número de Habitación:",
+                label_guest_name: "Nombre del Huésped:",
+                label_butler: "Butler (Opcional):",
+                label_guest_email: "Email:",
+                send_info_btn: "Enviar Información",
+                required_fields_error: "Por favor, complete todos los campos requeridos.",
+                all_questions_error: "Por favor, responda todas las preguntas de la encuesta antes de continuar.",
+                survey_already_sent: "¡Ya hemos recibido una encuesta de este dispositivo! Gracias por su feedback.",
+                survey_success: "¡Encuesta enviada con éxito! Gracias por su feedback.",
+                survey_error: "Hubo un error al enviar la encuesta. Por favor, inténtelo de nuevo."
+            },
+            en: {
+                page_title: "Satisfaction Survey - Secrets Royal Beach",
+                main_title: "Satisfaction Survey",
+                subtitle: "Punta Cana, Dominican Republic",
+                q1: "How would you rate your overall experience with us?",
+                q2: "How would you rate the overall level of service provided by our staff?",
+                q3: "Would you recommend this hotel to your family and friends?",
+                q4: "How would you rate your experience as a Preferred Club guest?",
+                q5: "Thank you for your visit! What is your final rating?",
+                bad: "BAD",
+                poor: "POOR",
+                regular: "REGULAR",
+                good: "GOOD",
+                excellent: "EXCELLENT",
+                send_survey_btn: "Submit Survey",
+                popup_title: "Additional Information",
+                label_room_number: "Room Number:",
+                label_guest_name: "Guest Name:",
+                label_butler: "Butler (Optional):",
+                label_guest_email: "Email:",
+                send_info_btn: "Submit Information",
+                required_fields_error: "Please fill in all required fields.",
+                all_questions_error: "Please answer all survey questions before proceeding.",
+                survey_already_sent: "We have already received a survey from this device! Thank you for your feedback.",
+                survey_success: "Survey sent successfully! Thank you for your feedback.",
+                survey_error: "There was an error sending the survey. Please try again."
+            },
+            fr: {
+                page_title: "Enquête de Satisfaction - Secrets Royal Beach",
+                main_title: "Enquête de Satisfaction",
+                subtitle: "Punta Cana, République Dominicaine",
+                q1: "Comment évalueriez-vous votre expérience globale avec nous ?",
+                q2: "Comment évalueriez-vous le niveau général de service fourni par notre personnel ?",
+                q3: "Recommanderiez-vous cet hôtel à votre famille et vos amis ?",
+                q4: "Comment évalueriez-vous votre expérience en tant que client du Preferred Club ?",
+                q5: "Merci pour votre visite ! Quelle est votre note finale ?",
+                bad: "MAUVAIS",
+                poor: "PAUVRE",
+                regular: "RÉGULIER",
+                good: "BON",
+                excellent: "EXCELLENT",
+                send_survey_btn: "Envoyer l'enquête",
+                popup_title: "Informations Supplémentaires",
+                label_room_number: "Numéro de Chambre :",
+                label_guest_name: "Nom du Client :",
+                label_butler: "Majordome (Optionnel) :",
+                label_guest_email: "E-mail :",
+                send_info_btn: "Envoyer les Informations",
+                required_fields_error: "Veuillez remplir tous les champs obligatoires.",
+                all_questions_error: "Veuillez répondre à toutes les questions de l'enquête avant de continuer.",
+                survey_already_sent: "Nous avons déjà reçu une enquête de cet appareil ! Merci pour vos commentaires.",
+                survey_success: "Enquête envoyée avec succès ! Merci pour vos commentaires.",
+                survey_error: "Une erreur s'est produite lors de l'envoi de l'enquête. Veuillez réessayer."
+            }
         };
 
-        // Función para formatear la fecha
-        function formatTimestamp(timestamp) {
-            if (timestamp && timestamp.toDate) {
-                const date = timestamp.toDate();
-                return date.toLocaleString('es-DO', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false // Formato 24 horas
+        // --- Función para aplicar el idioma seleccionado ---
+        function applyLanguage(lang) {
+            const currentTranslations = translations[lang];
+
+            // Título de la página
+            document.getElementById('pageTitle').textContent = currentTranslations.page_title;
+            // Títulos principales
+            document.getElementById('mainTitle').textContent = currentTranslations.main_title;
+            document.getElementById('subtitle').textContent = currentTranslations.subtitle;
+
+            // Preguntas
+            document.getElementById('q1').textContent = currentTranslations.q1;
+            document.getElementById('q2').textContent = currentTranslations.q2;
+            document.getElementById('q3').textContent = currentTranslations.q3;
+            document.getElementById('q4').textContent = currentTranslations.q4;
+            document.getElementById('q5').textContent = currentTranslations.q5;
+
+            // Textos de calificación (usando data-lang-key)
+            document.querySelectorAll('.rating-text').forEach(element => {
+                const key = element.dataset.langKey;
+                if (key && currentTranslations[key]) {
+                    element.textContent = currentTranslations[key];
+                }
+            });
+
+            // Botón principal
+            document.getElementById('openPopupButton').textContent = currentTranslations.send_survey_btn;
+
+            // Popup
+            document.getElementById('popupTitle').textContent = currentTranslations.popup_title;
+            document.getElementById('labelRoomNumber').textContent = currentTranslations.label_room_number;
+            document.getElementById('labelGuestName').textContent = currentTranslations.label_guest_name;
+            document.getElementById('labelButler').textContent = currentTranslations.label_butler;
+            document.getElementById('labelGuestEmail').textContent = currentTranslations.label_guest_email;
+            document.getElementById('sendInfoButton').textContent = currentTranslations.send_info_btn;
+
+            // Actualizar el atributo lang del HTML
+            document.documentElement.lang = lang;
+        }
+
+        // --- Inicializar idioma al cargar la página ---
+        const savedLang = localStorage.getItem(LANG_PREF_KEY) || 'es'; // 'es' como predeterminado
+        languageSelect.value = savedLang; // Establecer el selector
+        applyLanguage(savedLang); // Aplicar el idioma
+
+        // --- Event Listener para cambio de idioma ---
+        languageSelect.addEventListener('change', (e) => {
+            const newLang = e.target.value;
+            localStorage.setItem(LANG_PREF_KEY, newLang); // Guardar preferencia
+            applyLanguage(newLang); // Aplicar nuevo idioma
+        });
+
+        // --- Función para mostrar mensajes de feedback ---
+        function showFeedback(message, type = 'info') {
+            feedbackMessage.textContent = message;
+            feedbackMessage.style.display = 'block';
+            if (type === 'success') {
+                feedbackMessage.style.color = "var(--selected-good-excellent-border)";
+            } else if (type === 'error') {
+                feedbackMessage.style.color = "var(--selected-bad-poor-border)";
+            } else { // info
+                feedbackMessage.style.color = "#007bff";
+            }
+            // Opcional: Ocultar el mensaje después de un tiempo
+            setTimeout(() => {
+                feedbackMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // --- Función para verificar si la encuesta ya fue enviada desde este dispositivo ---
+        function checkSurveyStatus() {
+            if (localStorage.getItem(SURVEY_COMPLETED_KEY) === 'true') {
+                showFeedback(translations[localStorage.getItem(LANG_PREF_KEY) || 'es'].survey_already_sent, 'info');
+                surveyForm.style.display = 'none';
+                openPopupButton.style.display = 'none';
+                return true;
+            }
+            return false;
+        }
+
+        // Ejecutar la verificación al cargar la página
+        if (checkSurveyStatus()) {
+            // Ya se mostró el mensaje y se ocultó el formulario
+        } else {
+            // --- Manejar la apertura del popup cuando se presiona el botón de enviar encuesta ---
+            openPopupButton.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                // Validar que todas las preguntas de la encuesta estén respondidas
+                const questions = surveyForm.querySelectorAll('.question');
+                let allQuestionsAnswered = true;
+                questions.forEach(question => {
+                    // Selecciona los radio buttons DENTRO de esta pregunta
+                    const radioButtons = question.querySelectorAll('input[type="radio"]');
+                    const isAnswered = Array.from(radioButtons).some(radio => radio.checked);
+                    if (!isAnswered) {
+                        allQuestionsAnswered = false;
+                    }
                 });
-            }
-            return 'N/A';
-        }
 
-        // Función para aplicar color y clase a la calificación
-        function getRatingClass(rating) {
-            switch (rating) {
-                case 'excellent': return 'rating-excellent';
-                case 'good': return 'rating-good';
-                case 'regular': return 'rating-regular';
-                case 'poor': return 'rating-poor';
-                case 'bad': return 'rating-bad';
-                default: return '';
-            }
-        }
+                if (!allQuestionsAnswered) {
+                    showFeedback(translations[localStorage.getItem(LANG_PREF_KEY) || 'es'].all_questions_error, 'error');
+                    return;
+                }
 
-        // Función para obtener el texto de la calificación en mayúsculas
-        function getRatingText(rating) {
-            return rating ? rating.toUpperCase() : '';
-        }
+                infoPopup.classList.add('show');
+            });
 
-        // Función para calcular la puntuación final promedio
-        function calculateOverallScore(data) {
-            const relevantRatings = [
-                data.overall_experience,
-                data.staff_service,
-                data.recommend_hotel,
-                data.preferred_club,
-                data.overall_experience_2
-            ];
+            // --- Manejar el envío del formulario del popup ---
+            infoForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            let sum = 0;
-            let count = 0;
+                // Validar campos requeridos del popup
+                const roomNumber = document.getElementById('roomNumber').value;
+                const guestName = document.getElementById('guestName').value;
+                const guestEmail = document.getElementById('guestEmail').value;
 
-            relevantRatings.forEach(rating => {
-                if (ratingToValue.hasOwnProperty(rating)) {
-                    sum += ratingToValue[rating];
-                    count++;
+                if (!roomNumber || !guestName || !guestEmail) {
+                    showFeedback(translations[localStorage.getItem(LANG_PREF_KEY) || 'es'].required_fields_error, 'error');
+                    return;
+                }
+
+                const surveyData = {};
+                const mainFormData = new FormData(surveyForm);
+                const infoFormData = new FormData(infoForm);
+
+                for (let [name, value] of mainFormData) {
+                    surveyData[name] = value;
+                }
+
+                for (let [name, value] of infoFormData) {
+                    surveyData[name] = value;
+                }
+
+                surveyData.timestamp = serverTimestamp();
+
+                try {
+                    const docRef = await addDoc(collection(db, "survey_responses"), surveyData);
+                    console.log("Document written with ID: ", docRef.id);
+                    showFeedback(translations[localStorage.getItem(LANG_PREF_KEY) || 'es'].survey_success, 'success');
+
+                    localStorage.setItem(SURVEY_COMPLETED_KEY, 'true');
+
+                    infoPopup.classList.remove('show');
+                    surveyForm.style.display = 'none';
+                    openPopupButton.style.display = 'none';
+                    document.getElementById('feedback-message').style.display = 'block'; // Asegura que el mensaje final quede visible
+
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                    showFeedback(translations[localStorage.getItem(LANG_PREF_KEY) || 'es'].survey_error, 'error');
                 }
             });
 
-            return count > 0 ? Math.round(sum / count) : 0; // Redondea al entero más cercano
-        }
-
-        // Función para obtener la clase de color para la barra de progreso
-        function getProgressBarColor(score) {
-            if (score >= 70) return 'progress-bar-green';
-            if (score >= 40) return 'progress-bar-yellow';
-            return 'progress-bar-red';
-        }
-
-        // Escucha en tiempo real los cambios en la colección 'survey_responses'
-        function setupRealtimeListener() {
-            const q = query(collection(db, "survey_responses"), orderBy("timestamp", "desc"));
-
-            onSnapshot(q, (snapshot) => {
-                surveyTableBody.innerHTML = '';
-                allSurveyData = [];
-
-                if (snapshot.empty) {
-                    noDataMessage.style.display = 'block';
-                    exportCsvBtn.disabled = true;
-                } else {
-                    noDataMessage.style.display = 'none';
-                    exportCsvBtn.disabled = false;
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        allSurveyData.push(data); // Guardar para exportación
-
-                        const row = surveyTableBody.insertRow();
-
-                        row.insertCell().textContent = formatTimestamp(data.timestamp);
-                        row.insertCell().textContent = data.room_number || 'N/A';
-                        row.insertCell().textContent = data.guest_name || 'N/A';
-                        row.insertCell().textContent = data.guest_email || 'N/A';
-                        row.insertCell().textContent = data.butler || 'N/A';
-
-                        // Celdas de calificación con estilo
-                        const overallExpCell = row.insertCell();
-                        overallExpCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.overall_experience)}">${getRatingText(data.overall_experience)}</span>`;
-
-                        const staffServiceCell = row.insertCell();
-                        staffServiceCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.staff_service)}">${getRatingText(data.staff_service)}</span>`;
-
-                        const recommendHotelCell = row.insertCell();
-                        recommendHotelCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.recommend_hotel)}">${getRatingText(data.recommend_hotel)}</span>`;
-
-                        const preferredClubCell = row.insertCell();
-                        preferredClubCell.innerHTML = `<span class="rating-cell ${getRatingClass(data.preferred_club)}">${getRatingText(data.preferred_club)}</span>`;
-
-                        const overallExp2Cell = row.insertCell();
-                        overallExp2Cell.innerHTML = `<span class="rating-cell ${getRatingClass(data.overall_experience_2)}">${getRatingText(data.overall_experience_2)}</span>`;
-
-                        // Nueva celda para la puntuación calculada
-                        const calculatedScore = calculateOverallScore(data);
-                        const scoreCell = row.insertCell();
-                        scoreCell.innerHTML = `
-                            <div class="progress-bar-container">
-                                <div class="progress-bar ${getProgressBarColor(calculatedScore)}" style="width: ${calculatedScore}%;"></div>
-                            </div>
-                            <div class="progress-score-text">${calculatedScore}%</div>
-                        `;
-                    });
+            // Cerrar popup haciendo clic fuera del contenido
+            infoPopup.addEventListener('click', (e) => {
+                if (e.target === infoPopup) {
+                    infoPopup.classList.remove('show');
                 }
-            }, (error) => {
-                console.error("Error al escuchar documentos de Firestore:", error);
-                surveyTableBody.innerHTML = `<tr><td colspan="11" style="color: var(--rating-bad); text-align: center; padding: 20px;">Error al cargar los datos: ${error.message}</td></tr>`;
             });
         }
-
-        // Función para exportar a CSV
-        function exportToCsv() {
-            if (allSurveyData.length === 0) {
-                alert("No hay datos para exportar.");
-                return;
-            }
-
-            const headers = [
-                "Fecha y Hora", "No. Habitacion", "Nombre Huesped", "Email Huesped", "Butler",
-                "Experiencia General", "Servicio del Personal", "Recomendacion Hotel",
-                "Experiencia Preferred Club", "Calificacion Final Encuesta", "Puntuacion Calculada"
-            ];
-
-            const rows = allSurveyData.map(data => {
-                const calculatedScore = calculateOverallScore(data);
-                return [
-                    `"${formatTimestamp(data.timestamp)}"`,
-                    `"${data.room_number || ''}"`,
-                    `"${data.guest_name || ''}"`,
-                    `"${data.guest_email || ''}"`,
-                    `"${data.butler || ''}"`,
-                    `"${getRatingText(data.overall_experience) || ''}"`,
-                    `"${getRatingText(data.staff_service) || ''}"`,
-                    `"${getRatingText(data.recommend_hotel) || ''}"`,
-                    `"${getRatingText(data.preferred_club) || ''}"`,
-                    `"${getRatingText(data.overall_experience_2) || ''}"`,
-                    `"${calculatedScore}%"` // Añadir la puntuación calculada al CSV
-                ].map(field => field.replace(/"/g, '""')).join(','); // Escapa comillas dobles
-            });
-
-            const csvContent = [
-                headers.join(','),
-                ...rows
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `encuestas_secrets_royal_beach_${new Date().toISOString().slice(0,10)}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Event Listeners
-        exportCsvBtn.addEventListener('click', exportToCsv);
-        refreshBtn.addEventListener('click', setupRealtimeListener);
-
-        // Iniciar la escucha en tiempo real al cargar la página
-        document.addEventListener('DOMContentLoaded', setupRealtimeListener);
     </script>
 
 </body>
