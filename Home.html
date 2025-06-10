@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secrets Royal Beach Punta Cana Survey</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+        h2 {
+            color: #4CAF50; /* A shade of green, similar to the logo */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo img {
+            max-width: 200px;
+            height: auto;
+        }
+        .question {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .question:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .question p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .rating-options {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .rating-option {
+            text-align: center;
+            flex: 1;
+            min-width: 80px; /* Adjust as needed */
+        }
+        .rating-option input[type="radio"] {
+            display: none; /* Hide the default radio button */
+        }
+        .rating-option label {
+            display: block;
+            cursor: pointer;
+            padding: 10px 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+        .rating-option input[type="radio"]:checked + label {
+            background-color: #e0f7e0; /* Light green for selected */
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+        .rating-option label:hover {
+            background-color: #f0f0f0;
+        }
+        .rating-label {
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo">
+            <img src="https://via.placeholder.com/200x50?text=SECRETS+Royal+Beach" alt="Secrets Royal Beach Logo">
+        </div>
+
+        <h2>Punta Cana</h2>
+
+        <form action="#" method="post">
+            <div class="question">
+                <p>How would you rate your overall experience with us?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="overall_bad" name="overall_experience" value="bad">
+                        <label for="overall_bad">☹️</label>
+                        <div class="rating-label">BAD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_poor" name="overall_experience" value="poor">
+                        <label for="overall_poor">🙁</label>
+                        <div class="rating-label">POOR</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_average" name="overall_experience" value="average">
+                        <label for="overall_average">😐</label>
+                        <div class="rating-label">AVERAGE</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_good" name="overall_experience" value="good">
+                        <label for="overall_good">🙂</label>
+                        <div class="rating-label">GOOD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_happy" name="overall_experience" value="happy">
+                        <label for="overall_happy">😊</label>
+                        <div class="rating-label">HAPPY</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_excellent" name="overall_experience" value="excellent">
+                        <label for="overall_excellent">😁</label>
+                        <div class="rating-label">EXCELLENT</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>How would you rate the overall level of service provided by our staff?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="staff_bad" name="staff_service" value="bad">
+                        <label for="staff_bad">☹️</label>
+                        <div class="rating-label">BAD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_poor" name="staff_service" value="poor">
+                        <label for="staff_poor">🙁</label>
+                        <div class="rating-label">POOR</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_average" name="staff_service" value="average">
+                        <label for="staff_average">😐</label>
+                        <div class="rating-label">AVERAGE</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_good" name="staff_service" value="good">
+                        <label for="staff_good">🙂</label>
+                        <div class="rating-label">GOOD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_happy" name="staff_service" value="happy">
+                        <label for="staff_happy">😊</label>
+                        <div class="rating-label">HAPPY</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="staff_excellent" name="staff_service" value="excellent">
+                        <label for="staff_excellent">😁</label>
+                        <div class="rating-label">EXCELLENT</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>Would you recommend this hotel to your family and friends?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_bad" name="recommend_hotel" value="bad">
+                        <label for="recommend_bad">☹️</label>
+                        <div class="rating-label">BAD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_poor" name="recommend_hotel" value="poor">
+                        <label for="recommend_poor">🙁</label>
+                        <div class="rating-label">POOR</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_average" name="recommend_hotel" value="average">
+                        <label for="recommend_average">😐</label>
+                        <div class="rating-label">AVERAGE</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_good" name="recommend_hotel" value="good">
+                        <label for="recommend_good">🙂</label>
+                        <div class="rating-label">GOOD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_happy" name="recommend_hotel" value="happy">
+                        <label for="recommend_happy">😊</label>
+                        <div class="rating-label">HAPPY</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="recommend_excellent" name="recommend_hotel" value="excellent">
+                        <label for="recommend_excellent">😁</label>
+                        <div class="rating-label">EXCELLENT</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>How would you rate your experience as Preferred Club guest?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_bad" name="preferred_club" value="bad">
+                        <label for="preferred_bad">☹️</label>
+                        <div class="rating-label">BAD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_poor" name="preferred_club" value="poor">
+                        <label for="preferred_poor">🙁</label>
+                        <div class="rating-label">POOR</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_average" name="preferred_club" value="average">
+                        <label for="preferred_average">😐</label>
+                        <div class="rating-label">AVERAGE</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_good" name="preferred_club" value="good">
+                        <label for="preferred_good">🙂</label>
+                        <div class="rating-label">GOOD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_happy" name="preferred_club" value="happy">
+                        <label for="preferred_happy">😊</label>
+                        <div class="rating-label">HAPPY</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="preferred_excellent" name="preferred_club" value="excellent">
+                        <label for="preferred_excellent">😁</label>
+                        <div class="rating-label">EXCELLENT</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <p>How would you rate your overall experience?</p>
+                <div class="rating-options">
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_bad" name="overall_experience_2" value="bad">
+                        <label for="overall_experience_2_bad">☹️</label>
+                        <div class="rating-label">BAD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_poor" name="overall_experience_2" value="poor">
+                        <label for="overall_experience_2_poor">🙁</label>
+                        <div class="rating-label">POOR</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_average" name="overall_experience_2" value="average">
+                        <label for="overall_experience_2_average">😐</label>
+                        <div class="rating-label">AVERAGE</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_good" name="overall_experience_2" value="good">
+                        <label for="overall_experience_2_good">🙂</label>
+                        <div class="rating-label">GOOD</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_happy" name="overall_experience_2" value="happy">
+                        <label for="overall_experience_2_happy">😊</label>
+                        <div class="rating-label">HAPPY</div>
+                    </div>
+                    <div class="rating-option">
+                        <input type="radio" id="overall_experience_2_excellent" name="overall_experience_2" value="excellent">
+                        <label for="overall_experience_2_excellent">😁</label>
+                        <div class="rating-label">EXCELLENT</div>
+                    </div>
+                </div>
+            </div>
+
+            </form>
+    </div>
+
+</body>
+</html>
