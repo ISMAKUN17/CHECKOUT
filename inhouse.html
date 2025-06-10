@@ -236,6 +236,13 @@
         .rating-na { background-color: var(--border-color); color: var(--light-text-color); }
 
 
+        /* Estilos para el campo Butler */
+        .butler-cell {
+            font-weight: 600; /* Negrita */
+            color: #444; /* Un gris un poco más oscuro para resaltar */
+        }
+
+
         /* Estilos para la barra de progreso general */
         .progress-bar-container {
             width: 90px;
@@ -513,7 +520,7 @@
                 data.staff_service_q2,     // Q2
                 data.recommend_hotel_q3,   // Q3
                 data.preferred_club_q4,    // Q4
-                data.overall_experience_final_q5 // Q5 - ¡Este es el ajuste clave!
+                data.overall_experience_final_q5 // Q5
             ];
 
             let sum = 0;
@@ -597,13 +604,16 @@
                         const row = surveyTableBody.insertRow();
 
                         row.insertCell().textContent = formatTimestamp(data.timestamp);
-                        row.insertCell().textContent = data.room_number || 'N/A'; // From popup
-                        row.insertCell().textContent = data.guest_name || 'N/A';   // From popup
-                        row.insertCell().textContent = data.guest_email || 'N/A'; // From popup
-                        row.insertCell().textContent = data.butler || 'N/A';       // From popup
+                        row.insertCell().textContent = data.room_number || 'N/A';
+                        row.insertCell().textContent = data.guest_name || 'N/A';
+                        row.insertCell().textContent = data.guest_email || 'N/A';
+
+                        // Celda para Butler con la nueva clase
+                        const butlerCell = row.insertCell();
+                        butlerCell.classList.add('butler-cell'); // Agregamos la clase aquí
+                        butlerCell.textContent = data.butler || 'N/A';
 
                         // Celdas de calificación usando la nueva función getRatingDisplay
-                        // NOMBRES DE CAMPOS ACTUALIZADOS SEGÚN EL CÓDIGO DE TU ENCUESTA
                         const overallExpDisplay = getRatingDisplay(data.overall_experience_q1);
                         const overallExpCell = row.insertCell();
                         overallExpCell.innerHTML = `<span class="rating-cell ${overallExpDisplay.class}">${overallExpDisplay.text}</span>`;
@@ -620,7 +630,7 @@
                         const preferredClubCell = row.insertCell();
                         preferredClubCell.innerHTML = `<span class="rating-cell ${preferredClubDisplay.class}">${preferredClubDisplay.text}</span>`;
 
-                        const overallExpFinalDisplay = getRatingDisplay(data.overall_experience_final_q5); // ¡Ajustado aquí!
+                        const overallExpFinalDisplay = getRatingDisplay(data.overall_experience_final_q5);
                         const overallExpFinalCell = row.insertCell();
                         overallExpFinalCell.innerHTML = `<span class="rating-cell ${overallExpFinalDisplay.class}">${overallExpFinalDisplay.text}</span>`;
 
@@ -681,14 +691,13 @@
 
             const rows = allSurveyData.map(data => {
                 const calculatedScore = calculateOverallScore(data);
-                const individualNPS = calculateIndividualNPS(data.recommend_hotel_q3); // Basado en Q3
+                const individualNPS = calculateIndividualNPS(data.recommend_hotel_q3);
 
-                // Obtener el texto de visualización para CSV
                 const overallExpDisplay = getRatingDisplay(data.overall_experience_q1);
                 const staffServiceDisplay = getRatingDisplay(data.staff_service_q2);
                 const recommendHotelDisplay = getRatingDisplay(data.recommend_hotel_q3);
                 const preferredClubDisplay = getRatingDisplay(data.preferred_club_q4);
-                const overallExpFinalDisplay = getRatingDisplay(data.overall_experience_final_q5); // ¡Ajustado aquí!
+                const overallExpFinalDisplay = getRatingDisplay(data.overall_experience_final_q5);
 
 
                 return [
@@ -696,7 +705,7 @@
                     `"${data.room_number || ''}"`,
                     `"${data.guest_name || ''}"`,
                     `"${data.guest_email || ''}"`,
-                    `"${data.butler || ''}"`,
+                    `"${data.butler || ''}"`, // El valor en sí, no la clase CSS
                     `"${overallExpDisplay.text}"`,
                     `"${staffServiceDisplay.text}"`,
                     `"${recommendHotelDisplay.text}"`,
@@ -704,7 +713,7 @@
                     `"${overallExpFinalDisplay.text}"`,
                     `"${calculatedScore}%"`,
                     `"${individualNPS.category}"`
-                ].map(field => field.replace(/"/g, '""')).join(','); // Escapa comillas dobles
+                ].map(field => field.replace(/"/g, '""')).join(',');
             });
 
             const csvContent = [
