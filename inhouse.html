@@ -76,6 +76,13 @@
             margin-bottom: 25px;
         }
 
+        /* Estilos para el logo */
+        .logo {
+            max-width: 200px; /* Ajusta el tamaño máximo del logo */
+            height: auto;
+            margin-bottom: 20px; /* Espacio entre el logo y el título */
+        }
+
         h1 {
             color: var(--primary-color);
             font-weight: 700;
@@ -358,6 +365,7 @@
 <body>
 
     <div class="container">
+        <img src="https://images.seeklogo.com/logo-png/34/1/secrets-resorts-spas-logo-png_seeklogo-344670.png" alt="Secrets Royal Beach Logo" class="logo">
         <h1>Dashboard de Encuestas</h1>
         <p class="subtitle">Visualización en tiempo real, análisis de satisfacción y NPS de Secrets Royal Beach</p>
 
@@ -705,7 +713,7 @@
                     `"${data.room_number || ''}"`,
                     `"${data.guest_name || ''}"`,
                     `"${data.guest_email || ''}"`,
-                    `"${data.butler || ''}"`, // El valor en sí, no la clase CSS
+                    `"${data.butler || ''}"`,
                     `"${overallExpDisplay.text}"`,
                     `"${staffServiceDisplay.text}"`,
                     `"${recommendHotelDisplay.text}"`,
