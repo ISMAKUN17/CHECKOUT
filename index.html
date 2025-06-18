@@ -52,8 +52,8 @@
             font-weight: 600;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            background-color: #f9f9f9;
-            color: #333;
+            background-color: #f9f9f9; /* Default background when not selected */
+            color: #333; /* Default text color when not selected */
         }
         .rating-button:hover {
             transform: translateY(-3px) scale(1.05);
@@ -63,10 +63,11 @@
             transform: scale(1.1);
             border-color: #a0a0a0;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* Color classes will be added dynamically when selected */
         }
-        /* Color classes for ratings */
+        /* Color classes for ratings - only applied when 'selected' */
         .rating-red { background-color: #ef4444; color: white; border-color: #dc2626; } /* Tailwind red-500 */
-        .rating-red.selected { background-color: #dc2626; border-color: #b91c1c; }
+        .rating-red.selected { background-color: #dc2626; border-color: #b91c1c; } /* Darker on selected */
         .rating-yellow { background-color: #facc15; color: white; border-color: #eab308; } /* Tailwind yellow-400 */
         .rating-yellow.selected { background-color: #eab308; border-color: #d97706; }
         .rating-green { background-color: #22c55e; color: white; border-color: #16a34a; } /* Tailwind green-500 */
@@ -389,7 +390,7 @@
                 roomRequired: "Le numéro de chambre est requis.",
                 nameRequired: "Le nom complet est requis.",
                 ratingRequired: "Veuillez sélectionner une note pour cette question.",
-                modalRequiredFields: "Veuillez remplir tous les champs obligatorios (Numéro de Chambre, Nom Complet) avant de commencer l'enquête.",
+                modalRequiredFields: "Veuillez remplir tous les champs obligatoires (Numéro de Chambre, Nom Complet) avant de commencer l'enquête.",
                 modalSubmittedSuccessfully: "Votre enquête a été soumise avec succès !",
                 modalSubmissionFailed: "Échec de la soumission de l'enquête. Veuillez réessayer.",
                 modalOkButton: "OK",
@@ -451,7 +452,7 @@
                 } catch (error) {
                     console.error("Firebase Anonymous Auth Error:", error);
                     // This error typically means Anonymous Auth is not enabled in Firebase project settings
-                    showModal(translations[currentLang].modalSubmissionFailed + " " + error.message); // Added error message to modal
+                    showModal(translations[currentLang].modalSubmissionFailed + " (" + error.message + ")"); // Added error message to modal
                 }
             }
             isAuthReady = true;
@@ -503,7 +504,7 @@
                 button.classList.add('active');
                 currentLang = button.dataset.lang;
                 updateContent(); // Update content for new language
-                generateRatingButtons(); // Regenerate rating buttons to apply language to tooltips if they existed (not needed here but good practice)
+                generateRatingButtons(); // Regenerate rating buttons to ensure they pick up new language settings if any for future tooltip features etc.
             });
         });
 
@@ -523,7 +524,7 @@
                     button.classList.add('rating-button');
                     button.textContent = i;
                     button.dataset.value = i;
-                    button.classList.add(getRatingColorClass(i)); // Apply initial color class
+                    // NO longer adding color class initially here
                     q.container.appendChild(button);
                 }
             });
@@ -545,10 +546,16 @@
             questions.forEach(q => {
                 q.container.querySelectorAll('.rating-button').forEach(button => {
                     button.addEventListener('click', () => {
-                        // Remove 'selected' class from all buttons in this question
-                        q.container.querySelectorAll('.rating-button').forEach(btn => btn.classList.remove('selected'));
-                        // Add 'selected' class to the clicked button
+                        // Remove 'selected' class and color classes from all buttons in this question
+                        q.container.querySelectorAll('.rating-button').forEach(btn => {
+                            btn.classList.remove('selected');
+                            btn.classList.remove('rating-red', 'rating-yellow', 'rating-green'); // Remove all color classes
+                        });
+
+                        // Add 'selected' class and the correct color class to the clicked button
                         button.classList.add('selected');
+                        button.classList.add(getRatingColorClass(parseInt(button.dataset.value))); // Add the color class based on value
+
                         // Store the selected rating
                         q.rating = parseInt(button.dataset.value);
                         // Hide error message if visible
@@ -690,7 +697,7 @@
                 console.error("Error submitting survey:", error);
                 section2.classList.remove('active');
                 errorMessageSection.classList.add('active');
-                showModal(translations[currentLang].modalSubmissionFailed + " " + error.message); // Added error message to modal
+                showModal(translations[currentLang].modalSubmissionFailed + " (" + error.message + ")"); // Added error message to modal
 
             } finally {
                 submitButton.innerHTML = `<span id="button-send-survey">${translations[currentLang].buttonSendSurvey}</span>`;
@@ -705,7 +712,7 @@
         // --- Initial Load ---
         window.onload = function() {
             updateContent(); // Set initial language content
-            generateRatingButtons(); // Generate rating buttons
+            generateRatingButtons(); // Generate rating buttons without initial colors
             // The checkIfAlreadySubmitted is called after auth is ready via onAuthStateChanged
         };
     </script>
