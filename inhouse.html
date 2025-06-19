@@ -202,6 +202,29 @@
 
 
         /* Estilos para la lista de reservas del día (más sencilla) */
+        .reservation-list-container {
+            /* Contenedor para el buscador y la lista */
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Espacio entre el buscador y la lista */
+        }
+
+        #reservationSearch {
+            width: calc(100% - 20px); /* Ajuste para padding */
+            padding: 12px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            margin-bottom: 5px; /* Pequeño espacio debajo del buscador */
+        }
+
+        #reservationSearch:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
         .reservation-list {
             display: flex;
             flex-direction: column;
@@ -260,7 +283,9 @@
             border: 1px dashed var(--border-color);
             border-radius: var(--border-radius);
             margin-top: 20px;
-            grid-column: 1 / -1;
+            /* grid-column: 1 / -1; Esto se movió al contenedor padre si aplica */
+            width: 100%; /* Asegura que el mensaje ocupe el ancho completo de su contenedor */
+            box-sizing: border-box;
         }
 
         /* Modal / Popup Styling */
@@ -587,8 +612,11 @@
 
             <section class="reservation-list-section">
                 <h2>Reservas del Día</h2>
-                <div id="reservationList" class="reservation-list">
-                    <p class="no-reservations" id="noReservationsMessage">No hay reservas programadas para hoy.</p>
+                <div class="reservation-list-container">
+                    <input type="text" id="reservationSearch" placeholder="Buscar por habitación o comensal...">
+                    <div id="reservationList" class="reservation-list">
+                        <p class="no-reservations" id="noReservationsMessage">No hay reservas programadas para hoy.</p>
+                    </div>
                 </div>
             </section>
         </main>
@@ -646,6 +674,8 @@
             const timeSelect = document.getElementById('time');
             const paxInput = document.getElementById('pax');
             const availabilityInfo = document.getElementById('availabilityInfo');
+
+            const reservationSearchInput = document.getElementById('reservationSearch'); // Nuevo: campo de búsqueda
 
             let reservations = [];
             let currentReservationData = null;
@@ -735,6 +765,12 @@
             paxInput.addEventListener('input', () => {
                 updateAvailabilityInfo();
             });
+
+            // Nuevo: Evento para el buscador
+            reservationSearchInput.addEventListener('input', () => {
+                filterReservations();
+            });
+
 
             // Función para actualizar las opciones de hora según el restaurante seleccionado
             function updateTimeOptions(restaurant) {
@@ -906,13 +942,14 @@
             function addReservation(data) {
                 reservations.push(data);
                 saveReservations();
-                renderReservations();
+                renderReservations(); // Llamada inicial sin filtro
                 updateAvailabilityInfo();
             }
 
-            function renderReservations() {
+            // Función principal para renderizar reservas (ahora acepta un array filtrado)
+            function renderReservations(filteredReservations = reservations) {
                 // Ordenar por hora del restaurante primero, luego por habitación
-                reservations.sort((a, b) => {
+                filteredReservations.sort((a, b) => {
                     // Ordenar por restaurante
                     const restaurantComparison = a.place.localeCompare(b.place);
                     if (restaurantComparison !== 0) return restaurantComparison;
@@ -927,11 +964,15 @@
 
                 reservationListDiv.innerHTML = '';
 
-                if (reservations.length === 0) {
+                if (filteredReservations.length === 0) {
+                    // Mostrar mensaje "No hay reservas" si no hay ninguna o ninguna coincide con la búsqueda
+                    noReservationsMessage.textContent = reservations.length === 0 ?
+                                                        'No hay reservas programadas para hoy.' :
+                                                        'No se encontraron reservas con los criterios de búsqueda.';
                     noReservationsMessage.style.display = 'block';
                 } else {
                     noReservationsMessage.style.display = 'none';
-                    reservations.forEach((res) => {
+                    filteredReservations.forEach((res) => {
                         const reservationItem = document.createElement('div');
                         reservationItem.classList.add('reservation-item');
 
@@ -947,6 +988,27 @@
                 }
             }
 
+            // Nuevo: Función para filtrar reservas
+            function filterReservations() {
+                const searchTerm = reservationSearchInput.value.toLowerCase().trim();
+
+                if (!searchTerm) {
+                    renderReservations(reservations); // Si el buscador está vacío, muestra todas
+                    return;
+                }
+
+                const filtered = reservations.filter(res => {
+                    const roomMatches = String(res.room).includes(searchTerm);
+                    const guestMatches = res.guest.toLowerCase().includes(searchTerm);
+                    const restaurantMatches = res.place.toLowerCase().includes(searchTerm);
+                    const timeMatches = convertTo12HourFormat(res.time).toLowerCase().includes(searchTerm); // Buscar también por hora
+                    return roomMatches || guestMatches || restaurantMatches || timeMatches;
+                });
+
+                renderReservations(filtered);
+            }
+
+
             function saveReservations() {
                 localStorage.setItem('restaurantReservations', JSON.stringify(reservations));
             }
@@ -956,7 +1018,7 @@
                 if (storedReservations) {
                     reservations = JSON.parse(storedReservations);
                 }
-                renderReservations();
+                renderReservations(); // Llama a renderReservations sin argumentos al cargar
             }
 
             function convertTo12HourFormat(time24h) {
