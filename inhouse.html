@@ -719,7 +719,26 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // Importar las funciones de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // Tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyALR-b68phh_u92V3rw9B9Ei7FcexU2xc8",
+            authDomain: "proyectos17-98695.firebaseapp.com",
+            projectId: "proyectos17-98695",
+            storageBucket: "proyectos17-98695.firebasestorage.app",
+            messagingSenderId: "951673973410",
+            appId: "1:951673973410:web:4bc355e825cf86308645fb",
+            measurementId: "G-6YK06W16FZ"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app); // Obtener referencia a la Realtime Database
+
         document.addEventListener('DOMContentLoaded', () => {
             const addReservationBtn = document.getElementById('addReservationBtn');
             const viewSummaryBtn = document.getElementById('viewSummaryBtn');
@@ -754,13 +773,13 @@
             const availabilityInfo = document.getElementById('availabilityInfo');
 
             const reservationSearchInput = document.getElementById('reservationSearch');
-            const submitReservationBtn = document.getElementById('submitReservationBtn'); // Nuevo: botón de envío
-            const operatingHoursMessage = document.getElementById('operatingHoursMessage'); // Nuevo: mensaje de horario
+            const submitReservationBtn = document.getElementById('submitReservationBtn');
+            const operatingHoursMessage = document.getElementById('operatingHoursMessage');
 
-            let reservations = [];
-            let archivedReservations = [];
+            let reservations = []; // Reservas del día actual, ahora se sincronizarán con Firebase
+            let archivedReservations = []; // Reservas de días anteriores, también desde Firebase
             let currentReservationData = null;
-            let lastAccessDate = localStorage.getItem('lastAccessDate');
+            let lastAccessDate = localStorage.getItem('lastAccessDate'); // Todavía usado para control de fecha de acceso
 
             const restaurantTimes = {
                 "El Patio": ["18:00", "21:00"],
@@ -787,6 +806,7 @@
             }
 
             function getFormattedDate(dateString) {
+                if (!dateString) return 'Fecha desconocida';
                 const date = new Date(dateString + 'T12:00:00'); // Añadir T12:00:00 para evitar problemas de zona horaria
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 return date.toLocaleDateString('es-ES', options);
@@ -798,12 +818,10 @@
                 const currentHour = now.getHours();
                 const currentMinute = now.getMinutes();
 
-                // Convertir hora actual a minutos desde medianoche para fácil comparación
                 const currentTimeInMinutes = currentHour * 60 + currentMinute;
 
-                // Horario de operación: 7:00 AM (420 minutos) a 4:30 PM (16:30 PM = 16 * 60 + 30 = 990 minutos)
                 const startHourInMinutes = 7 * 60; // 7:00 AM
-                const endHourInMinutes = 16 * 60 + 30; // 4:30 PM
+                const endHourInMinutes = 16 * 60 + 30; // 4:30 PM (16:30 PM)
 
                 const isInOperatingHours = currentTimeInMinutes >= startHourInMinutes && currentTimeInMinutes <= endHourInMinutes;
 
@@ -816,46 +834,76 @@
                 return isInOperatingHours;
             }
 
-
-            // --- Lógica de Carga y Archivamiento ---
-            function loadAndArchiveReservations() {
+            // --- Lógica de Carga y Archivamiento con Firebase ---
+            async function loadAndArchiveReservations() {
                 const today = getTodayDateString();
-                const storedReservations = localStorage.getItem('restaurantReservations');
-                const storedArchivedReservations = localStorage.getItem('archivedReservations');
+                const dailyReservationsRef = ref(database, `dailyReservations/${today}`);
+                const allArchivedReservationsRef = ref(database, 'archivedReservations');
 
-                if (storedArchivedReservations) {
-                    archivedReservations = JSON.parse(storedArchivedReservations);
-                }
-
-                if (lastAccessDate !== today) {
-                    // Es un nuevo día, archivar las reservas anteriores si existen
-                    if (storedReservations) {
-                        const previousDayReservations = JSON.parse(storedReservations);
-                        if (previousDayReservations.length > 0) {
-                            // Añadir la fecha de archivo a cada reserva antes de moverla
-                            previousDayReservations.forEach(res => {
-                                res.archiveDate = lastAccessDate || 'Fecha desconocida'; // Usar lastAccessDate
+                try {
+                    // Cargar reservas archivadas (todas)
+                    const archiveSnapshot = await get(allArchivedReservationsRef);
+                    if (archiveSnapshot.exists()) {
+                        archivedReservations = [];
+                        archiveSnapshot.forEach(dateNode => {
+                            dateNode.forEach(resNode => {
+                                archivedReservations.push({ id: resNode.key, ...resNode.val() });
                             });
-                            archivedReservations.push(...previousDayReservations);
-                            saveArchivedReservations();
-                        }
+                        });
+                    } else {
+                        archivedReservations = [];
                     }
-                    // Reiniciar las reservas del día actual
-                    reservations = [];
-                    saveReservations(); // Vaciar las reservas del día
-                } else {
-                    // Es el mismo día, cargar las reservas actuales
-                    if (storedReservations) {
-                        reservations = JSON.parse(storedReservations);
-                    }
-                }
-                // Actualizar la fecha de último acceso
-                localStorage.setItem('lastAccessDate', today);
-                lastAccessDate = today; // Actualizar la variable también
 
-                renderReservations(); // Renderizar las reservas del día
+                    if (lastAccessDate && lastAccessDate !== today) {
+                        // Es un nuevo día, archivar las reservas del día anterior
+                        const previousDayReservationsRef = ref(database, `dailyReservations/${lastAccessDate}`);
+                        const previousDaySnapshot = await get(previousDayReservationsRef);
+
+                        if (previousDaySnapshot.exists()) {
+                            const previousDayData = previousDaySnapshot.val();
+                            const updates = {};
+                            for (const key in previousDayData) {
+                                const res = previousDayData[key];
+                                res.archiveDate = lastAccessDate; // Asegurarse de que tengan la fecha de archivo
+                                // Mover a la ruta de archivados bajo su fecha original
+                                updates[`archivedReservations/${lastAccessDate}/${key}`] = res;
+                            }
+                            // Eliminar las reservas del día anterior después de moverlas
+                            updates[`dailyReservations/${lastAccessDate}`] = null;
+
+                            await set(ref(database), updates); // Realizar la operación de actualización en lote
+                            console.log(`Reservas del ${lastAccessDate} archivadas y borradas.`);
+                        }
+                        // Después de archivar, las reservas del día actual se reinician (se cargan de Firebase, que estará vacío para el nuevo día)
+                        reservations = [];
+                        // La carga del día actual se manejará con onValue para actualizaciones en tiempo real
+                    }
+
+                    // Actualizar la fecha de último acceso en localStorage
+                    localStorage.setItem('lastAccessDate', today);
+                    lastAccessDate = today;
+
+                    // Escuchar cambios en las reservas del día actual en tiempo real
+                    onValue(dailyReservationsRef, (snapshot) => {
+                        const data = snapshot.val();
+                        reservations = [];
+                        if (data) {
+                            for (const key in data) {
+                                reservations.push({ id: key, ...data[key] });
+                            }
+                        }
+                        renderReservations(); // Volver a renderizar cada vez que cambian las reservas
+                        updateAvailabilityInfo(); // Actualizar disponibilidad también
+                    });
+
+                } catch (error) {
+                    console.error("Error al cargar o archivar reservas:", error);
+                    alert("Hubo un error al cargar los datos de las reservas. Por favor, intente de nuevo.");
+                }
+
                 checkOperatingHours(); // Verificar horario y deshabilitar/habilitar botón
             }
+
 
             // Llamar a la función de carga y archivo al inicio
             loadAndArchiveReservations();
@@ -863,16 +911,16 @@
             // Evento para mostrar el formulario de agregar reserva
             addReservationBtn.addEventListener('click', () => {
                 reservationForm.reset();
-                placeSelect.value = ""; // Resetear también el select del restaurante
-                updateTimeOptions(placeSelect.value); // Resetear las opciones de tiempo
+                placeSelect.value = "";
+                updateTimeOptions(placeSelect.value);
                 timeSelect.disabled = true;
                 availabilityInfo.textContent = '';
                 availabilityInfo.className = 'availability-info';
-                roomInput.focus(); // Enfocar el primer campo del formulario
+                roomInput.focus();
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
-                reservationSearchInput.value = ''; // Limpiar buscador
-                filterReservations(); // Volver a mostrar todas las reservas del día
-                checkOperatingHours(); // Re-chequear horario al intentar agregar
+                reservationSearchInput.value = '';
+                filterReservations();
+                checkOperatingHours();
             });
 
             // Evento para abrir el popup de resumen
@@ -882,10 +930,27 @@
             });
 
             // Nuevo: Evento para abrir el popup de archivo
-            viewArchiveBtn.addEventListener('click', () => {
+            viewArchiveBtn.addEventListener('click', async () => { // Hacer async para la carga de archivo
                 archiveSearchInput.value = ''; // Limpiar buscador del archivo
-                renderArchivedReservations(); // Renderizar todas las archivadas al abrir
-                showArchiveModal();
+
+                // Recargar todas las reservas archivadas para asegurar que estén al día
+                const allArchivedReservationsRef = ref(database, 'archivedReservations');
+                try {
+                    const archiveSnapshot = await get(allArchivedReservationsRef);
+                    archivedReservations = [];
+                    if (archiveSnapshot.exists()) {
+                        archiveSnapshot.forEach(dateNode => {
+                            dateNode.forEach(resNode => {
+                                archivedReservations.push({ id: resNode.key, ...resNode.val() });
+                            });
+                        });
+                    }
+                    renderArchivedReservations(); // Renderizar todas las archivadas al abrir
+                    showArchiveModal();
+                } catch (error) {
+                    console.error("Error al cargar el archivo de reservas:", error);
+                    alert("No se pudo cargar el archivo de reservas. Por favor, intente de nuevo.");
+                }
             });
 
             // Evento para cerrar el popup de resumen
@@ -1032,10 +1097,9 @@
 
 
             // Evento para manejar el envío del formulario
-            reservationForm.addEventListener('submit', (e) => {
+            reservationForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // Re-verificar horario de operación antes de procesar el formulario
                 if (!checkOperatingHours()) {
                     alert('No se pueden registrar reservas fuera del horario de operación (7:00 AM - 4:30 PM).');
                     return;
@@ -1048,20 +1112,17 @@
                 const pax = parseInt(document.getElementById('pax').value, 10);
                 const comment = document.getElementById('comment').value;
 
-                // Validación del número de habitación
                 if (room.length !== 4 || isNaN(room) || parseInt(room, 10) < 1000 || parseInt(room, 10) > 9999) {
                     alert('Por favor, ingrese un número de habitación válido de 4 dígitos (ej. 1000-9999).');
                     roomInput.focus();
                     return;
                 }
 
-                // Validar que se haya seleccionado una hora
                 if (!time) {
                     alert('Por favor, seleccione una hora de reserva válida para el restaurante elegido.');
                     return;
                 }
 
-                // Validación de límites de PAX antes de continuar al popup
                 const maxPax = restaurantPaxLimits[place];
                 const occupiedPax = reservations
                     .filter(res => res.place === place && res.time === time)
@@ -1090,20 +1151,20 @@
             });
 
             // Evento para confirmar la validación del nombre
-            confirmValidationBtn.addEventListener('click', () => {
+            confirmValidationBtn.addEventListener('click', async () => {
                 const validatorName = validatorNameInput.value.trim();
                 if (validatorName) {
                     currentReservationData.validator = validatorName;
-                    addReservation(currentReservationData);
+                    await addReservation(currentReservationData); // Esperar la operación de Firebase
                     hideValidationModal();
                     reservationForm.reset();
-                    placeSelect.value = ""; // Resetear también el select del restaurante
-                    updateTimeOptions(placeSelect.value); // Resetear las opciones de tiempo
+                    placeSelect.value = "";
+                    updateTimeOptions(placeSelect.value);
                     timeSelect.disabled = true;
                     availabilityInfo.textContent = '';
                     availabilityInfo.className = 'availability-info';
                     currentReservationData = null;
-                    checkOperatingHours(); // Re-chequear horario después de registrar
+                    checkOperatingHours();
                 } else {
                     alert('Por favor, ingrese el nombre de quien solicita la reserva.');
                 }
@@ -1142,26 +1203,26 @@
                 archiveModal.classList.remove('active');
             }
 
-            function addReservation(data) {
-                reservations.push(data);
-                saveReservations();
-                renderReservations();
-                updateAvailabilityInfo();
+            // Función para añadir reserva a Firebase
+            async function addReservation(data) {
+                const today = getTodayDateString();
+                const dailyReservationsRef = ref(database, `dailyReservations/${today}`);
+                try {
+                    await push(dailyReservationsRef, data); // 'push' crea un ID único y añade los datos
+                    console.log("Reserva añadida a Firebase con éxito.");
+                } catch (error) {
+                    console.error("Error al añadir reserva a Firebase:", error);
+                    alert("Error al registrar la reserva. Por favor, intente de nuevo.");
+                }
             }
 
-            // Función principal para renderizar reservas (ahora acepta un array filtrado)
+            // Función principal para renderizar reservas (ahora usa los datos de `reservations` que se actualizan desde Firebase)
             function renderReservations(filteredReservations = reservations) {
-                // Ordenar por hora del restaurante primero, luego por habitación
                 filteredReservations.sort((a, b) => {
-                    // Ordenar por restaurante
                     const restaurantComparison = a.place.localeCompare(b.place);
                     if (restaurantComparison !== 0) return restaurantComparison;
-
-                    // Luego por hora
                     const timeComparison = a.time.localeCompare(b.time);
                     if (timeComparison !== 0) return timeComparison;
-
-                    // Finalmente por número de habitación
                     return parseInt(a.room) - parseInt(b.room);
                 });
 
@@ -1190,19 +1251,13 @@
                 }
             }
 
-            // Nueva función para renderizar reservas archivadas
+            // Función para renderizar reservas archivadas (ahora usa los datos de `archivedReservations` que se actualizan desde Firebase)
             function renderArchivedReservations(filteredArchived = archivedReservations) {
-                // Ordenar archivadas por fecha (más reciente primero), luego por restaurante y hora
                 filteredArchived.sort((a, b) => {
-                    // Primero por fecha (descendente)
                     const dateComparison = new Date(b.archiveDate).getTime() - new Date(a.archiveDate).getTime();
                     if (dateComparison !== 0) return dateComparison;
-
-                    // Luego por restaurante
                     const restaurantComparison = a.place.localeCompare(b.place);
                     if (restaurantComparison !== 0) return restaurantComparison;
-
-                    // Finalmente por hora
                     return a.time.localeCompare(b.time);
                 });
 
@@ -1217,7 +1272,7 @@
                     noArchivedReservationsMessage.style.display = 'none';
                     filteredArchived.forEach((res) => {
                         const reservationItem = document.createElement('div');
-                        reservationItem.classList.add('reservation-item', 'archived'); // Clase 'archived' para estilo
+                        reservationItem.classList.add('reservation-item', 'archived');
 
                         const time12Hrs = convertTo12HourFormat(res.time);
                         const formattedArchiveDate = getFormattedDate(res.archiveDate);
@@ -1233,13 +1288,12 @@
                 }
             }
 
-
             // Función para filtrar reservas del día
             function filterReservations() {
                 const searchTerm = reservationSearchInput.value.toLowerCase().trim();
 
                 if (!searchTerm) {
-                    renderReservations(reservations); // Si el buscador está vacío, muestra todas
+                    renderReservations(reservations);
                     return;
                 }
 
@@ -1268,7 +1322,7 @@
                     const guestMatches = res.guest.toLowerCase().includes(searchTerm);
                     const restaurantMatches = res.place.toLowerCase().includes(searchTerm);
                     const timeMatches = convertTo12HourFormat(res.time).toLowerCase().includes(searchTerm);
-                    const dateMatches = getFormattedDate(res.archiveDate).toLowerCase().includes(searchTerm) || res.archiveDate.includes(searchTerm); // Buscar por fecha archivada también
+                    const dateMatches = getFormattedDate(res.archiveDate).toLowerCase().includes(searchTerm) || res.archiveDate.includes(searchTerm);
                     return roomMatches || guestMatches || restaurantMatches || timeMatches || dateMatches;
                 });
 
@@ -1276,13 +1330,9 @@
             }
 
 
-            function saveReservations() {
-                localStorage.setItem('restaurantReservations', JSON.stringify(reservations));
-            }
-
-            function saveArchivedReservations() {
-                localStorage.setItem('archivedReservations', JSON.stringify(archivedReservations));
-            }
+            // Las funciones saveReservations y saveArchivedReservations ya no son necesarias directamente
+            // porque las operaciones de Firebase (push, set) se encargan de la persistencia.
+            // Las variables `reservations` y `archivedReservations` se actualizan mediante `onValue` de Firebase.
 
             function convertTo12HourFormat(time24h) {
                 const [hours, minutes] = time24h.split(':');
