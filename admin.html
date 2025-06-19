@@ -887,7 +887,8 @@
                     await push(reservationsRef, newReservation);
                     alert('Reserva agregada con éxito!');
                     adminReservationForm.reset();
-                } catch (error) {
+                }
+                catch (error) {
                     console.error("Error al agregar reserva:", error);
                     alert("Error al agregar la reserva. Por favor, intente de nuevo. Revise la consola para más detalles.");
                 }
@@ -1138,12 +1139,24 @@
                     return acc;
                 }, {});
 
-                // Obtener la fecha actual para el encabezado de impresión
-                const printDate = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                // Obtener la fecha y hora actual para el encabezado de impresión (ajustado a la ubicación Punta Cana)
+                const now = new Date();
+                const options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true,
+                    timeZone: 'America/Santo_Domingo' // Zona horaria de Punta Cana
+                };
+                const printDate = now.toLocaleString('es-ES', options);
+
 
                 let printContent = `
                     <div class="print-page-content">
-                        <h1>Reservas del Restaurante Xcaret</h1>
+                        <h1>Listado de Reservas del Restaurante Xcaret</h1>
                         <p class="print-date-header">Fecha de Impresión: ${printDate}</p>
                 `;
 
@@ -1154,7 +1167,7 @@
                     printContent += `<h3>${place}</h3>`;
                     printContent += `<ul>`;
 
-                    // Ordenar las reservas dentro de cada restaurante por hora
+                    // Ordenar las reservas dentro de cada restaurante por hora y luego por habitación
                     reservationsByRestaurant[place].sort((a, b) => {
                         // Primero por hora
                         const timeComparison = a.time.localeCompare(b.time);
@@ -1164,15 +1177,11 @@
                     });
 
                     reservationsByRestaurant[place].forEach(res => {
+                        // Nuevo formato: Habitación - Nombre - Restaurante - Hora - PAX - Comentario
+                        const commentText = res.comment ? ` - ${res.comment}` : '';
                         printContent += `
                             <li>
-                                <strong>Hora:</strong> ${convertTo12HourFormat(res.time)} |
-                                <strong>Hab:</strong> ${res.room} |
-                                <strong>Comensal:</strong> ${res.guest} |
-                                <strong>PAX:</strong> ${res.pax}
-                                ${res.comment ? ` | <strong>Comentario:</strong> ${res.comment}` : ''}
-                                ${res.validator ? ` | <strong>Por:</strong> ${res.validator}` : ''}
-                                ${res.date ? ` | <strong>Fecha:</strong> ${getFormattedDate(res.date)}` : ''}
+                                <strong>${res.room}</strong> - ${res.guest} - ${res.place} - ${convertTo12HourFormat(res.time)} - PAX: ${res.pax}${commentText}
                             </li>
                         `;
                     });
@@ -1193,7 +1202,7 @@
                             h3 { color: #343A40; font-size: 18px; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
                             ul { list-style: none; padding: 0; margin-left: 20px; }
                             li { margin-bottom: 8px; line-height: 1.4; }
-                            li strong { font-weight: 600; min-width: 90px; display: inline-block; }
+                            li strong { font-weight: 600; } /* Para "Habitación" */
                             .print-date-header { text-align: center; font-style: italic; color: #666; margin-bottom: 30px; }
 
                             /* Estilos para cuando realmente se imprime */
