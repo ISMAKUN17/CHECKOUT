@@ -267,6 +267,9 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+            /* Nuevo: Permitir scroll en el overlay si el contenido del modal es muy largo */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Para un scroll más suave en iOS */
         }
 
         .modal-overlay.active {
@@ -279,11 +282,14 @@
             padding: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            width: 90%;
+            width: 90%; /* Ajuste para responsividad */
             max-width: 400px;
             text-align: center;
             transform: translateY(-50px);
             transition: transform var(--transition-speed) ease;
+            box-sizing: border-box; /* Incluir padding en el ancho */
+            position: relative; /* Para posibles elementos dentro como un botón de cerrar absoluto */
+            margin: 20px auto; /* Centrar y añadir margen vertical para scroll */
         }
 
         /* Summary Modal specific styles */
@@ -293,10 +299,13 @@
         }
 
         #summaryModal .modal-content h3 {
-            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color); /* Separador para el título */
             padding-bottom: 10px;
-            margin-bottom: 20px;
         }
+
 
         #summaryModal .summary-restaurant {
             margin-bottom: 20px;
@@ -400,9 +409,19 @@
                 width: 100%;
             }
 
+            /* Ajuste de modals para pantallas pequeñas */
+            .modal-content {
+                width: 95%; /* Ocupa casi todo el ancho */
+                padding: 20px; /* Menor padding para más espacio de contenido */
+                margin: 10px auto; /* Margen más pequeño */
+            }
             #summaryModal .modal-content {
-                width: 95%; /* Ajuste para el resumen en móviles */
-                padding: 20px;
+                max-width: 95%; /* Asegura que el modal de resumen no sea demasiado grande */
+            }
+
+            #summaryModal .summary-reservation-detail {
+                margin-left: 15px; /* Menor indentación en móviles */
+                font-size: 0.85em; /* Fuente un poco más pequeña */
             }
         }
     </style>
@@ -566,6 +585,24 @@
             closeSummaryBtn.addEventListener('click', () => {
                 hideSummaryModal();
             });
+
+            // Nuevo: Evento para cerrar el modal de validación al hacer clic fuera
+            validationModal.addEventListener('click', (e) => {
+                // Solo cerrar si el clic fue directamente en el overlay, no en el contenido del modal
+                if (e.target === validationModal) {
+                    hideValidationModal();
+                    currentReservationData = null; // Descartar los datos si se cancela así
+                }
+            });
+
+            // Nuevo: Evento para cerrar el modal de resumen al hacer clic fuera
+            summaryModal.addEventListener('click', (e) => {
+                // Solo cerrar si el clic fue directamente en el overlay, no en el contenido del modal
+                if (e.target === summaryModal) {
+                    hideSummaryModal();
+                }
+            });
+
 
             // Eventos para actualizar el contador de disponibilidad
             placeSelect.addEventListener('change', () => {
@@ -861,7 +898,9 @@
                             summaryHtml += `
                                 <p class="summary-time">${convertTo12HourFormat(time24h)} (${timeData.pax} PAX):</p>
                             `;
-                            // Ahora iteramos sobre los detalles de cada reserva para ese horario
+                            // Ordenar los detalles de las reservas por número de habitación
+                            timeData.details.sort((a, b) => parseInt(a.room) - parseInt(b.room));
+
                             timeData.details.forEach(detail => {
                                 summaryHtml += `
                                     <p class="summary-reservation-detail">
