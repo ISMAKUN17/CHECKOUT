@@ -165,8 +165,16 @@
             color: #000;
             text-decoration: none;
         }
+        .modal-body h3 {
+            font-size: 1.25rem; /* Large text for section titles */
+            font-weight: 700;
+            color: #374151; /* Tailwind gray-700 */
+            margin-bottom: 1rem; /* More space below headings */
+            border-bottom: 1px solid #e5e7eb; /* Subtle line below section titles */
+            padding-bottom: 0.5rem;
+        }
         .modal-body p {
-            margin-bottom: 10px;
+            margin-bottom: 0.75rem; /* More space between paragraphs */
             font-size: 1rem;
             color: #333;
             line-height: 1.5;
@@ -262,6 +270,11 @@
             .modal-body .rating-detail {
                 padding: 6px 10px;
                 font-size: 1rem;
+            }
+            .modal-body h3 {
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.25rem;
             }
         }
     </style>
@@ -584,28 +597,40 @@
         // --- Mostrar Detalles Completos en el Modal ---
         function displayFullDetailsInModal(data) {
             let htmlContent = `
-                <p><strong>Número de Habitación:</strong> ${data.room || 'N/A'}</p>
-                <p><strong>Nombre:</strong> ${data.name || 'N/A'}</p>
-                <p><strong>Mayordomo:</strong> ${data.butler || 'N/A'}</p>
-                <p><strong>Email:</strong> ${data.email || 'N/A'}</p>
-                <hr class="my-4 border-gray-200">
-                <p class="mb-2"><strong>1. ¿Recomendaría este hotel a su familia y amigos?:</strong>
-                    <span class="rating-detail ${getRatingColorClass(data.q1_recommend)}">${data.q1_recommend || 'N/A'}</span>
-                </p>
-                <p class="mb-2"><strong>2. ¿Cómo calificaría su experiencia general con nosotros?:</strong>
-                    <span class="rating-detail ${getRatingColorClass(data.q2_overall_experience)}">${data.q2_overall_experience || 'N/A'}</span>
-                </p>
-                <p class="mb-2"><strong>3. ¿Cómo calificaría el nivel general de servicio proporcionado por nuestro personal?:</strong>
-                    <span class="rating-detail ${getRatingColorClass(data.q3_staff_service)}">${data.q3_staff_service || 'N/A'}</span>
-                </p>
-                <p class="mb-2"><strong>4. ¿Cómo calificaría su experiencia como huésped Preferred Club?:</strong>
-                    <span class="rating-detail ${getRatingColorClass(data.q4_preferred_club)}">${data.q4_preferred_club || 'N/A'}</span>
-                </p>
-                <hr class="my-4 border-gray-200">
-                <p><strong>Comentarios:</strong> ${data.comments || 'Sin comentarios'}</p>
-                <p class="text-sm text-gray-500 mt-4"><strong>Fecha de Envío:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
-                <p class="text-xs text-gray-400"><strong>ID de Dispositivo:</strong> ${data.deviceId || 'N/A'}</p>
-                <p class="text-xs text-gray-400"><strong>ID de Usuario (Firebase):</strong> ${data.userId || 'N/A'}</p>
+                <div class="modal-section mb-6">
+                    <h3>Información del Huésped</h3>
+                    <p><strong>Número de Habitación:</strong> ${data.room || 'N/A'}</p>
+                    <p><strong>Nombre:</strong> ${data.name || 'N/A'}</p>
+                    <p><strong>Mayordomo:</strong> ${data.butler || 'N/A'}</p>
+                    <p><strong>Email:</strong> ${data.email || 'N/A'}</p>
+                </div>
+                <hr class="my-6 border-gray-300">
+                <div class="modal-section mb-6">
+                    <h3>Respuestas de la Encuesta</h3>
+                    <p><strong>1. ¿Recomendaría este hotel a su familia y amigos?:</strong>
+                        <span class="rating-detail ${getRatingColorClass(data.q1_recommend)}">${data.q1_recommend || 'N/A'}</span>
+                    </p>
+                    <p><strong>2. ¿Cómo calificaría su experiencia general con nosotros?:</strong>
+                        <span class="rating-detail ${getRatingColorClass(data.q2_overall_experience)}">${data.q2_overall_experience || 'N/A'}</span>
+                    </p>
+                    <p><strong>3. ¿Cómo calificaría el nivel general de servicio proporcionado por nuestro personal?:</strong>
+                        <span class="rating-detail ${getRatingColorClass(data.q3_staff_service)}">${data.q3_staff_service || 'N/A'}</span>
+                    </p>
+                    <p><strong>4. ¿Cómo calificaría su experiencia como huésped Preferred Club?:</strong>
+                        <span class="rating-detail ${getRatingColorClass(data.q4_preferred_club)}">${data.q4_preferred_club || 'N/A'}</span>
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-300">
+                <div class="modal-section mb-6">
+                    <h3>Comentarios Adicionales</h3>
+                    <p>${data.comments || 'Sin comentarios'}</p>
+                </div>
+                <hr class="my-6 border-gray-300">
+                <div class="modal-section text-sm text-gray-500">
+                    <p><strong>Fecha de Envío:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
+                    <p class="text-xs text-gray-400"><strong>ID de Dispositivo:</strong> ${data.deviceId || 'N/A'}</p>
+                    <p class="text-xs text-gray-400"><strong>ID de Usuario (Firebase):</strong> ${data.userId || 'N/A'}</p>
+                </div>
             `;
             showModal(htmlContent);
         }
