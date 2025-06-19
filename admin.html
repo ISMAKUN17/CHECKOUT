@@ -269,6 +269,29 @@
             font-size: 1.1em;
         }
 
+        /* Search and Print Controls */
+        .table-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        #adminReservationSearch {
+            flex-grow: 1; /* Permite que el input de búsqueda ocupe espacio */
+            padding: 12px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 1em;
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        #adminReservationSearch:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
         /* Modal Styling */
         .modal-overlay {
             position: fixed;
@@ -353,22 +376,6 @@
             border-top: 1px solid var(--border-color);
         }
 
-        /* Search input styling */
-        #adminReservationSearch {
-            width: calc(100% - 22px);
-            padding: 12px 10px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            font-size: 1em;
-            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
-        }
-        #adminReservationSearch:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-            outline: none;
-        }
-
         /* Responsive Design */
         @media (max-width: 992px) {
             .admin-table th, .admin-table td {
@@ -426,12 +433,12 @@
             .admin-table .actions .btn {
                 width: 100%;
             }
-            .modal-content {
-                width: 95%;
-                padding: 20px;
-            }
-            .modal-actions {
+            .table-controls {
                 flex-direction: column;
+                align-items: stretch;
+            }
+            #adminReservationSearch {
+                width: 100%; /* Make search full width */
             }
         }
 
@@ -450,6 +457,111 @@
                 padding: 10px 8px;
             }
         }
+
+        /* --- Estilos para Impresión --- */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: none;
+                font-family: 'Times New Roman', serif; /* Fuente más formal para impresión */
+                color: black;
+                font-size: 12pt;
+            }
+            .container, section, .modal-overlay, .modal-content, .header, .add-reservation-section,
+            .table-controls, .btn, .form-grid, .form-group, label, input, select, textarea {
+                box-shadow: none !important;
+                border: none !important;
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                color: black !important;
+                width: auto !important;
+                max-width: none !important;
+                overflow: visible !important;
+            }
+
+            .header, .add-reservation-section, .modal-overlay, .modal-content, /* Esconde la UI */
+            .table-controls .btn-primary, /* Esconde el botón de búsqueda si lo hubiera */
+            #adminReservationSearch, /* Esconde la barra de búsqueda */
+            .admin-table .actions, /* Esconde los botones de Editar/Eliminar en la tabla */
+            a[href] { /* Esconde enlaces */
+                display: none !important;
+            }
+
+            .manage-reservations-section {
+                padding: 0; /* Asegura que no haya padding extra */
+            }
+
+            .admin-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .admin-table th,
+            .admin-table td {
+                border: 1px solid #ccc !important;
+                padding: 8px 10px !important;
+                font-size: 10pt !important;
+                white-space: normal; /* Permite que el texto se envuelva */
+            }
+            .admin-table th {
+                background-color: #eee !important;
+                color: black !important;
+            }
+            .admin-table tbody tr:nth-child(even) {
+                background-color: #f9f9f9 !important;
+            }
+            .admin-table tbody tr:hover {
+                background-color: #f9f9f9 !important; /* Deshabilita el hover en impresión */
+            }
+
+            h1, h2 {
+                color: black !important;
+                text-align: center;
+                margin-bottom: 15px !important;
+            }
+            h1 {
+                font-size: 18pt !important;
+                margin-top: 20px !important;
+            }
+            h2 {
+                font-size: 14pt !important;
+            }
+
+            /* Estilos específicos para la ventana de impresión generada */
+            .print-page-content {
+                margin: 20px;
+            }
+            .print-page-content h3 {
+                font-size: 16pt;
+                margin-top: 25px;
+                margin-bottom: 10px;
+                border-bottom: 1px dashed #999;
+                padding-bottom: 5px;
+            }
+            .print-page-content ul {
+                list-style: none;
+                padding: 0;
+                margin: 0 0 15px 0;
+            }
+            .print-page-content ul li {
+                margin-bottom: 5px;
+                font-size: 11pt;
+            }
+            .print-page-content ul li strong {
+                display: inline-block;
+                min-width: 80px; /* Alineación de etiquetas */
+            }
+            .print-page-content .print-date-header {
+                text-align: center;
+                font-size: 14pt;
+                font-weight: bold;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 5px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -510,7 +622,10 @@
 
         <section class="manage-reservations-section">
             <h2>Gestionar Reservas Existentes</h2>
-            <input type="text" id="adminReservationSearch" placeholder="Buscar por habitación, comensal, restaurante o fecha...">
+            <div class="table-controls">
+                <input type="text" id="adminReservationSearch" placeholder="Buscar por habitación, comensal, restaurante o fecha...">
+                <button type="button" id="printReservationsBtn" class="btn btn-info">Imprimir Reservas</button>
+            </div>
             <div class="table-container">
                 <table class="admin-table">
                     <thead>
@@ -614,6 +729,7 @@
             const adminReservationSearchInput = document.getElementById('adminReservationSearch');
             const loadingMessage = document.getElementById('loadingMessage');
             const noReservationsAdminMessage = document.getElementById('noReservationsAdminMessage');
+            const printReservationsBtn = document.getElementById('printReservationsBtn'); // Nuevo botón de impresión
 
             // Elementos del modal de edición
             const editReservationModal = document.getElementById('editReservationModal');
@@ -621,7 +737,7 @@
             const editReservationIdInput = document.getElementById('editReservationId');
             const editDateInput = document.getElementById('editDate');
             const editRoomInput = document.getElementById('editRoom');
-            const editGuestInput = document.getElementById('editGuest');
+            const editGuestInput = document = document.getElementById('editGuest');
             const editPlaceSelect = document.getElementById('editPlace');
             const editTimeInput = document.getElementById('editTime');
             const editPaxInput = document.getElementById('editPax');
@@ -633,6 +749,7 @@
             let allReservations = []; // Contendrá todas las reservas (del día y archivadas)
             let dailyReservationsData = []; // Cache para dailyReservations
             let archivedReservationsData = []; // Cache para archivedReservations
+            let currentFilteredReservations = []; // Para almacenar las reservas actualmente filtradas/mostradas
 
 
             // --- Funciones de Utilidad de Fecha y Hora ---
@@ -644,11 +761,9 @@
             function getFormattedDate(dateString) {
                 if (!dateString) return 'Fecha desconocida';
                 try {
-                    // Firebase Realtime Database almacena las fechas como strings YYYY-MM-DD.
-                    // Para evitar problemas de zona horaria al parsear, añadimos una hora fija.
-                    const date = new Date(dateString + 'T12:00:00');
+                    const date = new Date(dateString + 'T12:00:00'); // Añadir T12:00:00 para evitar problemas de zona horaria
                     if (isNaN(date.getTime())) {
-                        return dateString; // Si no es una fecha válida, devolver el string original
+                        return dateString;
                     }
                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
                     return date.toLocaleDateString('es-ES', options);
@@ -723,8 +838,7 @@
                 allReservations = [...dailyReservationsData, ...archivedReservationsData];
 
                 loadingMessage.style.display = 'none';
-                renderAdminReservationsTable(); // Renderizar con los datos más recientes
-                filterAdminReservations(); // Re-aplicar el filtro si existe
+                filterAdminReservations(); // Esto llamará a renderAdminReservationsTable
             }
 
 
@@ -763,7 +877,7 @@
                 };
 
                 try {
-                    // Siempre agregar a dailyReservations bajo la fecha especificada
+                    // Siempre agregar a dailyReservations under the specified date
                     const reservationsRef = ref(database, `dailyReservations/${date}`);
                     await push(reservationsRef, newReservation);
                     alert('Reserva agregada con éxito!');
@@ -811,7 +925,7 @@
                 };
 
                 try {
-                    if (originalDate === newDate) { // Si la fecha de la reserva no cambia
+                    if (originalDate === newDate) { // If reservation date doesn't change
                         let path;
                         if (originalType === 'daily') {
                             path = `dailyReservations/${originalDate}/${id}`;
@@ -819,8 +933,8 @@
                             path = `archivedReservations/${originalDate}/${id}`;
                         }
                         await update(ref(database, path), updatedReservation);
-                    } else { // Si la fecha de la reserva ha cambiado
-                        // Primero, eliminar de la ubicación antigua
+                    } else { // If reservation date has changed
+                        // First, remove from old location
                         let oldPath;
                         if (originalType === 'daily') {
                             oldPath = `dailyReservations/${originalDate}/${id}`;
@@ -830,11 +944,11 @@
                         await remove(ref(database, oldPath));
                         console.log("Reserva eliminada de la ubicación antigua:", oldPath);
 
-                        // Luego, añadirla a la nueva ubicación (siempre como 'daily' en la nueva fecha)
-                        // El sistema de archivado del `index.html` se encargará de moverla a 'archived' si es una fecha pasada.
+                        // Then, add it to the new location (always as 'daily' under the new date)
+                        // The archiving system of `index.html` will handle moving it to 'archived' if it's a past date.
                         const newReservationsRef = ref(database, `dailyReservations/${newDate}`);
                         const newRef = push(newReservationsRef);
-                        await set(newRef, { ...updatedReservation, timestamp: new Date().getTime() }); // Asegurar nuevo timestamp y ID
+                        await set(newRef, { ...updatedReservation, timestamp: new Date().getTime() }); // Ensure new timestamp and ID
                         console.log("Reserva añadida a la nueva ubicación:", newDate);
                     }
 
@@ -873,6 +987,7 @@
 
             function renderAdminReservationsTable(filteredReservations = allReservations) {
                 adminReservationsTableBody.innerHTML = '';
+                currentFilteredReservations = filteredReservations; // Guarda las reservas que se muestran actualmente
 
                 // Ordenar por fecha (más reciente primero), luego restaurante, luego hora, luego habitación
                 filteredReservations.sort((a, b) => {
@@ -999,6 +1114,96 @@
                     hideEditModal();
                 }
             });
+
+            // --- Funcionalidad de Impresión ---
+            printReservationsBtn.addEventListener('click', printReservations);
+
+            function printReservations() {
+                if (currentFilteredReservations.length === 0) {
+                    alert('No hay reservas para imprimir. Por favor, asegúrese de que la tabla no esté vacía.');
+                    return;
+                }
+
+                // Agrupar reservas por restaurante
+                const reservationsByRestaurant = currentFilteredReservations.reduce((acc, res) => {
+                    if (!acc[res.place]) {
+                        acc[res.place] = [];
+                    }
+                    acc[res.place].push(res);
+                    return acc;
+                }, {});
+
+                let printContent = `
+                    <div class="print-page-content">
+                        <h1>Reservas del Restaurante Xcaret</h1>
+                        <p class="print-date-header">Fecha de Impresión: ${getFormattedDate(getTodayDateString())}</p>
+                `;
+
+                // Ordenar los restaurantes alfabéticamente
+                const sortedRestaurants = Object.keys(reservationsByRestaurant).sort();
+
+                sortedRestaurants.forEach(place => {
+                    printContent += `<h3>${place}</h3>`;
+                    printContent += `<ul>`;
+
+                    // Ordenar las reservas dentro de cada restaurante por hora
+                    reservationsByRestaurant[place].sort((a, b) => a.time.localeCompare(b.time));
+
+                    reservationsByRestaurant[place].forEach(res => {
+                        printContent += `
+                            <li>
+                                <strong>Hora:</strong> ${convertTo12HourFormat(res.time)} |
+                                <strong>Hab:</strong> ${res.room} |
+                                <strong>Comensal:</strong> ${res.guest} |
+                                <strong>PAX:</strong> ${res.pax}
+                                ${res.comment ? ` | <strong>Comentario:</strong> ${res.comment}` : ''}
+                                ${res.validator ? ` | <strong>Por:</strong> ${res.validator}` : ''}
+                                ${res.date ? ` | <strong>Fecha:</strong> ${getFormattedDate(res.date)}` : ''}
+                            </li>
+                        `;
+                    });
+                    printContent += `</ul>`;
+                });
+
+                printContent += `</div>`;
+
+                const printWindow = window.open('', '_blank', 'height=800,width=1000');
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Imprimir Reservas</title>
+                        <style>
+                            /* Estilos para la ventana de impresión, optimizados para papel */
+                            body { font-family: 'Poppins', sans-serif; margin: 20px; color: #333; }
+                            h1 { text-align: center; color: #007BFF; font-size: 24px; margin-bottom: 20px; }
+                            h3 { color: #343A40; font-size: 18px; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+                            ul { list-style: none; padding: 0; margin-left: 20px; }
+                            li { margin-bottom: 8px; line-height: 1.4; }
+                            li strong { font-weight: 600; min-width: 90px; display: inline-block; }
+                            .print-date-header { text-align: center; font-style: italic; color: #666; margin-bottom: 30px; }
+
+                            /* Estilos para cuando realmente se imprime */
+                            @media print {
+                                body { margin: 10mm; font-size: 10pt; }
+                                h1 { font-size: 20pt; }
+                                h3 { font-size: 14pt; margin-top: 15px; }
+                                li { font-size: 9pt; }
+                                .print-date-header { font-size: 10pt; }
+                                ul { margin-left: 10px; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${printContent}
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                // printWindow.close(); // Puedes descomentar esto si quieres que la ventana se cierre automáticamente después de imprimir
+            }
+
 
             // Iniciar los listeners de Firebase al cargar la página
             setupFirebaseListeners();
