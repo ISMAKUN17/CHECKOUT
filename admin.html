@@ -163,6 +163,8 @@
         input[type="text"],
         input[type="number"],
         input[type="datetime-local"],
+        input[type="date"], /* Asegúrate de incluir el tipo date */
+        input[type="time"], /* Asegúrate de incluir el tipo time */
         select,
         textarea {
             width: calc(100% - 20px);
@@ -542,6 +544,9 @@
             const modalCloseButtons = document.querySelectorAll('.modal-close-btn');
 
             let allReservations = []; // Contendrá todas las reservas (del día y archivadas)
+            let dailyReservationsData = []; // Cache para dailyReservations
+            let archivedReservationsData = []; // Cache para archivedReservations
+
 
             // --- Funciones de Utilidad de Fecha y Hora ---
             function getTodayDateString() {
@@ -552,20 +557,17 @@
             function getFormattedDate(dateString) {
                 if (!dateString) return 'Fecha desconocida';
                 try {
-                    // Si ya tiene un timestamp de Firebase o es una fecha ISO, intentar parsearla
-                    const date = new Date(dateString + 'T12:00:00'); // Añadir T12:00:00 para evitar problemas de zona horaria
-                    if (isNaN(date.getTime())) { // Si sigue siendo inválida, puede ser un timestamp numérico
-                        const timestampDate = new Date(parseInt(dateString, 10));
-                         if (isNaN(timestampDate.getTime())) {
-                            return dateString; // Si nada funciona, devolver el string original
-                         }
-                         return timestampDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    // Firebase Realtime Database almacena las fechas como strings YYYY-MM-DD.
+                    // Para evitar problemas de zona horaria al parsear, añadimos una hora fija.
+                    const date = new Date(dateString + 'T12:00:00');
+                    if (isNaN(date.getTime())) {
+                        return dateString; // Si no es una fecha válida, devolver el string original
                     }
                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
                     return date.toLocaleDateString('es-ES', options);
                 } catch (e) {
                     console.error("Error formatting date:", dateString, e);
-                    return dateString; // En caso de error, devolver el string original
+                    return dateString;
                 }
             }
 
@@ -580,67 +582,64 @@
 
             // --- Funciones de Interacción con Firebase ---
 
-            // Cargar todas las reservas (diarias y archivadas)
-            async function loadAllReservations() {
+            // Configurar listeners para la carga en tiempo real de todas las reservas
+            function setupFirebaseListeners() {
                 loadingMessage.style.display = 'block';
                 noReservationsAdminMessage.style.display = 'none';
-                allReservations = [];
 
-                try {
-                    // Obtener todas las reservas diarias
-                    const dailySnapshot = await onValue(ref(database, 'dailyReservations'), (snapshot) => {
-                        const data = snapshot.val();
-                        const todayReservations = [];
-                        if (data) {
-                            for (const dateKey in data) {
+                // Listener para dailyReservations (todos los nodos de fecha dentro)
+                onValue(ref(database, 'dailyReservations'), (snapshot) => {
+                    const data = snapshot.val();
+                    dailyReservationsData = [];
+                    if (data) {
+                        for (const dateKey in data) {
+                            if (data.hasOwnProperty(dateKey)) {
                                 for (const resKey in data[dateKey]) {
-                                    todayReservations.push({ id: resKey, date: dateKey, ...data[dateKey][resKey] });
+                                    if (data[dateKey].hasOwnProperty(resKey)) {
+                                        dailyReservationsData.push({ id: resKey, date: dateKey, ...data[dateKey][resKey], type: 'daily' });
+                                    }
                                 }
                             }
                         }
-                        // Aquí, las 'dailyReservations' incluyen todas las fechas aún no archivadas.
-                        // La lógica de archivado asegura que solo la fecha actual persista en 'dailyReservations/YYYY-MM-DD'.
-                        // Entonces, es más preciso cargar 'dailyReservations/TODAY' y 'archivedReservations'.
-                        // Para el admin, necesitamos _todas_ las reservas, lo que implica recorrer todo el nodo 'dailyReservations'
-                        // y el nodo 'archivedReservations'.
+                    }
+                    updateCombinedReservations();
+                }, (error) => {
+                    console.error("Error fetching daily reservations:", error);
+                    alert("Error al cargar reservas activas. Por favor, revise la conexión a Firebase.");
+                });
 
-                        // Actualizar la lista completa de reservas
-                        updateAllReservationsList(todayReservations, archivedReservations);
-                    }, { onlyOnce: false }); // Escuchar en tiempo real para cambios en reservas diarias
-
-                    // Obtener todas las reservas archivadas
-                    const archiveSnapshot = await onValue(ref(database, 'archivedReservations'), (snapshot) => {
-                        const archivedData = snapshot.val();
-                        const loadedArchived = [];
-                        if (archivedData) {
-                            for (const dateKey in archivedData) {
-                                for (const resKey in archivedData[dateKey]) {
-                                    loadedArchived.push({ id: resKey, archiveDate: dateKey, ...archivedData[dateKey][resKey] });
+                // Listener para archivedReservations (todos los nodos de fecha dentro)
+                onValue(ref(database, 'archivedReservations'), (snapshot) => {
+                    const data = snapshot.val();
+                    archivedReservationsData = [];
+                    if (data) {
+                        for (const dateKey in data) {
+                            if (data.hasOwnProperty(dateKey)) {
+                                for (const resKey in data[dateKey]) {
+                                    if (data[dateKey].hasOwnProperty(resKey)) {
+                                        archivedReservationsData.push({ id: resKey, date: dateKey, ...data[dateKey][resKey], type: 'archived' });
+                                    }
                                 }
                             }
                         }
-                        // Actualizar la lista completa de reservas
-                        updateAllReservationsList(reservations, loadedArchived);
-                    }, { onlyOnce: false }); // Escuchar en tiempo real para cambios en archivadas
-
-                } catch (error) {
-                    console.error("Error al cargar todas las reservas:", error);
-                    alert("Error al cargar los datos de las reservas. Por favor, intente de nuevo.");
-                } finally {
-                    loadingMessage.style.display = 'none';
-                }
+                    }
+                    updateCombinedReservations();
+                }, (error) => {
+                    console.error("Error fetching archived reservations:", error);
+                    alert("Error al cargar reservas archivadas. Por favor, revise la conexión a Firebase.");
+                });
             }
 
-            // Función auxiliar para combinar y actualizar la lista global de reservas
-            function updateAllReservationsList(daily = [], archived = []) {
-                 // Filtrar las reservas diarias para que solo sean las del día actual (si el sistema de index.html ya las archivó)
-                const today = getTodayDateString();
-                const currentDailyReservations = daily.filter(res => res.date === today);
+            // Función para combinar y actualizar la lista global de reservas
+            function updateCombinedReservations() {
+                // Combinar todas las reservas diarias y archivadas
+                allReservations = [...dailyReservationsData, ...archivedReservationsData];
 
-                // La lista 'allReservations' debe ser una combinación de las del día actual y todas las archivadas.
-                allReservations = [...currentDailyReservations, ...archived];
-                renderAdminReservationsTable();
-                filterAdminReservations(); // Aplicar filtro si hay búsqueda
+                // console.log("Combined Reservations:", allReservations); // Debugging
+
+                loadingMessage.style.display = 'none';
+                renderAdminReservationsTable(); // Renderizar con los datos más recientes
+                filterAdminReservations(); // Re-aplicar el filtro si existe
             }
 
 
@@ -679,7 +678,7 @@
                 };
 
                 try {
-                    // Guardar siempre en la ruta 'dailyReservations/YYYY-MM-DD' según la fecha ingresada
+                    // Siempre agregar a dailyReservations bajo la fecha especificada
                     const reservationsRef = ref(database, `dailyReservations/${date}`);
                     await push(reservationsRef, newReservation);
                     alert('Reserva agregada con éxito!');
@@ -695,7 +694,9 @@
                 e.preventDefault();
 
                 const id = editReservationIdInput.value;
-                const date = editDateInput.value; // La fecha original de la reserva
+                const originalDate = editReservationIdInput.dataset.originalDate; // Fecha de la reserva original
+                const originalType = editReservationIdInput.dataset.originalType; // 'daily' o 'archived'
+                const newDate = editDateInput.value; // La fecha que se ha ingresado en el formulario de edición
                 const room = editRoomInput.value;
                 const guest = editGuestInput.value;
                 const place = editPlaceSelect.value;
@@ -704,43 +705,14 @@
                 const comment = editCommentInput.value;
                 const validator = editValidatorInput.value;
 
-                if (!id || !date || !room || !guest || !place || !time || !pax || !validator) {
+                if (!id || !originalDate || !room || !guest || !place || !time || !pax || !validator || !newDate) {
                     alert('Por favor, complete todos los campos para editar.');
                     return;
                 }
-                 if (room.length !== 4 || isNaN(room) || parseInt(room, 10) < 1000 || parseInt(room, 10) > 9999) {
+                if (room.length !== 4 || isNaN(room) || parseInt(room, 10) < 1000 || parseInt(room, 10) > 9999) {
                     alert('Por favor, ingrese un número de habitación válido de 4 dígitos (ej. 1000-9999).');
                     return;
                 }
-
-                // Determinar si la reserva está en dailyReservations o archivedReservations
-                // Tendremos que buscar la reserva por ID para saber su ruta original
-                let reservationPath = null;
-                const existingRes = allReservations.find(res => res.id === id);
-
-                if (existingRes) {
-                    if (existingRes.date && existingRes.date === date) { // Si la fecha original coincide, está en dailyReservations (o estaba ahí antes de archivarla temporalmente)
-                        reservationPath = `dailyReservations/${date}/${id}`;
-                    } else if (existingRes.archiveDate && existingRes.archiveDate === date) { // Si tiene archiveDate y coincide con la fecha de la reserva, está archivada
-                         reservationPath = `archivedReservations/${date}/${id}`;
-                    } else { // Si la fecha fue cambiada en la edición, hay que reubicarla
-                        // Esto es más complejo: si la fecha cambia, deberíamos eliminar la antigua
-                        // y crear una nueva en la nueva fecha. Por simplicidad, asumiremos que
-                        // la fecha de la reserva editada no cambia, o que si lo hace, estamos
-                        // moviendo entre daily y archived para la misma fecha.
-                        // Para un cambio de fecha arbitrario, necesitarías una lógica de MOVE:
-                        // 1. Eliminar de la ubicación antigua.
-                        // 2. Añadir a la nueva ubicación.
-                        alert("Cambiar la fecha de una reserva es una operación compleja. Actualmente no soportado directamente. Si la fecha es diferente, por favor, elimine y vuelva a agregar.");
-                        return;
-                    }
-                }
-
-                if (!reservationPath) {
-                    alert("No se pudo encontrar la ruta de la reserva para actualizar.");
-                    return;
-                }
-
 
                 const updatedReservation = {
                     room: room,
@@ -750,13 +722,38 @@
                     pax: pax,
                     comment: comment,
                     validator: validator,
-                    // Mantener timestamp original si existe, o actualizar si es necesario
-                    timestamp: existingRes.timestamp || new Date().getTime(),
-                    date: date // Asegurar que la fecha editada se guarda
+                    date: newDate // Actualizar la fecha de la reserva
                 };
 
                 try {
-                    await update(ref(database, reservationPath), updatedReservation);
+                    if (originalDate === newDate && originalType === 'daily') {
+                        // Si la fecha no cambia y es una reserva diaria
+                        await update(ref(database, `dailyReservations/${originalDate}/${id}`), updatedReservation);
+                    } else if (originalDate === newDate && originalType === 'archived') {
+                        // Si la fecha no cambia y es una reserva archivada
+                        await update(ref(database, `archivedReservations/${originalDate}/${id}`), updatedReservation);
+                    } else {
+                        // Si la fecha de la reserva ha cambiado, o si se está moviendo entre daily/archived
+                        // Primero, eliminar de la ubicación antigua
+                        let oldPath;
+                        if (originalType === 'daily') {
+                            oldPath = `dailyReservations/${originalDate}/${id}`;
+                        } else { // originalType === 'archived'
+                            oldPath = `archivedReservations/${originalDate}/${id}`;
+                        }
+                        await remove(ref(database, oldPath));
+                        console.log("Reserva eliminada de la ubicación antigua:", oldPath);
+
+                        // Luego, añadirla a la nueva ubicación (siempre como 'daily' si la fecha es de hoy, sino 'archived')
+                        // Esto simplifica la lógica, asumiendo que el archivado automático de index.html se encargará
+                        // de moverla a 'archived' si es una fecha pasada.
+                        const newPath = `dailyReservations/${newDate}`; // La creamos como 'daily' y el sistema de archivado la moverá si es necesario.
+                        const newRef = push(ref(database, newPath));
+                        await set(newRef, { ...updatedReservation, id: newRef.key }); // Guardar con el nuevo ID si se genera uno nuevo
+
+                        console.log("Reserva añadida a la nueva ubicación:", newPath);
+                    }
+
                     alert('Reserva actualizada con éxito!');
                     hideEditModal();
                 } catch (error) {
@@ -766,15 +763,15 @@
             });
 
             // Eliminar una reserva
-            async function deleteReservation(reservationId, reservationDate, isArchived = false) {
+            async function deleteReservation(reservationId, reservationDate, reservationType) {
                 if (!confirm('¿Está seguro de que desea eliminar esta reserva? Esta acción no se puede deshacer.')) {
                     return;
                 }
 
                 let path;
-                if (isArchived) {
+                if (reservationType === 'archived') {
                     path = `archivedReservations/${reservationDate}/${reservationId}`;
-                } else {
+                } else { // type === 'daily'
                     path = `dailyReservations/${reservationDate}/${reservationId}`;
                 }
 
@@ -792,12 +789,11 @@
 
             function renderAdminReservationsTable(filteredReservations = allReservations) {
                 adminReservationsTableBody.innerHTML = '';
-                loadingMessage.style.display = 'none';
 
                 // Ordenar por fecha (más reciente primero), luego restaurante, luego hora, luego habitación
                 filteredReservations.sort((a, b) => {
-                    const dateA = a.date || a.archiveDate;
-                    const dateB = b.date || b.archiveDate;
+                    const dateA = a.date;
+                    const dateB = b.date;
                     const dateComparison = new Date(dateB).getTime() - new Date(dateA).getTime();
                     if (dateComparison !== 0) return dateComparison;
 
@@ -817,10 +813,11 @@
                     noReservationsAdminMessage.style.display = 'none';
                     filteredReservations.forEach(res => {
                         const row = adminReservationsTableBody.insertRow();
-                        const displayDate = res.date || res.archiveDate; // Usar 'date' si existe, sino 'archiveDate'
+                        // Determinar si es una reserva diaria (activa) o archivada para los botones de acción
+                        const reservationType = res.type; // 'daily' o 'archived'
 
                         row.innerHTML = `
-                            <td>${getFormattedDate(displayDate)}</td>
+                            <td>${getFormattedDate(res.date)}</td>
                             <td>${res.room}</td>
                             <td>${res.guest}</td>
                             <td>${res.place}</td>
@@ -829,8 +826,8 @@
                             <td>${res.comment || ''}</td>
                             <td>${res.validator || ''}</td>
                             <td class="actions">
-                                <button class="btn btn-warning btn-sm" data-id="${res.id}" data-date="${displayDate}" data-is-archived="${!!res.archiveDate}">Editar</button>
-                                <button class="btn btn-danger btn-sm" data-id="${res.id}" data-date="${displayDate}" data-is-archived="${!!res.archiveDate}">Eliminar</button>
+                                <button class="btn btn-warning btn-sm" data-id="${res.id}" data-date="${res.date}" data-type="${reservationType}">Editar</button>
+                                <button class="btn btn-danger btn-sm" data-id="${res.id}" data-date="${res.date}" data-type="${reservationType}">Eliminar</button>
                             </td>
                         `;
                     });
@@ -852,7 +849,7 @@
                     const timeMatches = convertTo12HourFormat(res.time).toLowerCase().includes(searchTerm);
                     const commentMatches = (res.comment || '').toLowerCase().includes(searchTerm);
                     const validatorMatches = (res.validator || '').toLowerCase().includes(searchTerm);
-                    const dateMatches = getFormattedDate(res.date || res.archiveDate).toLowerCase().includes(searchTerm) || (res.date || res.archiveDate).includes(searchTerm);
+                    const dateMatches = getFormattedDate(res.date).toLowerCase().includes(searchTerm) || res.date.includes(searchTerm);
 
                     return roomMatches || guestMatches || restaurantMatches || timeMatches || commentMatches || validatorMatches || dateMatches;
                 });
@@ -867,25 +864,30 @@
             adminReservationsTableBody.addEventListener('click', (e) => {
                 if (e.target.tagName === 'BUTTON') {
                     const id = e.target.dataset.id;
-                    const date = e.target.dataset.date;
-                    const isArchived = e.target.dataset.isArchived === 'true'; // Convertir a booleano
+                    const date = e.target.dataset.date; // Fecha de la reserva como string YYYY-MM-DD
+                    const type = e.target.dataset.type; // 'daily' o 'archived'
 
                     if (e.target.textContent === 'Editar') {
-                        const reservationToEdit = allReservations.find(res => res.id === id && (res.date === date || res.archiveDate === date));
+                        // Buscar la reserva por ID y fecha para asegurar la correcta
+                        const reservationToEdit = allReservations.find(res => res.id === id && res.date === date && res.type === type);
                         if (reservationToEdit) {
                             showEditModal(reservationToEdit);
                         } else {
                             alert('No se encontró la reserva para editar.');
                         }
                     } else if (e.target.textContent === 'Eliminar') {
-                        deleteReservation(id, date, isArchived);
+                        deleteReservation(id, date, type);
                     }
                 }
             });
 
             function showEditModal(reservation) {
                 editReservationIdInput.value = reservation.id;
-                editDateInput.value = reservation.date || reservation.archiveDate; // Usar la fecha de la reserva/archivo
+                // Guardar la fecha y tipo original en un dataset para usar en la actualización
+                editReservationIdInput.dataset.originalDate = reservation.date;
+                editReservationIdInput.dataset.originalType = reservation.type;
+
+                editDateInput.value = reservation.date;
                 editRoomInput.value = reservation.room;
                 editGuestInput.value = reservation.guest;
                 editPlaceSelect.value = reservation.place;
@@ -915,8 +917,8 @@
                 }
             });
 
-            // Cargar reservas al iniciar la página de administración
-            loadAllReservations();
+            // Iniciar los listeners de Firebase al cargar la página
+            setupFirebaseListeners();
         });
     </script>
 </body>
