@@ -64,6 +64,8 @@
         .header .buttons-group {
             display: flex;
             gap: 10px; /* Espacio entre los botones */
+            flex-wrap: wrap; /* Para que los botones se ajusten en móviles */
+            justify-content: flex-end; /* Alinea los botones a la derecha */
         }
 
 
@@ -209,7 +211,8 @@
             gap: 15px; /* Espacio entre el buscador y la lista */
         }
 
-        #reservationSearch {
+        #reservationSearch,
+        #archiveSearch { /* Estilos compartidos para ambos buscadores */
             width: calc(100% - 20px); /* Ajuste para padding */
             padding: 12px 10px;
             border: 1px solid var(--border-color);
@@ -219,7 +222,8 @@
             margin-bottom: 5px; /* Pequeño espacio debajo del buscador */
         }
 
-        #reservationSearch:focus {
+        #reservationSearch:focus,
+        #archiveSearch:focus {
             outline: none;
             border-color: var(--accent-color);
             box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
@@ -232,6 +236,9 @@
             padding: 0;
             margin: 0;
             list-style: none; /* Quitar viñetas de lista */
+            max-height: 500px; /* Altura máxima para la lista scrollable */
+            overflow-y: auto; /* Scroll vertical */
+            padding-right: 5px; /* Espacio para la barra de scroll */
         }
 
         .reservation-item {
@@ -246,6 +253,10 @@
             justify-content: space-between; /* Alinea los elementos al inicio y al final */
             align-items: center; /* Centra verticalmente */
             flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+        }
+
+        .reservation-item.archived {
+            border-left: 5px solid #607D8B; /* Color diferente para archivados */
         }
 
         .reservation-item span {
@@ -272,6 +283,16 @@
             padding: 4px 8px;
             border-radius: 4px;
             margin-left: auto; /* Empuja el PAX al final */
+        }
+
+        .reservation-item .archive-date {
+            font-size: 0.85em;
+            color: var(--light-text-color);
+            margin-top: 5px;
+            flex-basis: 100%; /* Ocupa toda la línea inferior */
+            text-align: right;
+            border-top: 1px dashed rgba(0,0,0,0.05);
+            padding-top: 5px;
         }
 
 
@@ -367,11 +388,13 @@
 
 
         /* Summary Modal specific styles */
-        #summaryModal .modal-content {
+        #summaryModal .modal-content,
+        #archiveModal .modal-content { /* Aplicar a ambos modales de lista */
             max-width: 700px;
             text-align: left;
         }
-        #summaryModal .modal-content h3 {
+        #summaryModal .modal-content h3,
+        #archiveModal .modal-content h3 {
             color: var(--primary-color);
             margin-top: 0;
             margin-bottom: 15px;
@@ -380,8 +403,9 @@
             text-align: center;
         }
 
-        /* Contenido del resumen con scroll */
-        #summaryContent {
+        /* Contenido del resumen/archivo con scroll */
+        #summaryContent,
+        #archiveListContent {
             flex-grow: 1;
             overflow-y: auto;
             padding-right: 10px;
@@ -513,7 +537,8 @@
                 margin: 10px auto;
                 max-height: 95vh;
             }
-            #summaryModal .modal-content {
+            #summaryModal .modal-content,
+            #archiveModal .modal-content {
                 max-width: 95%;
             }
 
@@ -550,6 +575,9 @@
                 margin-left: 0; /* Quitar margen automático */
                 margin-top: 5px; /* Espacio arriba */
             }
+            .reservation-item .archive-date {
+                text-align: left; /* Ajustar en móviles */
+            }
         }
     </style>
 </head>
@@ -563,6 +591,9 @@
                 </button>
                 <button id="viewSummaryBtn" class="btn btn-secondary">
                     Ver Resumen de Reservas
+                </button>
+                <button id="viewArchiveBtn" class="btn btn-secondary">
+                    Ver Archivo de Reservas
                 </button>
             </div>
         </header>
@@ -649,10 +680,25 @@
         </div>
     </div>
 
+    <div id="archiveModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" data-modal="archiveModal">&times;</button>
+            <h3 id="archiveTitle">Archivo de Reservas Históricas</h3>
+            <input type="text" id="archiveSearch" placeholder="Buscar en el archivo por habitación, comensal o fecha...">
+            <div id="archiveListContent" class="reservation-list">
+                <p class="no-reservations" id="noArchivedReservationsMessage">No hay reservas archivadas.</p>
+            </div>
+            <div class="modal-actions">
+                <button id="closeArchiveBtn" class="btn btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const addReservationBtn = document.getElementById('addReservationBtn');
             const viewSummaryBtn = document.getElementById('viewSummaryBtn');
+            const viewArchiveBtn = document.getElementById('viewArchiveBtn'); // Nuevo botón de archivo
             const reservationForm = document.getElementById('reservationForm');
             const reservationListDiv = document.getElementById('reservationList');
             const noReservationsMessage = document.getElementById('noReservationsMessage');
@@ -667,6 +713,13 @@
             const overallPaxTotal = document.getElementById('overallPaxTotal');
             const closeSummaryBtn = document.getElementById('closeSummaryBtn');
 
+            const archiveModal = document.getElementById('archiveModal'); // Nuevo modal de archivo
+            const archiveTitle = document.getElementById('archiveTitle');
+            const archiveSearchInput = document.getElementById('archiveSearch'); // Buscador del archivo
+            const archiveListContent = document.getElementById('archiveListContent');
+            const noArchivedReservationsMessage = document.getElementById('noArchivedReservationsMessage');
+            const closeArchiveBtn = document.getElementById('closeArchiveBtn');
+
             const modalCloseButtons = document.querySelectorAll('.modal-close-btn');
 
             const roomInput = document.getElementById('room');
@@ -675,10 +728,12 @@
             const paxInput = document.getElementById('pax');
             const availabilityInfo = document.getElementById('availabilityInfo');
 
-            const reservationSearchInput = document.getElementById('reservationSearch'); // Nuevo: campo de búsqueda
+            const reservationSearchInput = document.getElementById('reservationSearch');
 
-            let reservations = [];
+            let reservations = []; // Reservas del día actual
+            let archivedReservations = []; // Reservas de días anteriores
             let currentReservationData = null;
+            let lastAccessDate = localStorage.getItem('lastAccessDate'); // Fecha del último acceso
 
             const restaurantTimes = {
                 "El Patio": ["18:00", "21:00"],
@@ -698,18 +753,72 @@
                 "El Olio": 8
             };
 
-            // Cargar reservas guardadas al iniciar
-            loadReservations();
+            // --- Funciones de Utilidad de Fecha ---
+            function getTodayDateString() {
+                const today = new Date();
+                return today.toISOString().slice(0, 10); // Formato YYYY-MM-DD
+            }
+
+            function getFormattedDate(dateString) {
+                const date = new Date(dateString + 'T12:00:00'); // Añadir T12:00:00 para evitar problemas de zona horaria
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('es-ES', options);
+            }
+
+            // --- Lógica de Carga y Archivamiento ---
+            function loadAndArchiveReservations() {
+                const today = getTodayDateString();
+                const storedReservations = localStorage.getItem('restaurantReservations');
+                const storedArchivedReservations = localStorage.getItem('archivedReservations');
+
+                if (storedArchivedReservations) {
+                    archivedReservations = JSON.parse(storedArchivedReservations);
+                }
+
+                if (lastAccessDate !== today) {
+                    // Es un nuevo día, archivar las reservas anteriores si existen
+                    if (storedReservations) {
+                        const previousDayReservations = JSON.parse(storedReservations);
+                        if (previousDayReservations.length > 0) {
+                            // Añadir la fecha de archivo a cada reserva antes de moverla
+                            previousDayReservations.forEach(res => {
+                                res.archiveDate = lastAccessDate || 'Fecha desconocida'; // Usar lastAccessDate
+                            });
+                            archivedReservations.push(...previousDayReservations);
+                            saveArchivedReservations();
+                        }
+                    }
+                    // Reiniciar las reservas del día actual
+                    reservations = [];
+                    saveReservations(); // Vaciar las reservas del día
+                } else {
+                    // Es el mismo día, cargar las reservas actuales
+                    if (storedReservations) {
+                        reservations = JSON.parse(storedReservations);
+                    }
+                }
+                // Actualizar la fecha de último acceso
+                localStorage.setItem('lastAccessDate', today);
+                lastAccessDate = today; // Actualizar la variable también
+
+                renderReservations(); // Renderizar las reservas del día
+            }
+
+            // Llamar a la función de carga y archivo al inicio
+            loadAndArchiveReservations();
 
             // Evento para mostrar el formulario de agregar reserva
             addReservationBtn.addEventListener('click', () => {
                 reservationForm.reset();
-                timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
+                placeSelect.value = ""; // Resetear también el select del restaurante
+                updateTimeOptions(placeSelect.value); // Resetear las opciones de tiempo
                 timeSelect.disabled = true;
                 availabilityInfo.textContent = '';
                 availabilityInfo.className = 'availability-info';
                 roomInput.focus(); // Enfocar el primer campo del formulario
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
+                reservationSearchInput.value = ''; // Limpiar buscador
+                filterReservations(); // Volver a mostrar todas las reservas del día
             });
 
             // Evento para abrir el popup de resumen
@@ -718,9 +827,21 @@
                 showSummaryModal();
             });
 
+            // Nuevo: Evento para abrir el popup de archivo
+            viewArchiveBtn.addEventListener('click', () => {
+                archiveSearchInput.value = ''; // Limpiar buscador del archivo
+                renderArchivedReservations(); // Renderizar todas las archivadas al abrir
+                showArchiveModal();
+            });
+
             // Evento para cerrar el popup de resumen
             closeSummaryBtn.addEventListener('click', () => {
                 hideSummaryModal();
+            });
+
+            // Nuevo: Evento para cerrar el popup de archivo
+            closeArchiveBtn.addEventListener('click', () => {
+                hideArchiveModal();
             });
 
             // Eventos para cerrar modales al hacer clic en el botón 'X'
@@ -732,6 +853,8 @@
                         currentReservationData = null;
                     } else if (modalId === 'summaryModal') {
                         hideSummaryModal();
+                    } else if (modalId === 'archiveModal') {
+                        hideArchiveModal();
                     }
                 });
             });
@@ -750,6 +873,11 @@
                 }
             });
 
+            archiveModal.addEventListener('click', (e) => {
+                if (e.target === archiveModal) {
+                    hideArchiveModal();
+                }
+            });
 
             // Eventos para actualizar el contador de disponibilidad
             placeSelect.addEventListener('change', () => {
@@ -766,11 +894,15 @@
                 updateAvailabilityInfo();
             });
 
-            // Nuevo: Evento para el buscador
+            // Evento para el buscador de reservas del día
             reservationSearchInput.addEventListener('input', () => {
                 filterReservations();
             });
 
+            // Nuevo: Evento para el buscador de reservas archivadas
+            archiveSearchInput.addEventListener('input', () => {
+                filterArchivedReservations();
+            });
 
             // Función para actualizar las opciones de hora según el restaurante seleccionado
             function updateTimeOptions(restaurant) {
@@ -890,7 +1022,8 @@
                     time,
                     pax,
                     comment,
-                    timestamp: new Date().getTime()
+                    timestamp: new Date().getTime(),
+                    date: getTodayDateString() // Guardar la fecha de la reserva
                 };
 
                 showValidationModal();
@@ -904,6 +1037,7 @@
                     addReservation(currentReservationData);
                     hideValidationModal();
                     reservationForm.reset();
+                    placeSelect.value = ""; // Resetear también el select del restaurante
                     timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
                     timeSelect.disabled = true;
                     availabilityInfo.textContent = '';
@@ -937,6 +1071,14 @@
 
             function hideSummaryModal() {
                 summaryModal.classList.remove('active');
+            }
+
+            function showArchiveModal() { // Nuevo
+                archiveModal.classList.add('active');
+            }
+
+            function hideArchiveModal() { // Nuevo
+                archiveModal.classList.remove('active');
             }
 
             function addReservation(data) {
@@ -988,7 +1130,51 @@
                 }
             }
 
-            // Nuevo: Función para filtrar reservas
+            // Nueva función para renderizar reservas archivadas
+            function renderArchivedReservations(filteredArchived = archivedReservations) {
+                // Ordenar archivadas por fecha (más reciente primero), luego por restaurante y hora
+                filteredArchived.sort((a, b) => {
+                    // Primero por fecha (descendente)
+                    const dateComparison = new Date(b.archiveDate).getTime() - new Date(a.archiveDate).getTime();
+                    if (dateComparison !== 0) return dateComparison;
+
+                    // Luego por restaurante
+                    const restaurantComparison = a.place.localeCompare(b.place);
+                    if (restaurantComparison !== 0) return restaurantComparison;
+
+                    // Finalmente por hora
+                    return a.time.localeCompare(b.time);
+                });
+
+                archiveListContent.innerHTML = '';
+
+                if (filteredArchived.length === 0) {
+                    noArchivedReservationsMessage.textContent = archivedReservations.length === 0 ?
+                                                                'No hay reservas archivadas.' :
+                                                                'No se encontraron reservas archivadas con los criterios de búsqueda.';
+                    noArchivedReservationsMessage.style.display = 'block';
+                } else {
+                    noArchivedReservationsMessage.style.display = 'none';
+                    filteredArchived.forEach((res) => {
+                        const reservationItem = document.createElement('div');
+                        reservationItem.classList.add('reservation-item', 'archived'); // Clase 'archived' para estilo
+
+                        const time12Hrs = convertTo12HourFormat(res.time);
+                        const formattedArchiveDate = getFormattedDate(res.archiveDate);
+
+                        reservationItem.innerHTML = `
+                            <span class="room-name">${res.room} - ${res.guest}</span>
+                            <span class="restaurant-time">${res.place} - ${time12Hrs}</span>
+                            <span class="pax-info">${res.pax} PAX</span>
+                            <span class="archive-date">Archivado el: ${formattedArchiveDate}</span>
+                        `;
+                        archiveListContent.appendChild(reservationItem);
+                    });
+                }
+            }
+
+
+            // Función para filtrar reservas del día
             function filterReservations() {
                 const searchTerm = reservationSearchInput.value.toLowerCase().trim();
 
@@ -1001,11 +1187,32 @@
                     const roomMatches = String(res.room).includes(searchTerm);
                     const guestMatches = res.guest.toLowerCase().includes(searchTerm);
                     const restaurantMatches = res.place.toLowerCase().includes(searchTerm);
-                    const timeMatches = convertTo12HourFormat(res.time).toLowerCase().includes(searchTerm); // Buscar también por hora
+                    const timeMatches = convertTo12HourFormat(res.time).toLowerCase().includes(searchTerm);
                     return roomMatches || guestMatches || restaurantMatches || timeMatches;
                 });
 
                 renderReservations(filtered);
+            }
+
+            // Nueva función para filtrar reservas archivadas
+            function filterArchivedReservations() {
+                const searchTerm = archiveSearchInput.value.toLowerCase().trim();
+
+                if (!searchTerm) {
+                    renderArchivedReservations(archivedReservations);
+                    return;
+                }
+
+                const filtered = archivedReservations.filter(res => {
+                    const roomMatches = String(res.room).includes(searchTerm);
+                    const guestMatches = res.guest.toLowerCase().includes(searchTerm);
+                    const restaurantMatches = res.place.toLowerCase().includes(searchTerm);
+                    const timeMatches = convertTo12HourFormat(res.time).toLowerCase().includes(searchTerm);
+                    const dateMatches = getFormattedDate(res.archiveDate).toLowerCase().includes(searchTerm) || res.archiveDate.includes(searchTerm); // Buscar por fecha archivada también
+                    return roomMatches || guestMatches || restaurantMatches || timeMatches || dateMatches;
+                });
+
+                renderArchivedReservations(filtered);
             }
 
 
@@ -1013,13 +1220,18 @@
                 localStorage.setItem('restaurantReservations', JSON.stringify(reservations));
             }
 
-            function loadReservations() {
-                const storedReservations = localStorage.getItem('restaurantReservations');
-                if (storedReservations) {
-                    reservations = JSON.parse(storedReservations);
-                }
-                renderReservations(); // Llama a renderReservations sin argumentos al cargar
+            function saveArchivedReservations() { // Nuevo
+                localStorage.setItem('archivedReservations', JSON.stringify(archivedReservations));
             }
+
+            // loadReservations ya no es necesaria como estaba, su lógica se movió a loadAndArchiveReservations
+            // function loadReservations() {
+            //     const storedReservations = localStorage.getItem('restaurantReservations');
+            //     if (storedReservations) {
+            //         reservations = JSON.parse(storedReservations);
+            //     }
+            //     renderReservations();
+            // }
 
             function convertTo12HourFormat(time24h) {
                 const [hours, minutes] = time24h.split(':');
@@ -1040,7 +1252,7 @@
                 const groupedReservations = {};
                 let totalOverallPax = 0;
 
-                reservations.forEach(res => {
+                reservations.forEach(res => { // Usa 'reservations' (las del día)
                     const restaurant = res.place;
                     const time = res.time; // Formato 24h
                     const pax = res.pax;
@@ -1093,6 +1305,7 @@
                                     <p class="summary-reservation-detail">
                                         <strong>${detail.room}</strong> - ${detail.guest} - ${detail.pax} PAX
                                         ${detail.comment ? `<em>(Comentario: ${detail.comment})</em>` : ''}
+                                        ${detail.validator ? `<span>(Solicitado por: ${detail.validator})</span>` : ''}
                                     </p>
                                 `;
                             });
