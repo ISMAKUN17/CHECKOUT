@@ -1,282 +1,446 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secrets Royal Beach Punta Cana Survey</title>
+    <title>Visualización de Encuestas - Secrets Royal Beach</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: auto;
-        }
-        h2 {
-            color: #4CAF50; /* A shade of green, similar to the logo */
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo img {
-            max-width: 200px;
-            height: auto;
-        }
-        .question {
-            margin-bottom: 25px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
-        }
-        .question:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        .question p {
-            font-size: 1.1em;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .rating-options {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
             display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
         }
-        .rating-option {
-            text-align: center;
-            flex: 1;
-            min-width: 80px; /* Adjust as needed */
+        .dashboard-container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 1200px; /* Increased max-width for table */
+            width: 100%;
+            transition: all 0.5s ease-in-out;
+            border: 1px solid #e0e0e0;
         }
-        .rating-option input[type="radio"] {
-            display: none; /* Hide the default radio button */
+        .table-container {
+            overflow-x: auto; /* Allows horizontal scrolling for small screens */
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
-        .rating-option label {
-            display: block;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem; /* Slightly smaller font for compactness */
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap; /* Prevents text from wrapping */
+        }
+        th {
+            background-color: #f8f8f8;
+            font-weight: 600;
+            color: #333;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        tbody tr:hover {
+            background-color: #f5f5f5;
             cursor: pointer;
-            padding: 10px 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-            font-size: 0.9em;
+            transition: background-color 0.2s ease-in-out;
         }
-        .rating-option input[type="radio"]:checked + label {
-            background-color: #e0f7e0; /* Light green for selected */
-            border-color: #4CAF50;
-            color: #4CAF50;
+        tbody tr:last-child td {
+            border-bottom: none;
         }
-        .rating-option label:hover {
-            background-color: #f0f0f0;
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6); /* Darker overlay */
+            justify-content: center;
+            align-items: center;
+            animation: fadeInModal 0.3s ease-out;
         }
-        .rating-label {
-            margin-top: 5px;
-            font-size: 0.8em;
-            color: #666;
+        .modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Stronger shadow for modal */
+            max-width: 600px;
+            width: 90%;
+            position: relative; /* For close button positioning */
+            animation: slideInModal 0.3s ease-out;
+            max-height: 90vh; /* Limit height for scrollable content */
+            overflow-y: auto; /* Enable scrolling for modal content */
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInModal {
+            from { transform: translateY(-50px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 32px; /* Larger close button */
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+            position: absolute; /* Position relative to modal-content */
+            top: 15px;
+            right: 20px;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }
+        .modal-body p {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #4a4a4a;
+        }
+        .modal-body strong {
+            color: #222;
+        }
+        .modal-body .rating-detail {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-left: 5px;
+            font-size: 0.85rem;
+        }
+        .rating-detail.red { background-color: #ef4444; color: white; }
+        .rating-detail.yellow { background-color: #facc15; color: white; }
+        .rating-detail.green { background-color: #22c55e; color: white; }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 50px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            color: #dc2626;
+            background-color: #fee2e2;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ef4444;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 20px;
+            }
+            th, td {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+            .modal-content {
+                padding: 20px;
+            }
+            .modal-body p {
+                font-size: 0.85rem;
+            }
+            .close-button {
+                font-size: 28px;
+                top: 10px;
+                right: 15px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="logo">
-            <img src="https://via.placeholder.com/200x50?text=SECRETS+Royal+Beach" alt="Secrets Royal Beach Logo">
+    <div class="dashboard-container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Visualización de Encuestas de Satisfacción</h1>
+
+        <div id="loadingIndicator" class="text-center py-10">
+            <div class="loader"></div>
+            <p class="text-gray-600 mt-4">Cargando datos de encuestas...</p>
         </div>
 
-        <h2>Punta Cana</h2>
+        <div id="errorMessage" class="error-message hidden">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <span id="errorText">Error al cargar las encuestas. Por favor, inténtelo de nuevo más tarde.</span>
+        </div>
 
-        <form action="#" method="post">
-            <div class="question">
-                <p>How would you rate your overall experience with us?</p>
-                <div class="rating-options">
-                    <div class="rating-option">
-                        <input type="radio" id="overall_bad" name="overall_experience" value="bad">
-                        <label for="overall_bad">☹️</label>
-                        <div class="rating-label">BAD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_poor" name="overall_experience" value="poor">
-                        <label for="overall_poor">🙁</label>
-                        <div class="rating-label">POOR</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_average" name="overall_experience" value="average">
-                        <label for="overall_average">😐</label>
-                        <div class="rating-label">AVERAGE</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_good" name="overall_experience" value="good">
-                        <label for="overall_good">🙂</label>
-                        <div class="rating-label">GOOD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_happy" name="overall_experience" value="happy">
-                        <label for="overall_happy">😊</label>
-                        <div class="rating-label">HAPPY</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_excellent" name="overall_experience" value="excellent">
-                        <label for="overall_excellent">😁</label>
-                        <div class="rating-label">EXCELLENT</div>
-                    </div>
-                </div>
-            </div>
+        <div id="noDataMessage" class="text-center py-10 hidden">
+            <i class="fas fa-info-circle text-gray-500 text-4xl mb-4"></i>
+            <p class="text-gray-700 text-lg">Aún no hay encuestas enviadas.</p>
+        </div>
 
-            <div class="question">
-                <p>How would you rate the overall level of service provided by our staff?</p>
-                <div class="rating-options">
-                    <div class="rating-option">
-                        <input type="radio" id="staff_bad" name="staff_service" value="bad">
-                        <label for="staff_bad">☹️</label>
-                        <div class="rating-label">BAD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="staff_poor" name="staff_service" value="poor">
-                        <label for="staff_poor">🙁</label>
-                        <div class="rating-label">POOR</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="staff_average" name="staff_service" value="average">
-                        <label for="staff_average">😐</label>
-                        <div class="rating-label">AVERAGE</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="staff_good" name="staff_service" value="good">
-                        <label for="staff_good">🙂</label>
-                        <div class="rating-label">GOOD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="staff_happy" name="staff_service" value="happy">
-                        <label for="staff_happy">😊</label>
-                        <div class="rating-label">HAPPY</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="staff_excellent" name="staff_service" value="excellent">
-                        <label for="staff_excellent">😁</label>
-                        <div class="rating-label">EXCELLENT</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="question">
-                <p>Would you recommend this hotel to your family and friends?</p>
-                <div class="rating-options">
-                    <div class="rating-option">
-                        <input type="radio" id="recommend_bad" name="recommend_hotel" value="bad">
-                        <label for="recommend_bad">☹️</label>
-                        <div class="rating-label">BAD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="recommend_poor" name="recommend_hotel" value="poor">
-                        <label for="recommend_poor">🙁</label>
-                        <div class="rating-label">POOR</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="recommend_average" name="recommend_hotel" value="average">
-                        <label for="recommend_average">😐</label>
-                        <div class="rating-label">AVERAGE</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="recommend_good" name="recommend_hotel" value="good">
-                        <label for="recommend_good">🙂</label>
-                        <div class="rating-label">GOOD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="recommend_happy" name="recommend_hotel" value="happy">
-                        <label for="recommend_happy">😊</label>
-                        <div class="rating-label">HAPPY</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="recommend_excellent" name="recommend_hotel" value="excellent">
-                        <label for="recommend_excellent">😁</label>
-                        <div class="rating-label">EXCELLENT</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="question">
-                <p>How would you rate your experience as Preferred Club guest?</p>
-                <div class="rating-options">
-                    <div class="rating-option">
-                        <input type="radio" id="preferred_bad" name="preferred_club" value="bad">
-                        <label for="preferred_bad">☹️</label>
-                        <div class="rating-label">BAD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="preferred_poor" name="preferred_club" value="poor">
-                        <label for="preferred_poor">🙁</label>
-                        <div class="rating-label">POOR</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="preferred_average" name="preferred_club" value="average">
-                        <label for="preferred_average">😐</label>
-                        <div class="rating-label">AVERAGE</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="preferred_good" name="preferred_club" value="good">
-                        <label for="preferred_good">🙂</label>
-                        <div class="rating-label">GOOD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="preferred_happy" name="preferred_club" value="happy">
-                        <label for="preferred_happy">😊</label>
-                        <div class="rating-label">HAPPY</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="preferred_excellent" name="preferred_club" value="excellent">
-                        <label for="preferred_excellent">😁</label>
-                        <div class="rating-label">EXCELLENT</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="question">
-                <p>How would you rate your overall experience?</p>
-                <div class="rating-options">
-                    <div class="rating-option">
-                        <input type="radio" id="overall_experience_2_bad" name="overall_experience_2" value="bad">
-                        <label for="overall_experience_2_bad">☹️</label>
-                        <div class="rating-label">BAD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_experience_2_poor" name="overall_experience_2" value="poor">
-                        <label for="overall_experience_2_poor">🙁</label>
-                        <div class="rating-label">POOR</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_experience_2_average" name="overall_experience_2" value="average">
-                        <label for="overall_experience_2_average">😐</label>
-                        <div class="rating-label">AVERAGE</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_experience_2_good" name="overall_experience_2" value="good">
-                        <label for="overall_experience_2_good">🙂</label>
-                        <div class="rating-label">GOOD</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_experience_2_happy" name="overall_experience_2" value="happy">
-                        <label for="overall_experience_2_happy">😊</label>
-                        <div class="rating-label">HAPPY</div>
-                    </div>
-                    <div class="rating-option">
-                        <input type="radio" id="overall_experience_2_excellent" name="overall_experience_2" value="excellent">
-                        <label for="overall_experience_2_excellent">😁</label>
-                        <div class="rating-label">EXCELLENT</div>
-                    </div>
-                </div>
-            </div>
-
-            </form>
+        <div class="table-container hidden" id="surveyTableContainer">
+            <table class="w-full text-left table-auto">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-3">Número de Habitación</th>
+                        <th class="px-4 py-3">Nombre</th>
+                        <th class="px-4 py-3">Mayordomo</th>
+                        <th class="px-4 py-3">Recomendación (1-10)</th>
+                    </tr>
+                </thead>
+                <tbody id="surveyTableBody">
+                    <!-- Survey data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
+    <!-- Modal for full survey details -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Detalles de la Encuesta</h2>
+            <div id="modalBody" class="modal-body text-gray-700">
+                <!-- Full survey details will be loaded here -->
+            </div>
+            <button id="modalCloseButton" class="mt-8 bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300 ease-in-out">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Global variables provided by the Canvas environment (if available)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // User provided Firebase configuration. This will take precedence.
+        const userProvidedFirebaseConfig = {
+            apiKey: "AIzaSyALR-b68phh_u92V3rw9B9Ei7FcexU2xc8",
+            authDomain: "proyectos17-98695.firebaseapp.com",
+            projectId: "proyectos17-98695",
+            storageBucket: "proyectos17-98695.firebasestorage.app",
+            messagingSenderId: "951673973410",
+            appId: "1:951673973410:web:4bc355e825cf86308645fb",
+            measurementId: "G-6YK06W16FZ"
+        };
+
+        const firebaseConfig = userProvidedFirebaseConfig;
+        console.log("Firebase Config being used:", firebaseConfig); // Log the config for debugging
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let userId = null;
+        let isAuthReady = false;
+        let allSurveyData = []; // Store all data for modal display
+
+        // DOM Elements
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const errorTextSpan = document.getElementById('errorText');
+        const noDataMessageDiv = document.getElementById('noDataMessage');
+        const surveyTableBody = document.getElementById('surveyTableBody');
+        const surveyTableContainer = document.getElementById('surveyTableContainer');
+        const detailsModal = document.getElementById('detailsModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+        const modalCloseBtnTop = detailsModal.querySelector('.close-button');
+
+
+        // --- Custom Modal Functions ---
+        function showModal(contentHtml) {
+            modalBody.innerHTML = contentHtml;
+            detailsModal.style.display = 'flex'; // Use flex to center
+        }
+
+        function hideModal() {
+            detailsModal.style.display = 'none';
+        }
+
+        modalCloseButton.onclick = hideModal;
+        modalCloseBtnTop.onclick = hideModal;
+        window.onclick = function(event) {
+            if (event.target == detailsModal) {
+                hideModal();
+            }
+        }
+
+        // --- Utility to get rating color class ---
+        function getRatingColorClass(value) {
+            if (value >= 1 && value <= 6) {
+                return 'red';
+            } else if (value >= 7 && value <= 8) {
+                return 'yellow';
+            } else if (value >= 9 && value <= 10) {
+                return 'green';
+            }
+            return '';
+        }
+
+        // --- Render Survey Data to Table ---
+        function renderTable(data) {
+            surveyTableBody.innerHTML = ''; // Clear existing rows
+            if (Object.keys(data).length === 0) {
+                noDataMessageDiv.classList.remove('hidden');
+                surveyTableContainer.classList.add('hidden');
+                return;
+            }
+
+            noDataMessageDiv.classList.add('hidden');
+            surveyTableContainer.classList.remove('hidden');
+
+            // Convert object to array for easier sorting/iteration
+            allSurveyData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+
+            // Sort by timestamp if available (most recent first)
+            allSurveyData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            allSurveyData.forEach((survey, index) => {
+                const row = document.createElement('tr');
+                row.dataset.index = index; // Store index to easily retrieve full data later
+
+                // Get recommendation score and apply color class for display
+                const recommendationScore = survey.q1_recommend || 'N/A';
+                const recommendationColorClass = getRatingColorClass(recommendationScore);
+
+                row.innerHTML = `
+                    <td class="px-4 py-3">${survey.room || 'N/A'}</td>
+                    <td class="px-4 py-3">${survey.name || 'N/A'}</td>
+                    <td class="px-4 py-3">${survey.butler || 'N/A'}</td>
+                    <td class="px-4 py-3">
+                        <span class="rating-detail ${recommendationColorClass}">${recommendationScore}</span>
+                    </td>
+                `;
+                surveyTableBody.appendChild(row);
+            });
+
+            // Add click listener to each row
+            surveyTableBody.querySelectorAll('tr').forEach(row => {
+                row.addEventListener('click', (event) => {
+                    const index = event.currentTarget.dataset.index;
+                    const fullDetails = allSurveyData[index];
+                    displayFullDetailsInModal(fullDetails);
+                });
+            });
+        }
+
+        // --- Display Full Details in Modal ---
+        function displayFullDetailsInModal(data) {
+            let htmlContent = `
+                <p><strong>Número de Habitación:</strong> ${data.room || 'N/A'}</p>
+                <p><strong>Nombre:</strong> ${data.name || 'N/A'}</p>
+                <p><strong>Mayordomo:</strong> ${data.butler || 'N/A'}</p>
+                <p><strong>Email:</strong> ${data.email || 'N/A'}</p>
+                <hr class="my-4 border-gray-200">
+                <p class="mb-2"><strong>1. ¿Recomendaría este hotel a su familia y amigos?:</strong>
+                    <span class="rating-detail ${getRatingColorClass(data.q1_recommend)}">${data.q1_recommend || 'N/A'}</span>
+                </p>
+                <p class="mb-2"><strong>2. ¿Cómo calificaría su experiencia general con nosotros?:</strong>
+                    <span class="rating-detail ${getRatingColorClass(data.q2_overall_experience)}">${data.q2_overall_experience || 'N/A'}</span>
+                </p>
+                <p class="mb-2"><strong>3. ¿Cómo calificaría el nivel general de servicio proporcionado por nuestro personal?:</strong>
+                    <span class="rating-detail ${getRatingColorClass(data.q3_staff_service)}">${data.q3_staff_service || 'N/A'}</span>
+                </p>
+                <p class="mb-2"><strong>4. ¿Cómo calificaría su experiencia como huésped Preferred Club?:</strong>
+                    <span class="rating-detail ${getRatingColorClass(data.q4_preferred_club)}">${data.q4_preferred_club || 'N/A'}</span>
+                </p>
+                <hr class="my-4 border-gray-200">
+                <p><strong>Comentarios:</strong> ${data.comments || 'Sin comentarios'}</p>
+                <p class="text-sm text-gray-500 mt-4"><strong>Fecha de Envío:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
+                <p class="text-xs text-gray-400"><strong>ID de Dispositivo:</strong> ${data.deviceId || 'N/A'}</p>
+                <p class="text-xs text-gray-400"><strong>ID de Usuario (Firebase):</strong> ${data.userId || 'N/A'}</p>
+            `;
+            showModal(htmlContent);
+        }
+
+        // --- Firebase Data Fetching ---
+        function fetchSurveyData() {
+            // Ensure auth is ready before fetching data
+            if (!isAuthReady) {
+                setTimeout(fetchSurveyData, 100); // Retry after short delay
+                return;
+            }
+
+            loadingIndicator.classList.remove('hidden');
+            errorMessageDiv.classList.add('hidden');
+            noDataMessageDiv.classList.add('hidden');
+            surveyTableContainer.classList.add('hidden');
+
+            // Path to public data as per instructions
+            const surveysRef = ref(db, `artifacts/${appId}/public/data/surveys`);
+
+            onValue(surveysRef, (snapshot) => {
+                loadingIndicator.classList.add('hidden'); // Hide loader regardless of outcome
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    renderTable(data);
+                } else {
+                    noDataMessageDiv.classList.remove('hidden');
+                    surveyTableContainer.classList.add('hidden');
+                    console.log("No data available in Firebase for this path.");
+                }
+            }, (error) => {
+                loadingIndicator.classList.add('hidden');
+                errorMessageDiv.classList.remove('hidden');
+                errorTextSpan.textContent = `Error al cargar las encuestas: ${error.message}`;
+                console.error("Firebase Realtime DB Read Error:", error);
+            });
+        }
+
+        // --- Auth State Change Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+            } else {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                        userId = auth.currentUser.uid;
+                    } else {
+                        const anonUser = await signInAnonymously(auth);
+                        userId = anonUser.user.uid;
+                    }
+                } catch (error) {
+                    console.error("Firebase Anonymous Auth Error:", error);
+                    errorMessageDiv.classList.remove('hidden');
+                    errorTextSpan.textContent = `Error de autenticación: ${error.message}. Asegúrese de que la autenticación anónima esté habilitada en Firebase.`;
+                    loadingIndicator.classList.add('hidden'); // Hide loader on auth error
+                    return; // Stop execution if auth fails
+                }
+            }
+            isAuthReady = true;
+            console.log("Firebase Auth Ready. User ID:", userId);
+            fetchSurveyData(); // Fetch data once auth is ready
+        });
+
+        // Initial fetch when page loads (will be triggered after auth state is determined)
+        // No need to call fetchSurveyData here explicitly as onAuthStateChanged will handle it.
+        // window.onload = fetchSurveyData; // This is now handled by onAuthStateChanged
+    </script>
 </body>
 </html>
