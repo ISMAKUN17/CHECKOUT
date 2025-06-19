@@ -181,6 +181,11 @@
 <body>
 
     <div class="dashboard-container">
+        <!-- Logo agregado aquí -->
+        <div class="flex justify-center mb-6">
+            <img src="https://assets.hyatt.com/content/dam/hyatt/hyattdam/images/2022/03/01/1532/Secrets-L001c-stk-R-color-RGB.png/Secrets-L001c-stk-R-color-RGB.400x196-PSR.png" alt="Logo Secrets Royal Beach" class="max-w-[150px] sm:max-w-[200px] h-auto">
+        </div>
+
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Visualización de Encuestas de Satisfacción</h1>
 
         <div id="loadingIndicator" class="text-center py-10">
@@ -209,19 +214,19 @@
                     </tr>
                 </thead>
                 <tbody id="surveyTableBody">
-                    <!-- Survey data will be inserted here -->
+                    <!-- Los datos de la encuesta se insertarán aquí -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal for full survey details -->
+    <!-- Modal para detalles completos de la encuesta -->
     <div id="detailsModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Detalles de la Encuesta</h2>
             <div id="modalBody" class="modal-body text-gray-700">
-                <!-- Full survey details will be loaded here -->
+                <!-- Aquí se cargarán todos los detalles de la encuesta -->
             </div>
             <button id="modalCloseButton" class="mt-8 bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300 ease-in-out">Cerrar</button>
         </div>
@@ -233,10 +238,10 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        // Global variables provided by the Canvas environment (if available)
+        // Variables globales proporcionadas por el entorno Canvas (si están disponibles)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // User provided Firebase configuration. This will take precedence.
+        // Configuración de Firebase proporcionada por el usuario. Esto tendrá prioridad.
         const userProvidedFirebaseConfig = {
             apiKey: "AIzaSyALR-b68phh_u92V3rw9B9Ei7FcexU2xc8",
             authDomain: "proyectos17-98695.firebaseapp.com",
@@ -248,18 +253,18 @@
         };
 
         const firebaseConfig = userProvidedFirebaseConfig;
-        console.log("Firebase Config being used:", firebaseConfig); // Log the config for debugging
+        console.log("Configuración de Firebase en uso:", firebaseConfig); // Registra la configuración para depuración
 
-        // Initialize Firebase
+        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
 
         let userId = null;
         let isAuthReady = false;
-        let allSurveyData = []; // Store all data for modal display
+        let allSurveyData = []; // Almacena todos los datos para mostrar en el modal
 
-        // DOM Elements
+        // Elementos del DOM
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorMessageDiv = document.getElementById('errorMessage');
         const errorTextSpan = document.getElementById('errorText');
@@ -272,10 +277,10 @@
         const modalCloseBtnTop = detailsModal.querySelector('.close-button');
 
 
-        // --- Custom Modal Functions ---
+        // --- Funciones del Modal Personalizado ---
         function showModal(contentHtml) {
             modalBody.innerHTML = contentHtml;
-            detailsModal.style.display = 'flex'; // Use flex to center
+            detailsModal.style.display = 'flex'; // Usar flex para centrar
         }
 
         function hideModal() {
@@ -290,7 +295,7 @@
             }
         }
 
-        // --- Utility to get rating color class ---
+        // --- Utilidad para obtener la clase de color de calificación ---
         function getRatingColorClass(value) {
             if (value >= 1 && value <= 6) {
                 return 'red';
@@ -302,9 +307,9 @@
             return '';
         }
 
-        // --- Render Survey Data to Table ---
+        // --- Renderizar Datos de Encuesta en la Tabla ---
         function renderTable(data) {
-            surveyTableBody.innerHTML = ''; // Clear existing rows
+            surveyTableBody.innerHTML = ''; // Limpiar filas existentes
             if (Object.keys(data).length === 0) {
                 noDataMessageDiv.classList.remove('hidden');
                 surveyTableContainer.classList.add('hidden');
@@ -314,17 +319,17 @@
             noDataMessageDiv.classList.add('hidden');
             surveyTableContainer.classList.remove('hidden');
 
-            // Convert object to array for easier sorting/iteration
+            // Convertir objeto a array para facilitar la ordenación/iteración
             allSurveyData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
 
-            // Sort by timestamp if available (most recent first)
+            // Ordenar por marca de tiempo si está disponible (más reciente primero)
             allSurveyData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             allSurveyData.forEach((survey, index) => {
                 const row = document.createElement('tr');
-                row.dataset.index = index; // Store index to easily retrieve full data later
+                row.dataset.index = index; // Almacenar el índice para recuperar datos completos más tarde
 
-                // Get recommendation score and apply color class for display
+                // Obtener la puntuación de recomendación y aplicar la clase de color para la visualización
                 const recommendationScore = survey.q1_recommend || 'N/A';
                 const recommendationColorClass = getRatingColorClass(recommendationScore);
 
@@ -339,7 +344,7 @@
                 surveyTableBody.appendChild(row);
             });
 
-            // Add click listener to each row
+            // Añadir un listener de clic a cada fila
             surveyTableBody.querySelectorAll('tr').forEach(row => {
                 row.addEventListener('click', (event) => {
                     const index = event.currentTarget.dataset.index;
@@ -349,7 +354,7 @@
             });
         }
 
-        // --- Display Full Details in Modal ---
+        // --- Mostrar Detalles Completos en el Modal ---
         function displayFullDetailsInModal(data) {
             let htmlContent = `
                 <p><strong>Número de Habitación:</strong> ${data.room || 'N/A'}</p>
@@ -378,11 +383,11 @@
             showModal(htmlContent);
         }
 
-        // --- Firebase Data Fetching ---
+        // --- Obtención de Datos de Firebase ---
         function fetchSurveyData() {
-            // Ensure auth is ready before fetching data
+            // Asegurarse de que la autenticación esté lista antes de obtener los datos
             if (!isAuthReady) {
-                setTimeout(fetchSurveyData, 100); // Retry after short delay
+                setTimeout(fetchSurveyData, 100); // Reintentar después de un breve retraso
                 return;
             }
 
@@ -391,28 +396,28 @@
             noDataMessageDiv.classList.add('hidden');
             surveyTableContainer.classList.add('hidden');
 
-            // Path to public data as per instructions
+            // Ruta a los datos públicos según las instrucciones
             const surveysRef = ref(db, `artifacts/${appId}/public/data/surveys`);
 
             onValue(surveysRef, (snapshot) => {
-                loadingIndicator.classList.add('hidden'); // Hide loader regardless of outcome
+                loadingIndicator.classList.add('hidden'); // Ocultar el cargador independientemente del resultado
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     renderTable(data);
                 } else {
                     noDataMessageDiv.classList.remove('hidden');
                     surveyTableContainer.classList.add('hidden');
-                    console.log("No data available in Firebase for this path.");
+                    console.log("No hay datos disponibles en Firebase para esta ruta.");
                 }
             }, (error) => {
                 loadingIndicator.classList.add('hidden');
                 errorMessageDiv.classList.remove('hidden');
                 errorTextSpan.textContent = `Error al cargar las encuestas: ${error.message}`;
-                console.error("Firebase Realtime DB Read Error:", error);
+                console.error("Error de lectura de Firebase Realtime DB:", error);
             });
         }
 
-        // --- Auth State Change Listener ---
+        // --- Listener de Cambio de Estado de Autenticación ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
@@ -426,21 +431,21 @@
                         userId = anonUser.user.uid;
                     }
                 } catch (error) {
-                    console.error("Firebase Anonymous Auth Error:", error);
+                    console.error("Error de Autenticación Anónima de Firebase:", error);
                     errorMessageDiv.classList.remove('hidden');
                     errorTextSpan.textContent = `Error de autenticación: ${error.message}. Asegúrese de que la autenticación anónima esté habilitada en Firebase.`;
-                    loadingIndicator.classList.add('hidden'); // Hide loader on auth error
-                    return; // Stop execution if auth fails
+                    loadingIndicator.classList.add('hidden'); // Ocultar el cargador en caso de error de autenticación
+                    return; // Detener la ejecución si la autenticación falla
                 }
             }
             isAuthReady = true;
-            console.log("Firebase Auth Ready. User ID:", userId);
-            fetchSurveyData(); // Fetch data once auth is ready
+            console.log("Autenticación de Firebase Lista. ID de Usuario:", userId);
+            fetchSurveyData(); // Obtener datos una vez que la autenticación esté lista
         });
 
-        // Initial fetch when page loads (will be triggered after auth state is determined)
-        // No need to call fetchSurveyData here explicitly as onAuthStateChanged will handle it.
-        // window.onload = fetchSurveyData; // This is now handled by onAuthStateChanged
+        // La carga inicial de la página (se activará después de que se determine el estado de autenticación)
+        // No es necesario llamar a fetchSurveyData aquí explícitamente ya que onAuthStateChanged lo manejará.
+        // window.onload = fetchSurveyData; // Esto ahora es manejado por onAuthStateChanged
     </script>
 </body>
 </html>
