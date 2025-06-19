@@ -147,7 +147,7 @@
         input[type="text"],
         input[type="number"],
         select,
-        textarea { /* Eliminado input[type="time"] de aquí, ya que ahora es un select */
+        textarea {
             width: calc(100% - 20px); /* Ajuste para padding */
             padding: 12px 10px;
             border: 1px solid var(--border-color);
@@ -167,6 +167,30 @@
         textarea {
             resize: vertical; /* Permitir redimensionar solo verticalmente */
         }
+
+        /* Estilos para el contador de espacios */
+        .availability-info {
+            font-size: 0.9em;
+            color: var(--light-text-color);
+            margin-top: 5px;
+            min-height: 1.5em; /* Para evitar saltos si el texto aparece/desaparece */
+        }
+
+        .availability-info.available {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .availability-info.limited {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .availability-info.full {
+            color: #d32f2f; /* Rojo oscuro */
+            font-weight: bold;
+        }
+
 
         .reservation-list {
             display: grid;
@@ -339,6 +363,7 @@
                         <select id="time" required>
                             <option value="">Seleccione un restaurante primero</option>
                         </select>
+                        <div id="availabilityInfo" class="availability-info"></div>
                     </div>
                     <div class="form-group">
                         <label for="pax">Cantidad de Personas:</label>
@@ -384,14 +409,15 @@
             const confirmValidationBtn = document.getElementById('confirmValidationBtn');
             const cancelValidationBtn = document.getElementById('cancelValidationBtn');
 
-            const roomInput = document.getElementById('room'); // Obtener referencia al campo de habitación
+            const roomInput = document.getElementById('room');
             const placeSelect = document.getElementById('place');
             const timeSelect = document.getElementById('time');
+            const paxInput = document.getElementById('pax'); // Nuevo: Referencia al input de PAX
+            const availabilityInfo = document.getElementById('availabilityInfo'); // Nuevo: Para el contador de disponibilidad
 
             let reservations = [];
-            let currentReservationData = null; // Para almacenar temporalmente los datos de la reserva antes de la validación
+            let currentReservationData = null;
 
-            // Definición de los restaurantes y sus horarios (en formato 24h para facilitar la lógica interna)
             const restaurantTimes = {
                 "El Patio": ["18:00", "21:00"],
                 "Bluewater": ["18:00", "21:00"],
@@ -401,22 +427,42 @@
                 "El Olio": ["18:30", "21:00"]
             };
 
-            // Cargar reservas guardadas (si existen) al iniciar
+            // Nuevo: Límites de PAX por restaurante y horario
+            const restaurantPaxLimits = {
+                "El Patio": 8,
+                "Bluewater": 8,
+                "Bordeaux": 6,
+                "Himitsu": 8,
+                "Hibachi": 10,
+                "El Olio": 8
+            };
+
+            // Cargar reservas guardadas al iniciar
             loadReservations();
 
             // Evento para mostrar el formulario de agregar reserva
             addReservationBtn.addEventListener('click', () => {
                 reservationForm.reset();
-                // Resetear y deshabilitar el campo de hora al limpiar el formulario
                 timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
                 timeSelect.disabled = true;
+                availabilityInfo.textContent = ''; // Limpiar el contador de disponibilidad
+                availabilityInfo.className = 'availability-info'; // Resetear clases
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
             });
 
-            // Evento para cuando se selecciona un restaurante
+            // Eventos para actualizar el contador de disponibilidad
             placeSelect.addEventListener('change', () => {
                 const selectedRestaurant = placeSelect.value;
                 updateTimeOptions(selectedRestaurant);
+                updateAvailabilityInfo(); // Actualizar info al cambiar restaurante
+            });
+
+            timeSelect.addEventListener('change', () => {
+                updateAvailabilityInfo(); // Actualizar info al cambiar hora
+            });
+
+            paxInput.addEventListener('input', () => {
+                updateAvailabilityInfo(); // Actualizar info al cambiar PAX
             });
 
             // Función para actualizar las opciones de hora según el restaurante seleccionado
@@ -425,6 +471,12 @@
                 if (restaurant && restaurantTimes[restaurant]) {
                     timeSelect.disabled = false; // Habilitar el select de la hora
                     const times = restaurantTimes[restaurant];
+                    // Añadir la opción por defecto para "seleccionar hora"
+                    const defaultTimeOption = document.createElement('option');
+                    defaultTimeOption.value = "";
+                    defaultTimeOption.textContent = "Seleccione una hora";
+                    timeSelect.appendChild(defaultTimeOption);
+
                     times.forEach(time24h => {
                         const option = document.createElement('option');
                         option.value = time24h;
@@ -440,23 +492,69 @@
                 }
             }
 
+            // Nuevo: Función para calcular y mostrar la disponibilidad
+            function updateAvailabilityInfo() {
+                const selectedRestaurant = placeSelect.value;
+                const selectedTime = timeSelect.value;
+                const requestedPax = parseInt(paxInput.value, 10);
+
+                if (!selectedRestaurant || !selectedTime) {
+                    availabilityInfo.textContent = 'Seleccione restaurante y hora para ver disponibilidad.';
+                    availabilityInfo.className = 'availability-info'; // Resetear clases
+                    return;
+                }
+
+                const maxPax = restaurantPaxLimits[selectedRestaurant];
+                if (maxPax === undefined) {
+                    availabilityInfo.textContent = 'Límite de PAX no definido para este restaurante.';
+                    availabilityInfo.className = 'availability-info';
+                    return;
+                }
+
+                // Filtrar reservas para el día actual y el horario/restaurante seleccionado
+                // Para una aplicación "por día", podemos considerar que todas las reservas son del mismo día
+                // Si necesitáramos fechas reales, la lógica sería más compleja
+                const occupiedPax = reservations
+                    .filter(res => res.place === selectedRestaurant && res.time === selectedTime)
+                    .reduce((sum, res) => sum + res.pax, 0);
+
+                const remainingPax = maxPax - occupiedPax;
+
+                availabilityInfo.textContent = `Espacios disponibles: ${remainingPax} de ${maxPax}`;
+
+                // Aplicar clases para estilos visuales
+                availabilityInfo.className = 'availability-info'; // Resetear
+                if (remainingPax > 0) {
+                    if (requestedPax > remainingPax) {
+                        availabilityInfo.textContent += ` (Solo quedan ${remainingPax})`;
+                        availabilityInfo.classList.add('limited');
+                    } else {
+                        availabilityInfo.classList.add('available');
+                    }
+                } else {
+                    availabilityInfo.textContent = '¡No hay espacios disponibles para esta hora!';
+                    availabilityInfo.classList.add('full');
+                    timeSelect.setCustomValidity('No hay espacios disponibles en este horario.'); // Validacion HTML5
+                    timeSelect.reportValidity();
+                }
+            }
+
 
             // Evento para manejar el envío del formulario
             reservationForm.addEventListener('submit', (e) => {
-                e.preventDefault(); // Evitar el envío por defecto del formulario
+                e.preventDefault();
 
-                // Recolectar datos del formulario
-                const room = document.getElementById('room').value; // Obtener el valor del número de habitación
+                const room = document.getElementById('room').value;
                 const guest = document.getElementById('guest').value;
                 const place = document.getElementById('place').value;
                 const time = document.getElementById('time').value;
                 const pax = parseInt(document.getElementById('pax').value, 10);
                 const comment = document.getElementById('comment').value;
 
-                // **Validación del número de habitación (4 dígitos)**
-                if (room.length !== 4 || isNaN(room)) {
-                    alert('Por favor, ingrese un número de habitación válido de 4 dígitos.');
-                    roomInput.focus(); // Enfocar el campo para corrección
+                // Validación del número de habitación
+                if (room.length !== 4 || isNaN(room) || parseInt(room, 10) < 1000 || parseInt(room, 10) > 9999) {
+                    alert('Por favor, ingrese un número de habitación válido de 4 dígitos (ej. 1000-9999).');
+                    roomInput.focus();
                     return;
                 }
 
@@ -466,18 +564,30 @@
                     return;
                 }
 
-                // Almacenar los datos temporalmente
+                // **Validación de límites de PAX antes de continuar al popup**
+                const maxPax = restaurantPaxLimits[place];
+                const occupiedPax = reservations
+                    .filter(res => res.place === place && res.time === time)
+                    .reduce((sum, res) => sum + res.pax, 0);
+
+                const remainingPax = maxPax - occupiedPax;
+
+                if (pax > remainingPax) {
+                    alert(`Lo sentimos, solo quedan ${remainingPax} espacios disponibles para ${place} a las ${convertTo12HourFormat(time)}.`);
+                    paxInput.focus();
+                    return;
+                }
+
                 currentReservationData = {
-                    room, // Usar el número de habitación
+                    room,
                     guest,
                     place,
                     time,
                     pax,
                     comment,
-                    timestamp: new Date().getTime() // Para FIFO: marca de tiempo de creación
+                    timestamp: new Date().getTime()
                 };
 
-                // Mostrar el modal de validación
                 showValidationModal();
             });
 
@@ -485,15 +595,15 @@
             confirmValidationBtn.addEventListener('click', () => {
                 const validatorName = validatorNameInput.value.trim();
                 if (validatorName) {
-                    // Agregar el nombre del validador a los datos de la reserva
                     currentReservationData.validator = validatorName;
                     addReservation(currentReservationData);
                     hideValidationModal();
-                    reservationForm.reset(); // Limpiar formulario después de agregar
-                    // Resetear y deshabilitar el campo de hora al limpiar el formulario
+                    reservationForm.reset();
                     timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
                     timeSelect.disabled = true;
-                    currentReservationData = null; // Limpiar datos temporales
+                    availabilityInfo.textContent = ''; // Limpiar el contador de disponibilidad
+                    availabilityInfo.className = 'availability-info'; // Resetear clases
+                    currentReservationData = null;
                 } else {
                     alert('Por favor, ingrese el nombre de quien solicita la reserva.');
                 }
@@ -502,34 +612,30 @@
             // Evento para cancelar la validación
             cancelValidationBtn.addEventListener('click', () => {
                 hideValidationModal();
-                currentReservationData = null; // Descartar los datos temporales
+                currentReservationData = null;
             });
 
-            // Función para mostrar el modal de validación
             function showValidationModal() {
                 validationModal.classList.add('active');
-                validatorNameInput.value = ''; // Limpiar el input cada vez
-                validatorNameInput.focus(); // Enfocar el input
+                validatorNameInput.value = '';
+                validatorNameInput.focus();
             }
 
-            // Función para ocultar el modal de validación
             function hideValidationModal() {
                 validationModal.classList.remove('active');
             }
 
-            // Función para agregar una nueva reserva
             function addReservation(data) {
                 reservations.push(data);
-                saveReservations(); // Guardar en localStorage
-                renderReservations(); // Actualizar la lista mostrada
+                saveReservations();
+                renderReservations();
+                updateAvailabilityInfo(); // Re-calcular la disponibilidad después de añadir una reserva
             }
 
-            // Función para renderizar las reservas en la lista
             function renderReservations() {
-                // Ordenar por timestamp para FIFO
                 reservations.sort((a, b) => a.timestamp - b.timestamp);
 
-                reservationListDiv.innerHTML = ''; // Limpiar la lista actual
+                reservationListDiv.innerHTML = '';
 
                 if (reservations.length === 0) {
                     noReservationsMessage.style.display = 'block';
@@ -555,31 +661,29 @@
                 }
             }
 
-            // Función para guardar reservas en localStorage
             function saveReservations() {
                 localStorage.setItem('restaurantReservations', JSON.stringify(reservations));
             }
 
-            // Función para cargar reservas desde localStorage
             function loadReservations() {
                 const storedReservations = localStorage.getItem('restaurantReservations');
                 if (storedReservations) {
                     reservations = JSON.parse(storedReservations);
                 }
-                renderReservations(); // Renderizar las reservas cargadas
+                renderReservations();
             }
 
-            // Función para convertir la hora de 24h (HH:MM) a 12h (HH:MM AM/PM)
             function convertTo12HourFormat(time24h) {
                 const [hours, minutes] = time24h.split(':');
                 const hour = parseInt(hours, 10);
                 const ampm = hour >= 12 ? 'PM' : 'AM';
-                const displayHour = hour % 12 || 12; // Convierte 0 a 12 para AM/PM
+                const displayHour = hour % 12 || 12;
                 return `${displayHour}:${minutes} ${ampm}`;
             }
 
             // Asegurarse de que el campo de hora esté deshabilitado al inicio
             timeSelect.disabled = true;
+            availabilityInfo.textContent = ''; // Limpiar el contador al inicio
         });
     </script>
 </body>
