@@ -468,8 +468,15 @@
                 color: black;
                 font-size: 12pt;
             }
-            .container, section, .modal-overlay, .modal-content, .header, .add-reservation-section,
-            .table-controls, .btn, .form-grid, .form-group, label, input, select, textarea {
+            /* Ocultar elementos de la UI que no queremos en la impresión */
+            .header, .add-reservation-section, .modal-overlay, .modal-content,
+            .table-controls, .btn, .form-grid, .form-group, label, input, select, textarea,
+            .admin-table .actions, /* Esconde los botones de Editar/Eliminar en la tabla */
+            a[href] { /* Esconde enlaces */
+                display: none !important;
+            }
+            /* Resetear estilos de contenedor para impresión */
+            .container, section {
                 box-shadow: none !important;
                 border: none !important;
                 background: none !important;
@@ -479,16 +486,8 @@
                 width: auto !important;
                 max-width: none !important;
                 overflow: visible !important;
+                display: block !important; /* Asegura que la sección se muestre */
             }
-
-            .header, .add-reservation-section, .modal-overlay, .modal-content, /* Esconde la UI */
-            .table-controls .btn-primary, /* Esconde el botón de búsqueda si lo hubiera */
-            #adminReservationSearch, /* Esconde la barra de búsqueda */
-            .admin-table .actions, /* Esconde los botones de Editar/Eliminar en la tabla */
-            a[href] { /* Esconde enlaces */
-                display: none !important;
-            }
-
             .manage-reservations-section {
                 padding: 0; /* Asegura que no haya padding extra */
             }
@@ -704,8 +703,9 @@
     </div>
 
     <script type="module">
-        // Importar las funciones de Firebase
+        // Importar las funciones que necesitas de los SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        // Importante: Asegúrate de importar getDatabase y las funciones necesarias para la base de datos
         import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         // Tu configuración de Firebase (DEBE SER LA MISMA QUE EN index.html)
@@ -723,13 +723,16 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // Opcional: Agrega un console.log para verificar si la base de datos se inicializó
+        console.log("Firebase Database initialized:", database);
+
         document.addEventListener('DOMContentLoaded', () => {
             const adminReservationForm = document.getElementById('adminReservationForm');
             const adminReservationsTableBody = document.getElementById('adminReservationsTableBody');
             const adminReservationSearchInput = document.getElementById('adminReservationSearch');
             const loadingMessage = document.getElementById('loadingMessage');
             const noReservationsAdminMessage = document.getElementById('noReservationsAdminMessage');
-            const printReservationsBtn = document.getElementById('printReservationsBtn'); // Nuevo botón de impresión
+            const printReservationsBtn = document.getElementById('printReservationsBtn');
 
             // Elementos del modal de edición
             const editReservationModal = document.getElementById('editReservationModal');
@@ -737,7 +740,7 @@
             const editReservationIdInput = document.getElementById('editReservationId');
             const editDateInput = document.getElementById('editDate');
             const editRoomInput = document.getElementById('editRoom');
-            const editGuestInput = document = document.getElementById('editGuest');
+            const editGuestInput = document.getElementById('editGuest');
             const editPlaceSelect = document.getElementById('editPlace');
             const editTimeInput = document.getElementById('editTime');
             const editPaxInput = document.getElementById('editPax');
@@ -808,6 +811,7 @@
                 }, (error) => {
                     console.error("Error fetching daily reservations:", error);
                     alert("Error al cargar reservas activas. Por favor, revise la conexión a Firebase.");
+                    loadingMessage.style.display = 'none'; // Ocultar mensaje de carga en caso de error
                 });
 
                 // Listener para archivedReservations (todos los nodos de fecha dentro)
@@ -829,6 +833,7 @@
                 }, (error) => {
                     console.error("Error fetching archived reservations:", error);
                     alert("Error al cargar reservas archivadas. Por favor, revise la conexión a Firebase.");
+                    loadingMessage.style.display = 'none'; // Ocultar mensaje de carga en caso de error
                 });
             }
 
@@ -856,7 +861,7 @@
                 const validator = document.getElementById('adminValidator').value;
 
                 if (!room || !guest || !place || !time || !pax || !date || !validator) {
-                    alert('Por favor, complete todos los campos.');
+                    alert('Por favor, complete todos los campos obligatorios.');
                     return;
                 }
                  if (room.length !== 4 || isNaN(room) || parseInt(room, 10) < 1000 || parseInt(room, 10) > 9999) {
@@ -877,14 +882,14 @@
                 };
 
                 try {
-                    // Siempre agregar a dailyReservations under the specified date
+                    // Siempre agregar a dailyReservations bajo la fecha especificada
                     const reservationsRef = ref(database, `dailyReservations/${date}`);
                     await push(reservationsRef, newReservation);
                     alert('Reserva agregada con éxito!');
                     adminReservationForm.reset();
                 } catch (error) {
                     console.error("Error al agregar reserva:", error);
-                    alert("Error al agregar la reserva. Por favor, intente de nuevo.");
+                    alert("Error al agregar la reserva. Por favor, intente de nuevo. Revise la consola para más detalles.");
                 }
             });
 
@@ -925,7 +930,7 @@
                 };
 
                 try {
-                    if (originalDate === newDate) { // If reservation date doesn't change
+                    if (originalDate === newDate) { // Si la fecha de la reserva no cambia
                         let path;
                         if (originalType === 'daily') {
                             path = `dailyReservations/${originalDate}/${id}`;
@@ -933,8 +938,8 @@
                             path = `archivedReservations/${originalDate}/${id}`;
                         }
                         await update(ref(database, path), updatedReservation);
-                    } else { // If reservation date has changed
-                        // First, remove from old location
+                    } else { // Si la fecha de la reserva ha cambiado
+                        // Primero, eliminar de la ubicación antigua
                         let oldPath;
                         if (originalType === 'daily') {
                             oldPath = `dailyReservations/${originalDate}/${id}`;
@@ -944,11 +949,11 @@
                         await remove(ref(database, oldPath));
                         console.log("Reserva eliminada de la ubicación antigua:", oldPath);
 
-                        // Then, add it to the new location (always as 'daily' under the new date)
-                        // The archiving system of `index.html` will handle moving it to 'archived' if it's a past date.
+                        // Luego, añadirla a la nueva ubicación (siempre como 'daily' en la nueva fecha)
+                        // El sistema de archivado del `index.html` se encargará de moverla a 'archived' si es una fecha pasada.
                         const newReservationsRef = ref(database, `dailyReservations/${newDate}`);
                         const newRef = push(newReservationsRef);
-                        await set(newRef, { ...updatedReservation, timestamp: new Date().getTime() }); // Ensure new timestamp and ID
+                        await set(newRef, { ...updatedReservation, timestamp: new Date().getTime() }); // Asegurar nuevo timestamp y ID
                         console.log("Reserva añadida a la nueva ubicación:", newDate);
                     }
 
@@ -956,7 +961,7 @@
                     hideEditModal();
                 } catch (error) {
                     console.error("Error al actualizar reserva:", error);
-                    alert("Error al actualizar la reserva. Por favor, intente de nuevo.");
+                    alert("Error al actualizar la reserva. Por favor, intente de nuevo. Revise la consola para más detalles.");
                 }
             });
 
@@ -978,7 +983,7 @@
                     alert('Reserva eliminada con éxito!');
                 } catch (error) {
                     console.error("Error al eliminar reserva:", error);
-                    alert("Error al eliminar la reserva. Por favor, intente de nuevo.");
+                    alert("Error al eliminar la reserva. Por favor, intente de nuevo. Revise la consola para más detalles.");
                 }
             }
 
@@ -1071,7 +1076,7 @@
                         if (reservationToEdit) {
                             showEditModal(reservationToEdit);
                         } else {
-                            alert('No se encontró la reserva para editar.');
+                            alert('No se encontró la reserva para editar. Puede que haya sido eliminada o que los datos no estén sincronizados.');
                         }
                     } else if (e.target.textContent === 'Eliminar') {
                         deleteReservation(id, date, type);
@@ -1120,7 +1125,7 @@
 
             function printReservations() {
                 if (currentFilteredReservations.length === 0) {
-                    alert('No hay reservas para imprimir. Por favor, asegúrese de que la tabla no esté vacía.');
+                    alert('No hay reservas para imprimir. Por favor, asegúrese de que la tabla no esté vacía o que haya aplicado un filtro.');
                     return;
                 }
 
@@ -1133,10 +1138,13 @@
                     return acc;
                 }, {});
 
+                // Obtener la fecha actual para el encabezado de impresión
+                const printDate = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+
                 let printContent = `
                     <div class="print-page-content">
                         <h1>Reservas del Restaurante Xcaret</h1>
-                        <p class="print-date-header">Fecha de Impresión: ${getFormattedDate(getTodayDateString())}</p>
+                        <p class="print-date-header">Fecha de Impresión: ${printDate}</p>
                 `;
 
                 // Ordenar los restaurantes alfabéticamente
@@ -1147,7 +1155,13 @@
                     printContent += `<ul>`;
 
                     // Ordenar las reservas dentro de cada restaurante por hora
-                    reservationsByRestaurant[place].sort((a, b) => a.time.localeCompare(b.time));
+                    reservationsByRestaurant[place].sort((a, b) => {
+                        // Primero por hora
+                        const timeComparison = a.time.localeCompare(b.time);
+                        if (timeComparison !== 0) return timeComparison;
+                        // Luego por habitación (para desempate)
+                        return parseInt(a.room) - parseInt(b.room);
+                    });
 
                     reservationsByRestaurant[place].forEach(res => {
                         printContent += `
