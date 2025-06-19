@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secrets Royal Beach - Internal Survey</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Secrets Royal Beach Punta Cana Encuesta Interna</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -154,16 +153,18 @@
 <body>
 
     <div class="survey-container">
-        <!-- Language Switcher -->
         <div class="language-switcher flex justify-end mb-8 space-x-2">
             <button id="lang-en" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 active" data-lang="en">English</button>
             <button id="lang-es" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-gray-100" data-lang="es">Español</button>
             <button id="lang-fr" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-gray-100" data-lang="fr">Français</button>
         </div>
 
-        <h1 id="survey-title" class="text-3xl font-bold text-center text-gray-800 mb-8">Secrets Royal Beach - Internal Survey</h1>
+        <div class="flex justify-center mb-6">
+            <img src="https://assets.hyatt.com/content/dam/hyatt/hyattdam/images/2022/03/01/1532/Secrets-L001c-stk-R-color-RGB.png/Secrets-L001c-stk-R-color-RGB.400x196-PSR.png" alt="Secrets Royal Beach Logo" class="max-w-[150px] sm:max-w-[200px] h-auto">
+        </div>
 
-        <!-- Section 1: User Details -->
+        <h1 id="survey-title" class="text-3xl font-bold text-center text-gray-800 mb-8">Secrets Royal Beach Punta Cana Encuesta Interna</h1>
+
         <div id="section1" class="form-section active">
             <p id="section1-description" class="text-gray-600 text-center mb-8">Please provide your details to start the survey.</p>
             <div class="mb-6">
@@ -189,46 +190,36 @@
             </button>
         </div>
 
-        <!-- Section 2: Survey Questions -->
         <div id="section2" class="form-section">
             <form id="surveyForm">
-                <!-- Question 1 -->
                 <div class="mb-10">
                     <label id="q1-label" class="block text-gray-800 text-lg font-semibold mb-4">1. Would you recommend this hotel to your family and friends?</label>
                     <div class="flex flex-wrap justify-center gap-4" data-question="q1">
-                        <!-- Rating buttons will be dynamically generated here -->
-                    </div>
+                        </div>
                     <p id="q1-error" class="text-red-500 text-xs italic mt-2 hidden">Please select a rating for this question.</p>
                 </div>
 
-                <!-- Question 2 -->
                 <div class="mb-10">
                     <label id="q2-label" class="block text-gray-800 text-lg font-semibold mb-4">2. How would you rate your overall experience with us?</label>
                     <div class="flex flex-wrap justify-center gap-4" data-question="q2">
-                        <!-- Rating buttons -->
-                    </div>
+                        </div>
                     <p id="q2-error" class="text-red-500 text-xs italic mt-2 hidden">Please select a rating for this question.</p>
                 </div>
 
-                <!-- Question 3 -->
                 <div class="mb-10">
                     <label id="q3-label" class="block text-gray-800 text-lg font-semibold mb-4">3. How would you rate the overall level of service provided by our staff?</label>
                     <div class="flex flex-wrap justify-center gap-4" data-question="q3">
-                        <!-- Rating buttons -->
-                    </div>
+                        </div>
                     <p id="q3-error" class="text-red-500 text-xs italic mt-2 hidden">Please select a rating for this question.</p>
                 </div>
 
-                <!-- Question 4 -->
                 <div class="mb-10">
                     <label id="q4-label" class="block text-gray-800 text-lg font-semibold mb-4">4. How would you rate your experience as a Preferred Club guest?</label>
                     <div class="flex flex-wrap justify-center gap-4" data-question="q4">
-                        <!-- Rating buttons -->
-                    </div>
+                        </div>
                     <p id="q4-error" class="text-red-500 text-xs italic mt-2 hidden">Please select a rating for this question.</p>
                 </div>
 
-                <!-- Comments Box -->
                 <div class="mb-10">
                     <label for="comments" id="label-comments" class="block text-gray-800 text-lg font-semibold mb-4">Comments (Optional)</label>
                     <textarea id="comments" name="comments" class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500 transition duration-200" placeholder="Please share any additional feedback or comments..."></textarea>
@@ -240,21 +231,18 @@
             </form>
         </div>
 
-        <!-- Survey Already Submitted Message -->
         <div id="alreadySubmitted" class="form-section text-center py-10 px-6 rounded-lg bg-blue-50 border border-blue-200 hidden">
             <i class="fas fa-check-circle text-blue-500 text-5xl mb-4"></i>
             <h2 id="submitted-title" class="text-2xl font-bold text-blue-800 mb-4">Survey Already Submitted!</h2>
             <p id="submitted-message" class="text-blue-700">It looks like you've already completed this survey from this device. Thank you for your feedback!</p>
         </div>
 
-        <!-- Success Message -->
         <div id="successMessage" class="form-section text-center py-10 px-6 rounded-lg bg-green-50 border border-green-200 hidden">
             <i class="fas fa-check-circle text-green-500 text-5xl mb-4"></i>
             <h2 id="success-title" class="text-2xl font-bold text-green-800 mb-4">Thank You!</h2>
             <p id="success-message" class="text-green-700">Your feedback has been successfully submitted. We appreciate your time.</p>
         </div>
 
-        <!-- Error Message -->
         <div id="errorMessage" class="form-section text-center py-10 px-6 rounded-lg bg-red-50 border border-red-200 hidden">
             <i class="fas fa-times-circle text-red-500 text-5xl mb-4"></i>
             <h2 id="error-title" class="text-2xl font-bold text-red-800 mb-4">Submission Failed!</h2>
@@ -262,7 +250,6 @@
         </div>
     </div>
 
-    <!-- Custom Modal for Messages -->
     <div id="customModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -271,7 +258,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -337,7 +323,7 @@
                 modalAlreadySubmitted: "This device has already submitted a survey. You cannot submit another one at this time."
             },
             es: {
-                surveyTitle: "Encuesta de Satisfacción del Hotel",
+                surveyTitle: "Encuesta Interna",
                 section1Description: "Por favor, proporcione sus datos para iniciar la encuesta.",
                 labelRoom: "Número de Habitación",
                 labelName: "Nombre Completo",
@@ -389,7 +375,7 @@
                 errorMessage: "Une erreur est survenue lors de la soumission de votre enquête. Veuillez réessayer plus tard.",
                 roomRequired: "Le numéro de chambre est requis.",
                 nameRequired: "Le nom complet est requis.",
-                ratingRequired: "Veuillez sélectionner une note pour cette question.",
+                ratingRequired: "Veuillez sélectionner una note para esta pregunta.",
                 modalRequiredFields: "Veuillez remplir tous les champs obligatoires (Numéro de Chambre, Nom Complet) avant de commencer l'enquête.",
                 modalSubmittedSuccessfully: "Votre enquête a été soumise avec succès !",
                 modalSubmissionFailed: "Échec de la soumission de l'enquête. Veuillez réessayer.",
@@ -403,6 +389,7 @@
         // Function to update text content based on selected language
         function updateContent() {
             const langData = translations[currentLang];
+            // Actualización del título principal de la encuesta
             document.getElementById('survey-title').textContent = langData.surveyTitle;
             document.getElementById('section1-description').textContent = langData.section1Description;
             document.getElementById('label-room').textContent = langData.labelRoom;
