@@ -201,85 +201,56 @@
         }
 
 
-        /* Mejoras para la sección de Reservas del Día */
+        /* Estilos para la lista de reservas del día (más sencilla) */
         .reservation-list {
-            display: grid;
-            gap: 20px; /* Aumento de espacio entre tarjetas */
-            /* Adaptar a columnas si hay muchas reservas y espacio */
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Espacio entre los ítems de la lista */
+            padding: 0;
+            margin: 0;
+            list-style: none; /* Quitar viñetas de lista */
         }
 
         .reservation-item {
-            background-color: var(--card-background); /* Fondo de la tarjeta */
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary-color); /* Borde de color para resaltar */
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
+            padding: 12px 15px; /* Padding más compacto */
+            font-size: 0.95em;
+            color: var(--text-color);
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            position: relative; /* Para el botón de eliminar */
-            border-left: 6px solid var(--primary-color); /* Borde de color más pronunciado */
+            justify-content: space-between; /* Alinea los elementos al inicio y al final */
+            align-items: center; /* Centra verticalmente */
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
         }
 
-        .reservation-item:hover {
-            transform: translateY(-5px); /* Efecto de "levantar" la tarjeta */
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Sombra más grande al pasar el ratón */
+        .reservation-item span {
+            /* Estilo para cada pieza de información */
+            padding: 0 5px; /* Pequeño espacio horizontal */
         }
 
-        .reservation-item .header-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+        .reservation-item .room-name {
+            font-weight: bold;
+            color: var(--accent-color);
+            flex-basis: 30%; /* Ocupa un poco más de espacio */
+            min-width: 150px; /* Ancho mínimo para evitar rupturas */
         }
 
-        .reservation-item .header-info .time {
-            font-size: 1.4em;
+        .reservation-item .restaurant-time {
+            color: var(--text-color);
+            flex-basis: 35%; /* Ocupa un poco más de espacio */
+            min-width: 180px;
+        }
+        .reservation-item .pax-info {
             font-weight: bold;
             color: var(--primary-color);
+            background-color: rgba(76, 175, 80, 0.1); /* Fondo ligero para PAX */
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: auto; /* Empuja el PAX al final */
         }
 
-        .reservation-item .header-info .pax-count {
-            background-color: var(--accent-color);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 50px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-
-        .reservation-item .guest-name {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        .reservation-item .details {
-            font-size: 0.95em;
-            color: var(--light-text-color);
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .reservation-item .details strong {
-            color: var(--accent-color); /* Para resaltar Room y Validator */
-        }
-
-        .reservation-item .comment {
-            font-style: italic;
-            color: #555;
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed var(--border-color);
-        }
-        .reservation-item .comment::before {
-            content: "💬 "; /* Icono simple antes del comentario */
-            font-style: normal;
-        }
 
         .no-reservations {
             text-align: center;
@@ -289,29 +260,8 @@
             border: 1px dashed var(--border-color);
             border-radius: var(--border-radius);
             margin-top: 20px;
-            grid-column: 1 / -1; /* Para que el mensaje ocupe todo el ancho si no hay reservas */
+            grid-column: 1 / -1;
         }
-
-        /* Botón de eliminar en la tarjeta de reserva */
-        .delete-reservation-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            color: #d32f2f; /* Rojo para eliminar */
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            line-height: 1;
-            padding: 0;
-        }
-        .delete-reservation-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
 
         /* Modal / Popup Styling */
         .modal-overlay {
@@ -564,12 +514,16 @@
                 margin-left: 5px;
                 font-size: 0.8em;
             }
-            /* Asegurar que las tarjetas de reserva se vean bien en móviles */
-            .reservation-list {
-                grid-template-columns: 1fr; /* Una sola columna en móviles */
-            }
+            /* Asegurar que los ítems de la lista se vean bien en móviles */
             .reservation-item {
-                padding: 15px;
+                flex-direction: column; /* Apilar elementos en móviles */
+                align-items: flex-start; /* Alinear al inicio */
+                gap: 5px; /* Menor espacio */
+                padding: 10px 15px;
+            }
+            .reservation-item .pax-info {
+                margin-left: 0; /* Quitar margen automático */
+                margin-top: 5px; /* Espacio arriba */
             }
         }
     </style>
@@ -724,6 +678,7 @@
                 timeSelect.disabled = true;
                 availabilityInfo.textContent = '';
                 availabilityInfo.className = 'availability-info';
+                roomInput.focus(); // Enfocar el primer campo del formulario
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
             });
 
@@ -893,7 +848,6 @@
                 }
 
                 currentReservationData = {
-                    id: Date.now(), // Añadir un ID único a cada reserva
                     room,
                     guest,
                     place,
@@ -908,7 +862,7 @@
 
             // Evento para confirmar la validación del nombre
             confirmValidationBtn.addEventListener('click', () => {
-                const validatorName = validatorInputName.value.trim();
+                const validatorName = validatorNameInput.value.trim();
                 if (validatorName) {
                     currentReservationData.validator = validatorName;
                     addReservation(currentReservationData);
@@ -952,20 +906,9 @@
             function addReservation(data) {
                 reservations.push(data);
                 saveReservations();
-                renderReservations(); // Volver a renderizar para que la nueva tarjeta aparezca
+                renderReservations();
                 updateAvailabilityInfo();
             }
-
-            // Función para eliminar una reserva
-            function deleteReservation(idToDelete) {
-                if (confirm('¿Está seguro de que desea eliminar esta reserva?')) {
-                    reservations = reservations.filter(res => res.id !== idToDelete);
-                    saveReservations();
-                    renderReservations(); // Volver a renderizar la lista
-                    updateAvailabilityInfo(); // Actualizar disponibilidad
-                }
-            }
-
 
             function renderReservations() {
                 // Ordenar por hora del restaurante primero, luego por habitación
@@ -991,33 +934,15 @@
                     reservations.forEach((res) => {
                         const reservationItem = document.createElement('div');
                         reservationItem.classList.add('reservation-item');
-                        reservationItem.dataset.id = res.id; // Guardar el ID en el elemento para eliminarlo
 
                         const time12Hrs = convertTo12HourFormat(res.time);
 
                         reservationItem.innerHTML = `
-                            <button class="delete-reservation-btn" data-id="${res.id}">&times;</button>
-                            <div class="header-info">
-                                <span class="time">${time12Hrs}</span>
-                                <span class="pax-count">${res.pax} PAX</span>
-                            </div>
-                            <p class="guest-name">${res.guest}</p>
-                            <div class="details">
-                                <span>Restaurante: <strong>${res.place}</strong></span>
-                                <span>Habitación: <strong>${res.room}</strong></span>
-                                <span>Solicitado por: <strong>${res.validator || 'N/A'}</strong></span>
-                            </div>
-                            ${res.comment ? `<p class="comment">${res.comment}</p>` : ''}
+                            <span class="room-name">${res.room} - ${res.guest}</span>
+                            <span class="restaurant-time">${res.place} - ${time12Hrs}</span>
+                            <span class="pax-info">${res.pax} PAX</span>
                         `;
                         reservationListDiv.appendChild(reservationItem);
-                    });
-
-                    // Añadir event listeners a los botones de eliminar después de renderizar
-                    document.querySelectorAll('.delete-reservation-btn').forEach(button => {
-                        button.addEventListener('click', (e) => {
-                            const idToDelete = parseInt(e.target.dataset.id);
-                            deleteReservation(idToDelete);
-                        });
                     });
                 }
             }
@@ -1030,8 +955,6 @@
                 const storedReservations = localStorage.getItem('restaurantReservations');
                 if (storedReservations) {
                     reservations = JSON.parse(storedReservations);
-                    // Asegurarse de que las reservas antiguas tengan un ID para poder eliminarlas
-                    reservations = reservations.map(res => ({ ...res, id: res.id || Date.now() + Math.random() }));
                 }
                 renderReservations();
             }
@@ -1107,6 +1030,7 @@
                                 summaryHtml += `
                                     <p class="summary-reservation-detail">
                                         <strong>${detail.room}</strong> - ${detail.guest} - ${detail.pax} PAX
+                                        ${detail.comment ? `<em>(Comentario: ${detail.comment})</em>` : ''}
                                     </p>
                                 `;
                             });
