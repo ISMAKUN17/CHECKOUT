@@ -201,45 +201,84 @@
         }
 
 
+        /* Mejoras para la sección de Reservas del Día */
         .reservation-list {
             display: grid;
-            gap: 15px;
+            gap: 20px; /* Aumento de espacio entre tarjetas */
+            /* Adaptar a columnas si hay muchas reservas y espacio */
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
 
         .reservation-item {
-            background-color: var(--background-color);
-            border: 1px solid var(--border-color);
-            border-left: 5px solid var(--primary-color); /* Borde de color para resaltar */
+            background-color: var(--card-background); /* Fondo de la tarjeta */
             border-radius: var(--border-radius);
-            padding: 15px 20px;
+            box-shadow: var(--shadow);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: var(--shadow);
+            gap: 10px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative; /* Para el botón de eliminar */
+            border-left: 6px solid var(--primary-color); /* Borde de color más pronunciado */
         }
 
         .reservation-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px); /* Efecto de "levantar" la tarjeta */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Sombra más grande al pasar el ratón */
         }
 
-        .reservation-item strong {
-            color: var(--accent-color);
-            font-size: 1.1em;
-        }
-
-        .reservation-item span {
-            font-size: 0.95em;
-            color: var(--light-text-color);
-        }
-
-        .reservation-item .time-pax {
+        .reservation-item .header-info {
             display: flex;
-            justify-content.space-between;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .reservation-item .header-info .time {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .reservation-item .header-info .pax-count {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .reservation-item .guest-name {
+            font-size: 1.2em;
             font-weight: bold;
             color: var(--text-color);
-            margin-top: 5px;
+        }
+
+        .reservation-item .details {
+            font-size: 0.95em;
+            color: var(--light-text-color);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .reservation-item .details strong {
+            color: var(--accent-color); /* Para resaltar Room y Validator */
+        }
+
+        .reservation-item .comment {
+            font-style: italic;
+            color: #555;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+        }
+        .reservation-item .comment::before {
+            content: "💬 "; /* Icono simple antes del comentario */
+            font-style: normal;
         }
 
         .no-reservations {
@@ -250,7 +289,29 @@
             border: 1px dashed var(--border-color);
             border-radius: var(--border-radius);
             margin-top: 20px;
+            grid-column: 1 / -1; /* Para que el mensaje ocupe todo el ancho si no hay reservas */
         }
+
+        /* Botón de eliminar en la tarjeta de reserva */
+        .delete-reservation-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #d32f2f; /* Rojo para eliminar */
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            line-height: 1;
+            padding: 0;
+        }
+        .delete-reservation-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
 
         /* Modal / Popup Styling */
         .modal-overlay {
@@ -259,7 +320,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Oscurecer un poco más el fondo */
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -267,7 +328,7 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
-            overflow-y: auto; /* Permite scroll si el contenido es largo */
+            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -280,9 +341,9 @@
             background-color: var(--card-background);
             padding: 30px;
             border-radius: var(--border-radius);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             width: 90%;
-            max-width: 600px; /* Ancho por defecto del modal de resumen */
+            max-width: 600px;
             text-align: center;
             transform: translateY(-50px);
             transition: transform var(--transition-speed) ease;
@@ -290,7 +351,7 @@
             margin: 20px auto;
             position: relative;
             animation: fadeInScaleUp var(--transition-speed) forwards;
-            max-height: 90vh; /* Altura máxima para permitir scroll */
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
         }
@@ -332,7 +393,7 @@
 
         /* Summary Modal specific styles */
         #summaryModal .modal-content {
-            max-width: 700px; /* Ancho para el listado */
+            max-width: 700px;
             text-align: left;
         }
         #summaryModal .modal-content h3 {
@@ -346,16 +407,16 @@
 
         /* Contenido del resumen con scroll */
         #summaryContent {
-            flex-grow: 1; /* Permite que el contenido ocupe el espacio restante */
-            overflow-y: auto; /* Habilita el scroll dentro del contenido del resumen */
-            padding-right: 10px; /* Para evitar que la barra de scroll se superponga al texto */
-            margin-bottom: 15px; /* Espacio antes del total PAX */
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 15px;
         }
 
         .summary-restaurant {
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color); /* Separador más sólido entre restaurantes */
+            border-bottom: 1px solid var(--border-color);
         }
 
         .summary-restaurant:last-child {
@@ -373,7 +434,7 @@
             justify-content: space-between;
             align-items: baseline;
             padding-bottom: 5px;
-            border-bottom: 1px dotted var(--border-color); /* Separador sutil para el título del restaurante */
+            border-bottom: 1px dotted var(--border-color);
         }
 
         .summary-restaurant h4 span {
@@ -383,10 +444,10 @@
         }
 
         .summary-time-group {
-            margin-left: 10px; /* Indentación para las horas */
+            margin-left: 10px;
             margin-bottom: 10px;
             padding: 8px;
-            border-left: 3px solid var(--primary-color); /* Borde de color para el grupo de hora */
+            border-left: 3px solid var(--primary-color);
             background-color: var(--background-color);
             border-radius: var(--border-radius);
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -406,18 +467,18 @@
             justify-content: space-between;
         }
         .summary-time span {
-            color: var(--primary-color); /* Para el total PAX de la hora */
+            color: var(--primary-color);
         }
 
         .summary-reservation-detail {
-            margin-left: 10px; /* Indentación para cada reserva */
+            margin-left: 10px;
             font-size: 0.9em;
             color: var(--light-text-color);
             margin-bottom: 2px;
             line-height: 1.4;
         }
         .summary-reservation-detail strong {
-            color: var(--accent-color); /* Para el número de habitación */
+            color: var(--accent-color);
         }
         .summary-reservation-detail:last-child {
             margin-bottom: 0;
@@ -475,7 +536,7 @@
                 width: 95%;
                 padding: 15px;
                 margin: 10px auto;
-                max-height: 95vh; /* Ajuste para móviles */
+                max-height: 95vh;
             }
             #summaryModal .modal-content {
                 max-width: 95%;
@@ -502,6 +563,13 @@
             .summary-reservation-detail {
                 margin-left: 5px;
                 font-size: 0.8em;
+            }
+            /* Asegurar que las tarjetas de reserva se vean bien en móviles */
+            .reservation-list {
+                grid-template-columns: 1fr; /* Una sola columna en móviles */
+            }
+            .reservation-item {
+                padding: 15px;
             }
         }
     </style>
@@ -613,7 +681,7 @@
 
             const summaryModal = document.getElementById('summaryModal');
             const summaryTitle = document.getElementById('summaryTitle');
-            const summaryContent = document.getElementById('summaryContent'); // Ahora es el div contenedor de la lista
+            const summaryContent = document.getElementById('summaryContent');
             const overallPaxTotal = document.getElementById('overallPaxTotal');
             const closeSummaryBtn = document.getElementById('closeSummaryBtn');
 
@@ -825,6 +893,7 @@
                 }
 
                 currentReservationData = {
+                    id: Date.now(), // Añadir un ID único a cada reserva
                     room,
                     guest,
                     place,
@@ -839,7 +908,7 @@
 
             // Evento para confirmar la validación del nombre
             confirmValidationBtn.addEventListener('click', () => {
-                const validatorName = validatorNameInput.value.trim();
+                const validatorName = validatorInputName.value.trim();
                 if (validatorName) {
                     currentReservationData.validator = validatorName;
                     addReservation(currentReservationData);
@@ -883,12 +952,35 @@
             function addReservation(data) {
                 reservations.push(data);
                 saveReservations();
-                renderReservations();
+                renderReservations(); // Volver a renderizar para que la nueva tarjeta aparezca
                 updateAvailabilityInfo();
             }
 
+            // Función para eliminar una reserva
+            function deleteReservation(idToDelete) {
+                if (confirm('¿Está seguro de que desea eliminar esta reserva?')) {
+                    reservations = reservations.filter(res => res.id !== idToDelete);
+                    saveReservations();
+                    renderReservations(); // Volver a renderizar la lista
+                    updateAvailabilityInfo(); // Actualizar disponibilidad
+                }
+            }
+
+
             function renderReservations() {
-                reservations.sort((a, b) => a.timestamp - b.timestamp);
+                // Ordenar por hora del restaurante primero, luego por habitación
+                reservations.sort((a, b) => {
+                    // Ordenar por restaurante
+                    const restaurantComparison = a.place.localeCompare(b.place);
+                    if (restaurantComparison !== 0) return restaurantComparison;
+
+                    // Luego por hora
+                    const timeComparison = a.time.localeCompare(b.time);
+                    if (timeComparison !== 0) return timeComparison;
+
+                    // Finalmente por número de habitación
+                    return parseInt(a.room) - parseInt(b.room);
+                });
 
                 reservationListDiv.innerHTML = '';
 
@@ -896,22 +988,36 @@
                     noReservationsMessage.style.display = 'block';
                 } else {
                     noReservationsMessage.style.display = 'none';
-                    reservations.forEach((res, index) => {
+                    reservations.forEach((res) => {
                         const reservationItem = document.createElement('div');
                         reservationItem.classList.add('reservation-item');
+                        reservationItem.dataset.id = res.id; // Guardar el ID en el elemento para eliminarlo
 
                         const time12Hrs = convertTo12HourFormat(res.time);
 
                         reservationItem.innerHTML = `
-                            <strong>${res.guest}</strong> (${res.pax} personas)
-                            <span>Restaurante: ${res.place} - Habitación: ${res.room}</span>
-                            <div class="time-pax">
-                                <span>Hora: ${time12Hrs}</span>
-                                <span>Solicitado por: ${res.validator || 'N/A'}</span>
+                            <button class="delete-reservation-btn" data-id="${res.id}">&times;</button>
+                            <div class="header-info">
+                                <span class="time">${time12Hrs}</span>
+                                <span class="pax-count">${res.pax} PAX</span>
                             </div>
-                            ${res.comment ? `<p><em>Comentario: ${res.comment}</em></p>` : ''}
+                            <p class="guest-name">${res.guest}</p>
+                            <div class="details">
+                                <span>Restaurante: <strong>${res.place}</strong></span>
+                                <span>Habitación: <strong>${res.room}</strong></span>
+                                <span>Solicitado por: <strong>${res.validator || 'N/A'}</strong></span>
+                            </div>
+                            ${res.comment ? `<p class="comment">${res.comment}</p>` : ''}
                         `;
                         reservationListDiv.appendChild(reservationItem);
+                    });
+
+                    // Añadir event listeners a los botones de eliminar después de renderizar
+                    document.querySelectorAll('.delete-reservation-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const idToDelete = parseInt(e.target.dataset.id);
+                            deleteReservation(idToDelete);
+                        });
                     });
                 }
             }
@@ -924,6 +1030,8 @@
                 const storedReservations = localStorage.getItem('restaurantReservations');
                 if (storedReservations) {
                     reservations = JSON.parse(storedReservations);
+                    // Asegurarse de que las reservas antiguas tengan un ID para poder eliminarlas
+                    reservations = reservations.map(res => ({ ...res, id: res.id || Date.now() + Math.random() }));
                 }
                 renderReservations();
             }
@@ -988,7 +1096,7 @@
                         const sortedTimes = Object.keys(restaurantData.times).sort();
 
                         sortedTimes.forEach(time24h => {
-                            const timeData = restaurantData.times[time24h];
+                            const timeData = groupedReservations[restaurant].times[time24h];
                             summaryHtml += `
                                 <div class="summary-time-group">
                                     <p class="summary-time">${convertTo12HourFormat(time24h)}: <span>${timeData.pax} PAX</span></p>
