@@ -330,12 +330,22 @@
                         <input type="text" id="guest" placeholder="Ej. Juan Pérez" required>
                     </div>
                     <div class="form-group">
-                        <label for="place">Mesa/Lugar:</label>
-                        <input type="text" id="place" placeholder="Ej. Mesa 5 / Jardín" required>
+                        <label for="place">Restaurante:</label>
+                        <select id="place" required>
+                            <option value="">Seleccione un restaurante</option>
+                            <option value="El Patio">El Patio</option>
+                            <option value="Bluewater">Bluewater</option>
+                            <option value="Bordeaux">Bordeaux</option>
+                            <option value="Himitsu">Himitsu</option>
+                            <option value="Hibachi">Hibachi</option>
+                            <option value="El Olio">El Olio</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="time">Hora (24h):</label>
-                        <input type="time" id="time" required>
+                        <label for="time">Hora de Reserva:</label>
+                        <select id="time" required>
+                            <option value="">Seleccione un restaurante primero</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="pax">Cantidad de Personas:</label>
@@ -381,18 +391,61 @@
             const confirmValidationBtn = document.getElementById('confirmValidationBtn');
             const cancelValidationBtn = document.getElementById('cancelValidationBtn');
 
+            const placeSelect = document.getElementById('place');
+            const timeSelect = document.getElementById('time');
+
             let reservations = [];
             let currentReservationData = null; // Para almacenar temporalmente los datos de la reserva antes de la validación
+
+            // Definición de los restaurantes y sus horarios (en formato 24h para facilitar la lógica interna)
+            const restaurantTimes = {
+                "El Patio": ["18:00", "21:00"],
+                "Bluewater": ["18:00", "21:00"],
+                "Bordeaux": ["18:00", "21:00"],
+                "Himitsu": ["18:00", "21:00"],
+                "Hibachi": ["17:30", "18:45", "20:00", "21:15"],
+                "El Olio": ["18:30", "21:00"]
+            };
 
             // Cargar reservas guardadas (si existen) al iniciar
             loadReservations();
 
             // Evento para mostrar el formulario de agregar reserva
             addReservationBtn.addEventListener('click', () => {
-                // Podrías limpiar el formulario o desplazar la vista si es necesario
                 reservationForm.reset();
+                // Resetear y deshabilitar el campo de hora al limpiar el formulario
+                timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
+                timeSelect.disabled = true;
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
             });
+
+            // Evento para cuando se selecciona un restaurante
+            placeSelect.addEventListener('change', () => {
+                const selectedRestaurant = placeSelect.value;
+                updateTimeOptions(selectedRestaurant);
+            });
+
+            // Función para actualizar las opciones de hora según el restaurante seleccionado
+            function updateTimeOptions(restaurant) {
+                timeSelect.innerHTML = ''; // Limpiar opciones anteriores
+                if (restaurant && restaurantTimes[restaurant]) {
+                    timeSelect.disabled = false; // Habilitar el select de la hora
+                    const times = restaurantTimes[restaurant];
+                    times.forEach(time24h => {
+                        const option = document.createElement('option');
+                        option.value = time24h;
+                        option.textContent = convertTo12HourFormat(time24h);
+                        timeSelect.appendChild(option);
+                    });
+                } else {
+                    timeSelect.disabled = true; // Deshabilitar si no hay restaurante seleccionado
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = "";
+                    defaultOption.textContent = "Seleccione un restaurante primero";
+                    timeSelect.appendChild(defaultOption);
+                }
+            }
+
 
             // Evento para manejar el envío del formulario
             reservationForm.addEventListener('submit', (e) => {
@@ -401,10 +454,16 @@
                 // Recolectar datos del formulario
                 const room = document.getElementById('room').value;
                 const guest = document.getElementById('guest').value;
-                const place = document.getElementById('place').value;
+                const place = document.getElementById('place').value; // Ahora es el nombre del restaurante
                 const time = document.getElementById('time').value;
                 const pax = parseInt(document.getElementById('pax').value, 10);
                 const comment = document.getElementById('comment').value;
+
+                // Validar que se haya seleccionado una hora
+                if (!time) {
+                    alert('Por favor, seleccione una hora de reserva válida para el restaurante elegido.');
+                    return;
+                }
 
                 // Almacenar los datos temporalmente
                 currentReservationData = {
@@ -430,6 +489,9 @@
                     addReservation(currentReservationData);
                     hideValidationModal();
                     reservationForm.reset(); // Limpiar formulario después de agregar
+                    // Resetear y deshabilitar el campo de hora al limpiar el formulario
+                    timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
+                    timeSelect.disabled = true;
                     currentReservationData = null; // Limpiar datos temporales
                 } else {
                     alert('Por favor, ingrese el nombre de quien solicita la reserva.');
@@ -480,7 +542,7 @@
 
                         reservationItem.innerHTML = `
                             <strong>${res.guest}</strong> (${res.pax} personas)
-                            <span>${res.room} - ${res.place}</span>
+                            <span>Restaurante: ${res.place} - Ambiente: ${res.room}</span>
                             <div class="time-pax">
                                 <span>Hora: ${time12Hrs}</span>
                                 <span>Solicitado por: ${res.validator || 'N/A'}</span>
@@ -506,7 +568,7 @@
                 renderReservations(); // Renderizar las reservas cargadas
             }
 
-            // Función para convertir la hora de 24h a 12h (HH:MM a HH:MM AM/PM)
+            // Función para convertir la hora de 24h (HH:MM) a 12h (HH:MM AM/PM)
             function convertTo12HourFormat(time24h) {
                 const [hours, minutes] = time24h.split(':');
                 const hour = parseInt(hours, 10);
@@ -515,18 +577,16 @@
                 return `${displayHour}:${minutes} ${ampm}`;
             }
 
-            // Opcional: Si quieres una forma de borrar todas las reservas (para desarrollo/pruebas)
-            // const clearAllBtn = document.createElement('button');
-            // clearAllBtn.textContent = 'Borrar Todas las Reservas';
-            // clearAllBtn.classList.add('btn', 'btn-secondary');
-            // document.querySelector('.header').appendChild(clearAllBtn);
-            // clearAllBtn.addEventListener('click', () => {
-            //     if (confirm('¿Estás seguro de que quieres borrar todas las reservas?')) {
-            //         reservations = [];
-            //         saveReservations();
-            //         renderReservations();
-            //     }
-            // });
+            // Inicializar opciones de tiempo al cargar la página si hay un restaurante pre-seleccionado
+            // Opcional: Podrías querer que no haya nada seleccionado y que el usuario elija primero.
+            // if (placeSelect.value) {
+            //     updateTimeOptions(placeSelect.value);
+            // } else {
+            //     timeSelect.disabled = true; // Asegurarse de que esté deshabilitado al inicio
+            // }
+
+            // Asegurarse de que el campo de hora esté deshabilitado al inicio
+            timeSelect.disabled = true;
         });
     </script>
 </body>
