@@ -30,40 +30,41 @@
         }
         .table-container {
             overflow-x: auto;
-            border-radius: 12px; /* Slightly more rounded corners for the table */
-            border: 1px solid #dcdcdc; /* Lighter border */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* More pronounced shadow */
-            margin-top: 2rem; /* Add some space above the table */
+            border-radius: 12px; /* Bordes ligeramente más redondeados para la tabla */
+            border: 1px solid #dcdcdc; /* Borde más claro */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra más pronunciada */
+            margin-top: 2rem; /* Espacio superior para la tabla */
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.95rem; /* Slightly larger font for better readability */
+            font-size: 0.95rem; /* Fuente ligeramente más grande para mejor legibilidad */
         }
         th, td {
-            padding: 14px 18px; /* More padding for better spacing */
+            padding: 14px 18px; /* Más padding para mejor espaciado */
             text-align: left;
-            border-bottom: 1px solid #ededed; /* Lighter border for rows */
+            border-bottom: 1px solid #d1d5db; /* Borde más oscuro para los separadores de fila */
             white-space: nowrap;
         }
         th {
-            background-color: #eef1f4; /* Slightly darker header background */
-            font-weight: 700; /* Bolder font for headers */
-            color: #4a4a4a; /* Darker text color */
+            background-color: #eef1f4; /* Fondo de encabezado ligeramente más oscuro */
+            font-weight: 700; /* Fuente más negrita para los encabezados */
+            color: #4a4a4a; /* Color de texto más oscuro */
             text-transform: uppercase;
-            font-size: 0.88rem; /* Slightly larger header font */
+            font-size: 0.88rem; /* Fuente de encabezado ligeramente más grande */
         }
         tbody tr:hover {
-            background-color: #eef2f7; /* Lighter hover background */
+            background-color: #eef2f7; /* Fondo más claro al pasar el cursor */
             cursor: pointer;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-out;
-            transform: translateY(-2px); /* Subtle lift on hover */
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-out, box-shadow 0.2s ease-out; /* Transiciones para el hover */
+            transform: translateY(-2px); /* Pequeño levantamiento al pasar el cursor */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sombra sutil al pasar el cursor */
         }
         tbody tr:last-child td {
-            border-bottom: none;
+            border-bottom: none; /* Eliminar el borde inferior de la última fila */
         }
 
-        /* Modal styling */
+        /* Estilos del Modal */
         .modal {
             display: none;
             position: fixed;
@@ -73,17 +74,17 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.7); /* Even darker overlay */
+            background-color: rgba(0,0,0,0.7); /* Capa superpuesta más oscura */
             justify-content: center;
             align-items: center;
             animation: fadeInModal 0.3s ease-out;
         }
         .modal-content {
             background-color: #fefefe;
-            padding: 40px; /* More padding inside modal */
-            border-radius: 18px; /* More rounded modal corners */
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4); /* Stronger shadow for modal */
-            max-width: 650px; /* Slightly wider modal */
+            padding: 40px; /* Más padding dentro del modal */
+            border-radius: 18px; /* Esquinas del modal más redondeadas */
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4); /* Sombra más fuerte para el modal */
+            max-width: 650px; /* Modal ligeramente más ancho */
             width: 90%;
             position: relative;
             animation: slideInModal 0.3s ease-out;
@@ -95,12 +96,12 @@
             to { opacity: 1; }
         }
         @keyframes slideInModal {
-            from { transform: translateY(-70px) scale(0.9); opacity: 0; } /* More pronounced slide-in */
+            from { transform: translateY(-70px) scale(0.9); opacity: 0; } /* Efecto de entrada más pronunciado */
             to { transform: translateY(0) scale(1); opacity: 1; }
         }
         .close-button {
-            color: #999; /* Slightly darker close button color */
-            font-size: 36px; /* Even larger close button */
+            color: #999; /* Color ligeramente más oscuro para el botón de cerrar */
+            font-size: 36px; /* Botón de cerrar más grande */
             font-weight: bold;
             cursor: pointer;
             transition: color 0.2s;
@@ -114,35 +115,36 @@
             text-decoration: none;
         }
         .modal-body p {
-            margin-bottom: 10px; /* More space between paragraphs */
-            font-size: 1rem; /* Standard font size for modal content */
-            color: #333; /* Darker text color */
-            line-height: 1.5; /* Better line height */
+            margin-bottom: 10px; /* Más espacio entre párrafos */
+            font-size: 1rem; /* Tamaño de fuente estándar para el contenido del modal */
+            color: #333; /* Color de texto más oscuro */
+            line-height: 1.5; /* Mejor altura de línea */
         }
         .modal-body strong {
-            color: #1a1a1a; /* Even darker strong text */
+            color: #1a1a1a; /* Texto fuerte aún más oscuro */
         }
         .modal-body .rating-detail {
             display: inline-block;
-            padding: 6px 12px; /* Increased padding for better visual size */
-            border-radius: 12px; /* Slightly more rounded rating details */
-            font-weight: 700; /* Bolder font */
-            margin-left: 8px; /* More margin */
-            font-size: 1rem; /* Increased font size for clarity */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Subtle shadow for rating detail */
+            padding: 8px 14px; /* Padding aumentado para un tamaño visual mejor */
+            border-radius: 14px; /* Bordes más redondeados para los detalles de calificación */
+            font-weight: 800; /* Hacemos la fuente aún más negrita */
+            margin-left: 10px; /* Más margen */
+            font-size: 1.1rem; /* Aumentamos el tamaño de la fuente para mayor claridad */
+            /* Eliminado box-shadow, ahora usamos border para un contorno más limpio */
+            border: 1px solid; /* Se define el borde, el color se asigna dinámicamente */
         }
-        .rating-detail.red { background-color: #ef4444; color: white; }
-        .rating-detail.yellow { background-color: #facc15; color: white; }
-        .rating-detail.green { background-color: #22c55e; color: white; }
+        .rating-detail.red { background-color: #ef4444; color: white; border-color: #dc2626; }
+        .rating-detail.yellow { background-color: #facc15; color: white; border-color: #eab308; }
+        .rating-detail.green { background-color: #22c55e; color: white; border-color: #16a34a; }
 
         .loader {
-            border: 5px solid #e0e0e0; /* Thicker loader border */
-            border-top: 5px solid #4f46e5; /* Tailwind indigo-600 for loader top */
+            border: 5px solid #e0e0e0; /* Borde del cargador más grueso */
+            border-top: 5px solid #4f46e5; /* Color Tailwind indigo-600 para la parte superior del cargador */
             border-radius: 50%;
-            width: 50px; /* Larger loader */
+            width: 50px; /* Cargador más grande */
             height: 50px;
             animation: spin 2s linear infinite;
-            margin: 60px auto; /* More margin */
+            margin: 60px auto; /* Más margen */
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -150,29 +152,29 @@
         }
         .error-message, .no-data-message {
             color: #dc2626;
-            background-color: #fef2f2; /* Lighter red background */
-            padding: 20px; /* More padding */
-            border-radius: 12px; /* Rounded corners */
-            border: 1px solid #fca5a5; /* Lighter red border */
+            background-color: #fef2f2; /* Fondo rojo más claro */
+            padding: 20px; /* Más padding */
+            border-radius: 12px; /* Esquinas redondeadas */
+            border: 1px solid #fca5a5; /* Borde rojo más claro */
             margin-top: 25px;
             text-align: center;
-            font-size: 1.05rem; /* Larger font size */
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+            font-size: 1.05rem; /* Tamaño de fuente más grande */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra sutil */
         }
         .no-data-message {
-            color: #4f46e5; /* Tailwind indigo-600 */
-            background-color: #eef2ff; /* Tailwind indigo-50 */
-            border: 1px solid #a5b4fc; /* Tailwind indigo-300 */
+            color: #4f46e5; /* Color Tailwind indigo-600 */
+            background-color: #eef2ff; /* Color Tailwind indigo-50 */
+            border: 1px solid #a5b4fc; /* Color Tailwind indigo-300 */
         }
 
-        /* Responsive adjustments for smaller screens */
+        /* Ajustes responsivos para pantallas más pequeñas */
         @media (max-width: 768px) {
             .dashboard-container {
                 padding: 20px;
             }
             th, td {
                 padding: 10px;
-                font-size: 0.85rem; /* Slightly smaller for mobile compactness */
+                font-size: 0.85rem; /* Ligeramente más pequeño para la compacidad móvil */
             }
             .modal-content {
                 padding: 25px;
@@ -186,11 +188,11 @@
                 right: 20px;
             }
             .table-container {
-                border-radius: 8px; /* Less rounded for very small screens */
+                border-radius: 8px; /* Menos redondeado para pantallas muy pequeñas */
             }
             .modal-body .rating-detail {
-                padding: 4px 8px; /* Adjust padding for smaller screens */
-                font-size: 0.9rem; /* Adjust font size for smaller screens */
+                padding: 6px 10px; /* Ajustar padding para pantallas más pequeñas */
+                font-size: 1rem; /* Ajustar tamaño de fuente para pantallas más pequeñas */
             }
         }
     </style>
