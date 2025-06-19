@@ -758,8 +758,14 @@
             // --- Funciones de Utilidad de Fecha y Hora ---
             function getTodayDateString() {
                 const today = new Date();
-                return today.toISOString().slice(0, 10); // Formato YYYY-MM-DD
+                // Asegurar que la fecha se formatee como YYYY-MM-DD en la zona horaria local de Punta Cana
+                // Esto es crucial para que coincida con cómo Firebase guarda las fechas diarias.
+                const year = today.getFullYear();
+                const month = (today.getMonth() + 1).toString().padStart(2, '0');
+                const day = today.getDate().toString().padStart(2, '0');
+                return `${year}-${month}-${day}`;
             }
+
 
             function getFormattedDate(dateString) {
                 if (!dateString) return 'Fecha desconocida';
@@ -1068,7 +1074,7 @@
             adminReservationsTableBody.addEventListener('click', (e) => {
                 if (e.target.tagName === 'BUTTON') {
                     const id = e.target.dataset.id;
-                    const date = e.target.dataset.date; // Fecha de la reserva como string YYYY-MM-DD
+                    const date = e.target.dataset.date; // Fecha de la reserva como string INSEE-MM-DD
                     const type = e.target.dataset.type; // 'daily' o 'archived'
 
                     if (e.target.textContent === 'Editar') {
@@ -1125,13 +1131,18 @@
             printReservationsBtn.addEventListener('click', printReservations);
 
             function printReservations() {
-                if (currentFilteredReservations.length === 0) {
-                    alert('No hay reservas para imprimir. Por favor, asegúrese de que la tabla no esté vacía o que haya aplicado un filtro.');
+                const todayDateString = getTodayDateString(); // Obtiene la fecha de hoy en formato YYYY-MM-DD
+
+                // Filtra las reservas para obtener solo las del día en curso
+                const reservationsForToday = dailyReservationsData.filter(res => res.date === todayDateString);
+
+                if (reservationsForToday.length === 0) {
+                    alert('No hay reservas para el día de hoy para imprimir.');
                     return;
                 }
 
                 // Agrupar reservas por restaurante
-                const reservationsByRestaurant = currentFilteredReservations.reduce((acc, res) => {
+                const reservationsByRestaurant = reservationsForToday.reduce((acc, res) => {
                     if (!acc[res.place]) {
                         acc[res.place] = [];
                     }
@@ -1156,7 +1167,7 @@
 
                 let printContent = `
                     <div class="print-page-content">
-                        <h1>Listado de Reservas del Restaurante Xcaret</h1>
+                        <h1>Reservas para Hoy: ${getFormattedDate(todayDateString)}</h1>
                         <p class="print-date-header">Fecha de Impresión: ${printDate}</p>
                 `;
 
@@ -1177,7 +1188,7 @@
                     });
 
                     reservationsByRestaurant[place].forEach(res => {
-                        // Nuevo formato: Habitación - Nombre - Restaurante - Hora - PAX - Comentario
+                        // Formato: Habitación - Nombre - Restaurante - Hora - PAX - Comentario
                         const commentText = res.comment ? ` - ${res.comment}` : '';
                         printContent += `
                             <li>
@@ -1194,7 +1205,7 @@
                 printWindow.document.write(`
                     <html>
                     <head>
-                        <title>Imprimir Reservas</title>
+                        <title>Imprimir Reservas del Día</title>
                         <style>
                             /* Estilos para la ventana de impresión, optimizados para papel */
                             body { font-family: 'Poppins', sans-serif; margin: 20px; color: #333; }
