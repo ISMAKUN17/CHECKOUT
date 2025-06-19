@@ -146,9 +146,8 @@
 
         input[type="text"],
         input[type="number"],
-        input[type="time"],
         select,
-        textarea {
+        textarea { /* Eliminado input[type="time"] de aquí, ya que ahora es un select */
             width: calc(100% - 20px); /* Ajuste para padding */
             padding: 12px 10px;
             border: 1px solid var(--border-color);
@@ -316,14 +315,8 @@
                 <h2>Detalles de la Reserva</h2>
                 <form id="reservationForm" class="form-grid">
                     <div class="form-group">
-                        <label for="room">Ambiente:</label>
-                        <select id="room" required>
-                            <option value="">Seleccione un ambiente</option>
-                            <option value="Salon Principal">Salón Principal</option>
-                            <option value="Terraza">Terraza</option>
-                            <option value="VIP">VIP</option>
-                            <option value="Barra">Barra</option>
-                        </select>
+                        <label for="room">Número de Habitación:</label>
+                        <input type="number" id="room" placeholder="Ej. 1234" min="1000" max="9999" required>
                     </div>
                     <div class="form-group">
                         <label for="guest">Nombre del Comensal:</label>
@@ -391,6 +384,7 @@
             const confirmValidationBtn = document.getElementById('confirmValidationBtn');
             const cancelValidationBtn = document.getElementById('cancelValidationBtn');
 
+            const roomInput = document.getElementById('room'); // Obtener referencia al campo de habitación
             const placeSelect = document.getElementById('place');
             const timeSelect = document.getElementById('time');
 
@@ -452,12 +446,19 @@
                 e.preventDefault(); // Evitar el envío por defecto del formulario
 
                 // Recolectar datos del formulario
-                const room = document.getElementById('room').value;
+                const room = document.getElementById('room').value; // Obtener el valor del número de habitación
                 const guest = document.getElementById('guest').value;
-                const place = document.getElementById('place').value; // Ahora es el nombre del restaurante
+                const place = document.getElementById('place').value;
                 const time = document.getElementById('time').value;
                 const pax = parseInt(document.getElementById('pax').value, 10);
                 const comment = document.getElementById('comment').value;
+
+                // **Validación del número de habitación (4 dígitos)**
+                if (room.length !== 4 || isNaN(room)) {
+                    alert('Por favor, ingrese un número de habitación válido de 4 dígitos.');
+                    roomInput.focus(); // Enfocar el campo para corrección
+                    return;
+                }
 
                 // Validar que se haya seleccionado una hora
                 if (!time) {
@@ -467,7 +468,7 @@
 
                 // Almacenar los datos temporalmente
                 currentReservationData = {
-                    room,
+                    room, // Usar el número de habitación
                     guest,
                     place,
                     time,
@@ -542,7 +543,7 @@
 
                         reservationItem.innerHTML = `
                             <strong>${res.guest}</strong> (${res.pax} personas)
-                            <span>Restaurante: ${res.place} - Ambiente: ${res.room}</span>
+                            <span>Restaurante: ${res.place} - Habitación: ${res.room}</span>
                             <div class="time-pax">
                                 <span>Hora: ${time12Hrs}</span>
                                 <span>Solicitado por: ${res.validator || 'N/A'}</span>
@@ -576,14 +577,6 @@
                 const displayHour = hour % 12 || 12; // Convierte 0 a 12 para AM/PM
                 return `${displayHour}:${minutes} ${ampm}`;
             }
-
-            // Inicializar opciones de tiempo al cargar la página si hay un restaurante pre-seleccionado
-            // Opcional: Podrías querer que no haya nada seleccionado y que el usuario elija primero.
-            // if (placeSelect.value) {
-            //     updateTimeOptions(placeSelect.value);
-            // } else {
-            //     timeSelect.disabled = true; // Asegurarse de que esté deshabilitado al inicio
-            // }
 
             // Asegurarse de que el campo de hora esté deshabilitado al inicio
             timeSelect.disabled = true;
