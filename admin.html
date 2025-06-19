@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador de Reservas</title>
+    <style>
+        :root {
+            --primary-color: #007bff; /* Azul vibrante para admin */
+            --secondary-color: #6c757d; /* Gris para botones secundarios */
+            --success-color: #28a745; /* Verde para acciones de éxito */
+            --danger-color: #dc3545; /* Rojo para acciones de peligro */
+            --warning-color: #ffc107; /* Amarillo para advertencias */
+            --info-color: #17a2b8; /* Azul claro para información */
+            --text-color: #343a40;
+            --light-text-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --border-color: #dee2e6;
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --border-radius: 0.25rem;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1400px; /* Un poco más ancho para la tabla */
+            width: 100%;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 2.2em;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            transform: translateY(-1px);
+        }
+
+        section {
+            background-color: var(--card-background);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        section h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1; /* Ocupa todo el ancho */
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--light-text-color);
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        select,
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .table-container {
+            overflow-x: auto; /* Permite scroll horizontal en tablas grandes */
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: top; /* Para que el texto largo no desalinee */
+        }
+
+        .admin-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            white-space: nowrap; /* Evita que los encabezados de columna se rompan */
+        }
+
+        .admin-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .admin-table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .admin-table .actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: nowrap; /* Evita que los botones de acción se envuelvan */
+        }
+
+        /* Loading state */
+        .loading-message {
+            text-align: center;
+            font-style: italic;
+            color: var(--light-text-color);
+            padding: 20px;
+        }
+
+        /* Modal / Popup Styling (reutilizado) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            transform: translateY(-50px);
+            transition: transform var(--transition-speed) ease;
+            box-sizing: border-box;
+            margin: 20px auto;
+            position: relative;
+            animation: fadeInScaleUp var(--transition-speed) forwards;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInScaleUp {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: var(--light-text-color);
+            transition: color 0.2s ease;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-color);
+            transform: scale(1.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+        /* Responsive Design for Admin Page */
+        @media (max-width: 992px) {
+            .admin-table th, .admin-table td {
+                padding: 8px 10px;
+                font-size: 0.9em;
+            }
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+            .form-grid {
+                grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+            }
+            .form-group-full {
+                grid-column: span 1;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                gap: 20px;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .admin-table {
+                font-size: 0.85em;
+            }
+            .admin-table .actions {
+                flex-direction: column; /* Apilar botones de acción */
+                gap: 5px;
+            }
+            .admin-table .actions .btn {
+                width: 100%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Panel de Administración de Reservas</h1>
+            <a href="index.html" class="btn btn-info">Volver a la Página de Reservas</a>
+        </header>
+
+        <section class="add-reservation-section">
+            <h2>Agregar Nueva Reserva (Admin)</h2>
+            <form id="adminReservationForm" class="form-grid">
+                <div class="form-group">
+                    <label for="adminRoom">Número de Habitación:</label>
+                    <input type="number" id="adminRoom" placeholder="Ej. 1234" min="1000" max="9999" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminGuest">Nombre del Comensal:</label>
+                    <input type="text" id="adminGuest" placeholder="Ej. Juan Pérez" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPlace">Restaurante:</label>
+                    <select id="adminPlace" required>
+                        <option value="">Seleccione un restaurante</option>
+                        <option value="El Patio">El Patio</option>
+                        <option value="Bluewater">Bluewater</option>
+                        <option value="Bordeaux">Bordeaux</option>
+                        <option value="Himitsu">Himitsu</option>
+                        <option value="Hibachi">Hibachi</option>
+                        <option value="El Olio">El Olio</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adminTime">Hora de Reserva:</label>
+                    <input type="time" id="adminTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPax">Cantidad de Personas:</label>
+                    <input type="number" id="adminPax" min="1" value="1" required>
+                </div>
+                 <div class="form-group">
+                    <label for="adminDate">Fecha de Reserva:</label>
+                    <input type="date" id="adminDate" required>
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="adminComment">Comentario:</label>
+                    <textarea id="adminComment" rows="3" placeholder="Notas especiales, alergias, etc."></textarea>
+                </div>
+                 <div class="form-group form-group-full">
+                    <label for="adminValidator">Solicitado por:</label>
+                    <input type="text" id="adminValidator" placeholder="Nombre del solicitante" required>
+                </div>
+                <div class="form-group-full">
+                    <button type="submit" class="btn btn-success">Agregar Reserva</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="manage-reservations-section">
+            <h2>Gestionar Reservas Existentes</h2>
+            <input type="text" id="adminReservationSearch" placeholder="Buscar por habitación, comensal, restaurante o fecha...">
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Habitación</th>
+                            <th>Comensal</th>
+                            <th>Restaurante</th>
+                            <th>Hora</th>
+                            <th>PAX</th>
+                            <th>Comentario</th>
+                            <th>Solicitado por</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminReservationsTableBody">
+                        </tbody>
+                </table>
+                <p id="loadingMessage" class="loading-message">Cargando reservas...</p>
+                <p id="noReservationsAdminMessage" class="no-reservations" style="display:none;">No hay reservas para mostrar.</p>
+            </div>
+        </section>
+    </div>
+
+    <div id="editReservationModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" data-modal="editReservationModal">&times;</button>
+            <h3>Editar Reserva</h3>
+            <form id="editReservationForm" class="form-grid">
+                <input type="hidden" id="editReservationId">
+                 <div class="form-group">
+                    <label for="editDate">Fecha de Reserva:</label>
+                    <input type="date" id="editDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRoom">Número de Habitación:</label>
+                    <input type="number" id="editRoom" min="1000" max="9999" required>
+                </div>
+                <div class="form-group">
+                    <label for="editGuest">Nombre del Comensal:</label>
+                    <input type="text" id="editGuest" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPlace">Restaurante:</label>
+                    <select id="editPlace" required>
+                        <option value="El Patio">El Patio</option>
+                        <option value="Bluewater">Bluewater</option>
+                        <option value="Bordeaux">Bordeaux</option>
+                        <option value="Himitsu">Himitsu</option>
+                        <option value="Hibachi">Hibachi</option>
+                        <option value="El Olio">El Olio</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editTime">Hora de Reserva:</label>
+                    <input type="time" id="editTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPax">Cantidad de Personas:</label>
+                    <input type="number" id="editPax" min="1" required>
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="editComment">Comentario:</label>
+                    <textarea id="editComment" rows="3"></textarea>
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="editValidator">Solicitado por:</label>
+                    <input type="text" id="editValidator" required>
+                </div>
+                <div class="form-group-full modal-actions">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" data-modal="editReservationModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importar las funciones de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // Tu configuración de Firebase (DEBE SER LA MISMA QUE EN index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyALR-b68phh_u92V3rw9B9Ei7FcexU2xc8",
+            authDomain: "proyectos17-98695.firebaseapp.com",
+            projectId: "proyectos17-98695",
+            storageBucket: "proyectos17-98695.firebasestorage.app",
+            messagingSenderId: "951673973410",
+            appId: "1:951673973410:web:4bc355e825cf86308645fb",
+            measurementId: "G-6YK06W16FZ"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminReservationForm = document.getElementById('adminReservationForm');
+            const adminReservationsTableBody = document.getElementById('adminReservationsTableBody');
+            const adminReservationSearchInput = document.getElementById('adminReservationSearch');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const noReservationsAdminMessage = document.getElementById('noReservationsAdminMessage');
+
+            // Elementos del modal de edición
+            const editReservationModal = document.getElementById('editReservationModal');
+            const editReservationForm = document.getElementById('editReservationForm');
+            const editReservationIdInput = document.getElementById('editReservationId');
+            const editDateInput = document.getElementById('editDate');
+            const editRoomInput = document.getElementById('editRoom');
+            const editGuestInput = document.getElementById('editGuest');
+            const editPlaceSelect = document.getElementById('editPlace');
+            const editTimeInput = document.getElementById('editTime');
+            const editPaxInput = document.getElementById('editPax');
+            const editCommentInput = document.getElementById('editComment');
+            const editValidatorInput = document.getElementById('editValidator');
+
+            const modalCloseButtons = document.querySelectorAll('.modal-close-btn');
+
+            let allReservations = []; // Contendrá todas las reservas (del día y archivadas)
+
+            // --- Funciones de Utilidad de Fecha y Hora ---
+            function getTodayDateString() {
+                const today = new Date();
+                return today.toISOString().slice(0, 10); // Formato YYYY-MM-DD
+            }
+
+            function getFormattedDate(dateString) {
+                if (!dateString) return 'Fecha desconocida';
+                try {
+                    // Si ya tiene un timestamp de Firebase o es una fecha ISO, intentar parsearla
+                    const date = new Date(dateString + 'T12:00:00'); // Añadir T12:00:00 para evitar problemas de zona horaria
+                    if (isNaN(date.getTime())) { // Si sigue siendo inválida, puede ser un timestamp numérico
+                        const timestampDate = new Date(parseInt(dateString, 10));
+                         if (isNaN(timestampDate.getTime())) {
+                            return dateString; // Si nada funciona, devolver el string original
+                         }
+                         return timestampDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    }
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    return date.toLocaleDateString('es-ES', options);
+                } catch (e) {
+                    console.error("Error formatting date:", dateString, e);
+                    return dateString; // En caso de error, devolver el string original
+                }
+            }
+
+            function convertTo12HourFormat(time24h) {
+                if (!time24h) return '';
+                const [hours, minutes] = time24h.split(':');
+                const hour = parseInt(hours, 10);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                const displayHour = hour % 12 || 12;
+                return `${displayHour}:${minutes} ${ampm}`;
+            }
+
+            // --- Funciones de Interacción con Firebase ---
+
+            // Cargar todas las reservas (diarias y archivadas)
+            async function loadAllReservations() {
+                loadingMessage.style.display = 'block';
+                noReservationsAdminMessage.style.display = 'none';
+                allReservations = [];
+
+                try {
+                    // Obtener todas las reservas diarias
+                    const dailySnapshot = await onValue(ref(database, 'dailyReservations'), (snapshot) => {
+                        const data = snapshot.val();
+                        const todayReservations = [];
+                        if (data) {
+                            for (const dateKey in data) {
+                                for (const resKey in data[dateKey]) {
+                                    todayReservations.push({ id: resKey, date: dateKey, ...data[dateKey][resKey] });
+                                }
+                            }
+                        }
+                        // Aquí, las 'dailyReservations' incluyen todas las fechas aún no archivadas.
+                        // La lógica de archivado asegura que solo la fecha actual persista en 'dailyReservations/YYYY-MM-DD'.
+                        // Entonces, es más preciso cargar 'dailyReservations/TODAY' y 'archivedReservations'.
+                        // Para el admin, necesitamos _todas_ las reservas, lo que implica recorrer todo el nodo 'dailyReservations'
+                        // y el nodo 'archivedReservations'.
+
+                        // Actualizar la lista completa de reservas
+                        updateAllReservationsList(todayReservations, archivedReservations);
+                    }, { onlyOnce: false }); // Escuchar en tiempo real para cambios en reservas diarias
+
+                    // Obtener todas las reservas archivadas
+                    const archiveSnapshot = await onValue(ref(database, 'archivedReservations'), (snapshot) => {
+                        const archivedData = snapshot.val();
+                        const loadedArchived = [];
+                        if (archivedData) {
+                            for (const dateKey in archivedData) {
+                                for (const resKey in archivedData[dateKey]) {
+                                    loadedArchived.push({ id: resKey, archiveDate: dateKey, ...archivedData[dateKey][resKey] });
+                                }
+                            }
+                        }
+                        // Actualizar la lista completa de reservas
+                        updateAllReservationsList(reservations, loadedArchived);
+                    }, { onlyOnce: false }); // Escuchar en tiempo real para cambios en archivadas
+
+                } catch (error) {
+                    console.error("Error al cargar todas las reservas:", error);
+                    alert("Error al cargar los datos de las reservas. Por favor, intente de nuevo.");
+                } finally {
+                    loadingMessage.style.display = 'none';
+                }
+            }
+
+            // Función auxiliar para combinar y actualizar la lista global de reservas
+            function updateAllReservationsList(daily = [], archived = []) {
+                 // Filtrar las reservas diarias para que solo sean las del día actual (si el sistema de index.html ya las archivó)
+                const today = getTodayDateString();
+                const currentDailyReservations = daily.filter(res => res.date === today);
+
+                // La lista 'allReservations' debe ser una combinación de las del día actual y todas las archivadas.
+                allReservations = [...currentDailyReservations, ...archived];
+                renderAdminReservationsTable();
+                filterAdminReservations(); // Aplicar filtro si hay búsqueda
+            }
+
+
+            // Añadir una nueva reserva desde el formulario de administrador
+            adminReservationForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const room = document.getElementById('adminRoom').value;
+                const guest = document.getElementById('adminGuest').value;
+                const place = document.getElementById('adminPlace').value;
+                const time = document.getElementById('adminTime').value;
+                const pax = parseInt(document.getElementById('adminPax').value, 10);
+                const date = document.getElementById('adminDate').value; // Nueva fecha
+                const comment = document.getElementById('adminComment').value;
+                const validator = document.getElementById('adminValidator').value;
+
+                if (!room || !guest || !place || !time || !pax || !date || !validator) {
+                    alert('Por favor, complete todos los campos.');
+                    return;
+                }
+                 if (room.length !== 4 || isNaN(room) || parseInt(room, 10) < 1000 || parseInt(room, 10) > 9999) {
+                    alert('Por favor, ingrese un número de habitación válido de 4 dígitos (ej. 1000-9999).');
+                    return;
+                }
+
+                const newReservation = {
+                    room: room,
+                    guest: guest,
+                    place: place,
+                    time: time,
+                    pax: pax,
+                    comment: comment,
+                    validator: validator,
+                    timestamp: new Date().getTime(),
+                    date: date // Fecha de la reserva
+                };
+
+                try {
+                    // Guardar siempre en la ruta 'dailyReservations/YYYY-MM-DD' según la fecha ingresada
+                    const reservationsRef = ref(database, `dailyReservations/${date}`);
+                    await push(reservationsRef, newReservation);
+                    alert('Reserva agregada con éxito!');
+                    adminReservationForm.reset();
+                } catch (error) {
+                    console.error("Error al agregar reserva:", error);
+                    alert("Error al agregar la reserva. Por favor, intente de nuevo.");
+                }
+            });
+
+            // Actualizar una reserva existente
+            editReservationForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const id = editReservationIdInput.value;
+                const date = editDateInput.value; // La fecha original de la reserva
+                const room = editRoomInput.value;
+                const guest = editGuestInput.value;
+                const place = editPlaceSelect.value;
+                const time = editTimeInput.value;
+                const pax = parseInt(editPaxInput.value, 10);
+                const comment = editCommentInput.value;
+                const validator = editValidatorInput.value;
+
+                if (!id || !date || !room || !guest || !place || !time || !pax || !validator) {
+                    alert('Por favor, complete todos los campos para editar.');
+                    return;
+                }
+                 if (room.length !== 4 || isNaN(room) || parseInt(room, 10) < 1000 || parseInt(room, 10) > 9999) {
+                    alert('Por favor, ingrese un número de habitación válido de 4 dígitos (ej. 1000-9999).');
+                    return;
+                }
+
+                // Determinar si la reserva está en dailyReservations o archivedReservations
+                // Tendremos que buscar la reserva por ID para saber su ruta original
+                let reservationPath = null;
+                const existingRes = allReservations.find(res => res.id === id);
+
+                if (existingRes) {
+                    if (existingRes.date && existingRes.date === date) { // Si la fecha original coincide, está en dailyReservations (o estaba ahí antes de archivarla temporalmente)
+                        reservationPath = `dailyReservations/${date}/${id}`;
+                    } else if (existingRes.archiveDate && existingRes.archiveDate === date) { // Si tiene archiveDate y coincide con la fecha de la reserva, está archivada
+                         reservationPath = `archivedReservations/${date}/${id}`;
+                    } else { // Si la fecha fue cambiada en la edición, hay que reubicarla
+                        // Esto es más complejo: si la fecha cambia, deberíamos eliminar la antigua
+                        // y crear una nueva en la nueva fecha. Por simplicidad, asumiremos que
+                        // la fecha de la reserva editada no cambia, o que si lo hace, estamos
+                        // moviendo entre daily y archived para la misma fecha.
+                        // Para un cambio de fecha arbitrario, necesitarías una lógica de MOVE:
+                        // 1. Eliminar de la ubicación antigua.
+                        // 2. Añadir a la nueva ubicación.
+                        alert("Cambiar la fecha de una reserva es una operación compleja. Actualmente no soportado directamente. Si la fecha es diferente, por favor, elimine y vuelva a agregar.");
+                        return;
+                    }
+                }
+
+                if (!reservationPath) {
+                    alert("No se pudo encontrar la ruta de la reserva para actualizar.");
+                    return;
+                }
+
+
+                const updatedReservation = {
+                    room: room,
+                    guest: guest,
+                    place: place,
+                    time: time,
+                    pax: pax,
+                    comment: comment,
+                    validator: validator,
+                    // Mantener timestamp original si existe, o actualizar si es necesario
+                    timestamp: existingRes.timestamp || new Date().getTime(),
+                    date: date // Asegurar que la fecha editada se guarda
+                };
+
+                try {
+                    await update(ref(database, reservationPath), updatedReservation);
+                    alert('Reserva actualizada con éxito!');
+                    hideEditModal();
+                } catch (error) {
+                    console.error("Error al actualizar reserva:", error);
+                    alert("Error al actualizar la reserva. Por favor, intente de nuevo.");
+                }
+            });
+
+            // Eliminar una reserva
+            async function deleteReservation(reservationId, reservationDate, isArchived = false) {
+                if (!confirm('¿Está seguro de que desea eliminar esta reserva? Esta acción no se puede deshacer.')) {
+                    return;
+                }
+
+                let path;
+                if (isArchived) {
+                    path = `archivedReservations/${reservationDate}/${reservationId}`;
+                } else {
+                    path = `dailyReservations/${reservationDate}/${reservationId}`;
+                }
+
+                try {
+                    await remove(ref(database, path));
+                    alert('Reserva eliminada con éxito!');
+                } catch (error) {
+                    console.error("Error al eliminar reserva:", error);
+                    alert("Error al eliminar la reserva. Por favor, intente de nuevo.");
+                }
+            }
+
+
+            // --- Funciones de Renderizado y Filtrado de Tabla ---
+
+            function renderAdminReservationsTable(filteredReservations = allReservations) {
+                adminReservationsTableBody.innerHTML = '';
+                loadingMessage.style.display = 'none';
+
+                // Ordenar por fecha (más reciente primero), luego restaurante, luego hora, luego habitación
+                filteredReservations.sort((a, b) => {
+                    const dateA = a.date || a.archiveDate;
+                    const dateB = b.date || b.archiveDate;
+                    const dateComparison = new Date(dateB).getTime() - new Date(dateA).getTime();
+                    if (dateComparison !== 0) return dateComparison;
+
+                    const restaurantComparison = a.place.localeCompare(b.place);
+                    if (restaurantComparison !== 0) return restaurantComparison;
+
+                    const timeComparison = a.time.localeCompare(b.time);
+                    if (timeComparison !== 0) return timeComparison;
+
+                    return parseInt(a.room) - parseInt(b.room);
+                });
+
+
+                if (filteredReservations.length === 0) {
+                    noReservationsAdminMessage.style.display = 'block';
+                } else {
+                    noReservationsAdminMessage.style.display = 'none';
+                    filteredReservations.forEach(res => {
+                        const row = adminReservationsTableBody.insertRow();
+                        const displayDate = res.date || res.archiveDate; // Usar 'date' si existe, sino 'archiveDate'
+
+                        row.innerHTML = `
+                            <td>${getFormattedDate(displayDate)}</td>
+                            <td>${res.room}</td>
+                            <td>${res.guest}</td>
+                            <td>${res.place}</td>
+                            <td>${convertTo12HourFormat(res.time)}</td>
+                            <td>${res.pax}</td>
+                            <td>${res.comment || ''}</td>
+                            <td>${res.validator || ''}</td>
+                            <td class="actions">
+                                <button class="btn btn-warning btn-sm" data-id="${res.id}" data-date="${displayDate}" data-is-archived="${!!res.archiveDate}">Editar</button>
+                                <button class="btn btn-danger btn-sm" data-id="${res.id}" data-date="${displayDate}" data-is-archived="${!!res.archiveDate}">Eliminar</button>
+                            </td>
+                        `;
+                    });
+                }
+            }
+
+            function filterAdminReservations() {
+                const searchTerm = adminReservationSearchInput.value.toLowerCase().trim();
+
+                if (!searchTerm) {
+                    renderAdminReservationsTable(allReservations);
+                    return;
+                }
+
+                const filtered = allReservations.filter(res => {
+                    const roomMatches = String(res.room).includes(searchTerm);
+                    const guestMatches = res.guest.toLowerCase().includes(searchTerm);
+                    const restaurantMatches = res.place.toLowerCase().includes(searchTerm);
+                    const timeMatches = convertTo12HourFormat(res.time).toLowerCase().includes(searchTerm);
+                    const commentMatches = (res.comment || '').toLowerCase().includes(searchTerm);
+                    const validatorMatches = (res.validator || '').toLowerCase().includes(searchTerm);
+                    const dateMatches = getFormattedDate(res.date || res.archiveDate).toLowerCase().includes(searchTerm) || (res.date || res.archiveDate).includes(searchTerm);
+
+                    return roomMatches || guestMatches || restaurantMatches || timeMatches || commentMatches || validatorMatches || dateMatches;
+                });
+
+                renderAdminReservationsTable(filtered);
+            }
+
+            adminReservationSearchInput.addEventListener('input', filterAdminReservations);
+
+
+            // --- Lógica del Modal de Edición ---
+            adminReservationsTableBody.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const id = e.target.dataset.id;
+                    const date = e.target.dataset.date;
+                    const isArchived = e.target.dataset.isArchived === 'true'; // Convertir a booleano
+
+                    if (e.target.textContent === 'Editar') {
+                        const reservationToEdit = allReservations.find(res => res.id === id && (res.date === date || res.archiveDate === date));
+                        if (reservationToEdit) {
+                            showEditModal(reservationToEdit);
+                        } else {
+                            alert('No se encontró la reserva para editar.');
+                        }
+                    } else if (e.target.textContent === 'Eliminar') {
+                        deleteReservation(id, date, isArchived);
+                    }
+                }
+            });
+
+            function showEditModal(reservation) {
+                editReservationIdInput.value = reservation.id;
+                editDateInput.value = reservation.date || reservation.archiveDate; // Usar la fecha de la reserva/archivo
+                editRoomInput.value = reservation.room;
+                editGuestInput.value = reservation.guest;
+                editPlaceSelect.value = reservation.place;
+                editTimeInput.value = reservation.time;
+                editPaxInput.value = reservation.pax;
+                editCommentInput.value = reservation.comment;
+                editValidatorInput.value = reservation.validator;
+                editReservationModal.classList.add('active');
+            }
+
+            function hideEditModal() {
+                editReservationModal.classList.remove('active');
+            }
+
+            // Eventos para cerrar el modal de edición
+            modalCloseButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    if (e.target.dataset.modal === 'editReservationModal') {
+                        hideEditModal();
+                    }
+                });
+            });
+
+            editReservationModal.addEventListener('click', (e) => {
+                if (e.target === editReservationModal) {
+                    hideEditModal();
+                }
+            });
+
+            // Cargar reservas al iniciar la página de administración
+            loadAllReservations();
+        });
+    </script>
+</body>
+</html>
