@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservas de Restaurantes</title>
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
         /* Variables CSS para consistencia de diseño */
         :root {
@@ -268,7 +267,7 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
-            overflow-y: auto;
+            overflow-y: auto; /* Permite scroll si el contenido es largo */
             -webkit-overflow-scrolling: touch;
         }
 
@@ -283,14 +282,17 @@
             border-radius: var(--border-radius);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
             width: 90%;
-            max-width: 500px; /* Ancho por defecto del modal */
+            max-width: 600px; /* Ancho por defecto del modal de resumen */
             text-align: center;
             transform: translateY(-50px);
             transition: transform var(--transition-speed) ease;
             box-sizing: border-box;
             margin: 20px auto;
             position: relative;
-            animation: fadeInScaleUp var(--transition-speed) forwards; /* Animación de entrada */
+            animation: fadeInScaleUp var(--transition-speed) forwards;
+            max-height: 90vh; /* Altura máxima para permitir scroll */
+            display: flex;
+            flex-direction: column;
         }
         .modal-overlay.active .modal-content {
             transform: translateY(0);
@@ -318,8 +320,8 @@
             cursor: pointer;
             color: var(--light-text-color);
             transition: color 0.2s ease;
-            line-height: 1; /* Asegura que la 'x' no tenga espacio extra */
-            padding: 0; /* Elimina padding por defecto del botón */
+            line-height: 1;
+            padding: 0;
         }
 
         .modal-close-btn:hover {
@@ -330,13 +332,8 @@
 
         /* Summary Modal specific styles */
         #summaryModal .modal-content {
-            max-width: 800px; /* Más ancho para el resumen con slider */
-            min-height: 400px; /* Altura mínima para el slider */
-            display: flex; /* Usar flexbox para el contenido */
-            flex-direction: column; /* Apilar elementos dentro del modal */
+            max-width: 700px; /* Ancho para el listado */
             text-align: left;
-            padding: 20px; /* Ajuste de padding para dejar espacio a los bordes del slider */
-            box-sizing: border-box; /* Asegurar que el padding no afecte el width/height */
         }
         #summaryModal .modal-content h3 {
             color: var(--primary-color);
@@ -344,65 +341,55 @@
             margin-bottom: 15px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
-            text-align: center; /* Centrar el título del resumen */
-        }
-        #summaryModal .summary-overall-pax {
-            text-align: right;
-            margin-top: 15px;
-            font-size: 1.1em;
-            font-weight: bold;
-            color: var(--primary-color);
-            padding-top: 10px;
-            border-top: 1px solid var(--border-color);
+            text-align: center;
         }
 
-
-        /* Swiper.js Custom Styles */
-        .swiper-container {
-            width: 100%;
-            flex-grow: 1; /* Permite que el swiper ocupe el espacio restante */
-            padding-bottom: 30px; /* Espacio para las paginaciones/navegación si están abajo */
+        /* Contenido del resumen con scroll */
+        #summaryContent {
+            flex-grow: 1; /* Permite que el contenido ocupe el espacio restante */
+            overflow-y: auto; /* Habilita el scroll dentro del contenido del resumen */
+            padding-right: 10px; /* Para evitar que la barra de scroll se superponga al texto */
+            margin-bottom: 15px; /* Espacio antes del total PAX */
         }
 
-        .swiper-slide {
-            padding: 15px; /* Espacio interno para el contenido de cada slide */
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* Espacio entre los elementos dentro de un slide */
+        .summary-restaurant {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color); /* Separador más sólido entre restaurantes */
         }
 
-        .swiper-pagination-bullet-active {
-            background: var(--primary-color) !important;
-        }
-        .swiper-button-next, .swiper-button-prev {
-            color: var(--primary-color) !important;
+        .summary-restaurant:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
-        .summary-restaurant-slide h4 {
+        .summary-restaurant h4 {
             color: var(--accent-color);
             margin-top: 0;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-size: 1.4em;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            line-height: 1.2;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 5px;
+            border-bottom: 1px dotted var(--border-color); /* Separador sutil para el título del restaurante */
         }
 
-        .summary-restaurant-slide h4 span {
-            font-size: 0.8em; /* Tamaño más pequeño para el total de PAX del restaurante */
+        .summary-restaurant h4 span {
+            font-size: 0.7em;
             color: var(--light-text-color);
             font-weight: normal;
-            margin-top: 5px;
         }
 
         .summary-time-group {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
+            margin-left: 10px; /* Indentación para las horas */
+            margin-bottom: 10px;
+            padding: 8px;
+            border-left: 3px solid var(--primary-color); /* Borde de color para el grupo de hora */
             background-color: var(--background-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .summary-time-group:last-child {
             margin-bottom: 0;
@@ -413,33 +400,45 @@
             color: var(--text-color);
             margin-bottom: 5px;
             padding-bottom: 5px;
-            border-bottom: 1px dotted rgba(0,0,0,0.1);
-            font-size: 1.1em;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            font-size: 1em;
+            display: flex;
+            justify-content: space-between;
         }
         .summary-time span {
-            color: var(--primary-color);
+            color: var(--primary-color); /* Para el total PAX de la hora */
         }
 
         .summary-reservation-detail {
-            margin-left: 10px; /* Indentación ligera */
-            font-size: 0.95em;
+            margin-left: 10px; /* Indentación para cada reserva */
+            font-size: 0.9em;
             color: var(--light-text-color);
             margin-bottom: 2px;
+            line-height: 1.4;
         }
         .summary-reservation-detail strong {
-            color: var(--accent-color);
+            color: var(--accent-color); /* Para el número de habitación */
         }
         .summary-reservation-detail:last-child {
             margin-bottom: 0;
         }
 
+        .summary-overall-pax {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
 
         /* Modal Actions */
         .modal-actions {
             display: flex;
-            justify-content: center; /* Centrar botones */
+            justify-content: center;
             gap: 15px;
-            margin-top: auto; /* Empuja los botones hacia abajo si hay espacio */
+            margin-top: auto;
             padding-top: 20px;
         }
 
@@ -474,35 +473,34 @@
             /* Ajuste de modals para pantallas pequeñas */
             .modal-content {
                 width: 95%;
-                padding: 15px; /* Menor padding */
+                padding: 15px;
                 margin: 10px auto;
+                max-height: 95vh; /* Ajuste para móviles */
             }
             #summaryModal .modal-content {
                 max-width: 95%;
-                min-height: 300px; /* Altura mínima para móviles */
             }
 
-            #summaryModal .summary-time-group {
-                padding: 8px;
-            }
-            #summaryModal .summary-reservation-detail {
-                margin-left: 5px; /* Menor indentación en móviles */
-                font-size: 0.85em;
-            }
             .modal-close-btn {
-                font-size: 1.5em; /* Un poco más pequeño en móviles */
+                font-size: 1.5em;
                 top: 10px;
                 right: 10px;
             }
-            #summaryModal .summary-overall-pax {
-                font-size: 1em;
+            .summary-overall-pax {
+                font-size: 1.1em;
             }
-
-            /* Swiper.js Nav and pagination on mobile */
-            .swiper-button-next, .swiper-button-prev {
-                transform: scale(0.8);
+            .summary-restaurant h4 {
+                font-size: 1.2em;
             }
-            .swiper-pagination {
+            .summary-restaurant h4 span {
+                font-size: 0.65em;
+            }
+            .summary-time-group {
+                margin-left: 5px;
+                padding: 5px;
+            }
+            .summary-reservation-detail {
+                margin-left: 5px;
                 font-size: 0.8em;
             }
         }
@@ -591,27 +589,15 @@
         <div class="modal-content">
             <button class="modal-close-btn" data-modal="summaryModal">&times;</button>
             <h3 id="summaryTitle">Resumen de Reservas</h3>
-
-            <div class="swiper-container" id="summarySwiper">
-                <div class="swiper-wrapper" id="summaryContent">
-                    <div class="swiper-slide">
-                        <p>Cargando resumen...</p>
-                    </div>
-                </div>
-                <div class="swiper-pagination"></div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-button-next"></div>
+            <div id="summaryContent" class="summary-content">
+                <p>Cargando resumen...</p>
             </div>
-
             <p id="overallPaxTotal" class="summary-overall-pax"></p>
-
             <div class="modal-actions">
                 <button id="closeSummaryBtn" class="btn btn-secondary">Cerrar</button>
             </div>
         </div>
     </div>
-
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -627,11 +613,10 @@
 
             const summaryModal = document.getElementById('summaryModal');
             const summaryTitle = document.getElementById('summaryTitle');
-            const summaryContent = document.getElementById('summaryContent'); // Ahora es el swiper-wrapper
-            const overallPaxTotal = document.getElementById('overallPaxTotal'); // Nuevo elemento para el total de PAX
+            const summaryContent = document.getElementById('summaryContent'); // Ahora es el div contenedor de la lista
+            const overallPaxTotal = document.getElementById('overallPaxTotal');
             const closeSummaryBtn = document.getElementById('closeSummaryBtn');
 
-            // Nuevo: Referencia a los botones de cerrar modales (común)
             const modalCloseButtons = document.querySelectorAll('.modal-close-btn');
 
             const roomInput = document.getElementById('room');
@@ -642,7 +627,6 @@
 
             let reservations = [];
             let currentReservationData = null;
-            let summarySwiper = null; // Variable para la instancia de Swiper
 
             const restaurantTimes = {
                 "El Patio": ["18:00", "21:00"],
@@ -889,44 +873,11 @@
             }
 
             function showSummaryModal() {
-                // Destruir la instancia existente de Swiper si la hay, para evitar duplicados
-                if (summarySwiper) {
-                    summarySwiper.destroy(true, true);
-                }
                 summaryModal.classList.add('active');
-                // Inicializar Swiper después de que el modal esté visible y el contenido inyectado
-                // Un pequeño retraso asegura que el DOM esté listo
-                setTimeout(() => {
-                    summarySwiper = new Swiper('#summarySwiper', {
-                        loop: false, // No hace un bucle infinito
-                        slidesPerView: 1,
-                        spaceBetween: 0,
-                        pagination: {
-                            el: '.swiper-pagination',
-                            clickable: true,
-                        },
-                        navigation: {
-                            nextEl: '.swiper-button-next',
-                            prevEl: '.swiper-button-prev',
-                        },
-                        // Permitir desplazamiento con el mouse/touch si el contenido es grande
-                        mousewheel: true,
-                        keyboard: true,
-                        // Añadir un scrollbar si el contenido de un slide es muy largo
-                        scrollbar: {
-                            el: '.swiper-scrollbar',
-                            draggable: true,
-                        },
-                    });
-                }, 100); // Pequeño retraso
             }
 
             function hideSummaryModal() {
                 summaryModal.classList.remove('active');
-                if (summarySwiper) {
-                    summarySwiper.destroy(true, true); // Destruir la instancia de Swiper al cerrar el modal
-                    summarySwiper = null; // Reiniciar la variable
-                }
             }
 
             function addReservation(data) {
@@ -988,12 +939,10 @@
             function getTodayDateFormatted() {
                 const today = new Date();
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                // Usar 'es-DO' para un formato más específico de República Dominicana si es necesario,
-                // aunque 'es-ES' suele ser suficiente para una fecha legible en español.
                 return today.toLocaleDateString('es-ES', options);
             }
 
-            // Función para generar y mostrar el resumen de reservas con el formato deseado en un slider
+            // Función para generar y mostrar el resumen de reservas en formato de lista/tabla
             function generateReservationsSummary() {
                 const groupedReservations = {};
                 let totalOverallPax = 0;
@@ -1023,20 +972,16 @@
                     totalOverallPax += pax;
                 });
 
-                let slidesHtml = '';
+                let summaryHtml = '';
                 const sortedRestaurants = Object.keys(groupedReservations).sort();
 
                 if (sortedRestaurants.length === 0) {
-                    slidesHtml = `
-                        <div class="swiper-slide">
-                            <p style="text-align: center; margin-top: 50px;">No hay reservas registradas para hoy.</p>
-                        </div>
-                    `;
+                    summaryHtml = '<p style="text-align: center; margin-top: 50px;">No hay reservas registradas para hoy.</p>';
                 } else {
                     sortedRestaurants.forEach(restaurant => {
                         const restaurantData = groupedReservations[restaurant];
-                        let restaurantSlideContent = `
-                            <div class="summary-restaurant-slide">
+                        summaryHtml += `
+                            <div class="summary-restaurant">
                                 <h4>${restaurant} <span>(Total PAX: ${restaurantData.totalRestaurantPax})</span></h4>
                         `;
 
@@ -1044,35 +989,28 @@
 
                         sortedTimes.forEach(time24h => {
                             const timeData = restaurantData.times[time24h];
-                            restaurantSlideContent += `
+                            summaryHtml += `
                                 <div class="summary-time-group">
                                     <p class="summary-time">${convertTo12HourFormat(time24h)}: <span>${timeData.pax} PAX</span></p>
                             `;
-                            timeData.details.sort((a, b) => parseInt(a.room) - parseInt(b.room)); // Ordenar por habitación
+                            timeData.details.sort((a, b) => parseInt(a.room) - parseInt(b.room));
 
                             timeData.details.forEach(detail => {
-                                restaurantSlideContent += `
+                                summaryHtml += `
                                     <p class="summary-reservation-detail">
                                         <strong>${detail.room}</strong> - ${detail.guest} - ${detail.pax} PAX
                                     </p>
                                 `;
                             });
-                            restaurantSlideContent += `</div>`; // Cierra summary-time-group
+                            summaryHtml += `</div>`;
                         });
-                        restaurantSlideContent += `</div>`; // Cierra summary-restaurant-slide
-                        slidesHtml += `<div class="swiper-slide">${restaurantSlideContent}</div>`;
+                        summaryHtml += `</div>`;
                     });
                 }
 
                 summaryTitle.textContent = `Resumen de Reservas para ${getTodayDateFormatted()}`;
-                summaryContent.innerHTML = slidesHtml; // Inyecta los slides en el swiper-wrapper
-                overallPaxTotal.textContent = `PAX Total del Día: ${totalOverallPax}`; // Actualiza el total de PAX global
-
-                // Si hay una instancia de Swiper, actualizarla. Si no, se inicializará en showSummaryModal.
-                if (summarySwiper) {
-                    summarySwiper.update();
-                    summarySwiper.slideTo(0, 0); // Ir al primer slide después de actualizar
-                }
+                summaryContent.innerHTML = summaryHtml;
+                overallPaxTotal.textContent = `PAX Total del Día: ${totalOverallPax}`;
             }
 
             // Asegurarse de que el campo de hora esté deshabilitado al inicio y el contador limpio
