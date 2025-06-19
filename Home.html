@@ -60,40 +60,59 @@
             color: #6b7280; /* Tailwind gray-500 */
         }
 
+        .filter-section {
+            background-color: #f9fafb; /* Light background for filter section */
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 2rem;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* Subtle inner shadow */
+            border: 1px solid #e5e7eb;
+        }
+        .filter-section input,
+        .filter-section select,
+        .filter-section button {
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-section input:focus,
+        .filter-section select:focus {
+            border-color: #6366f1; /* Indigo-500 on focus */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Focus ring */
+        }
+
         .table-container {
             overflow-x: auto;
-            border-radius: 12px; /* Bordes ligeramente más redondeados para la tabla */
-            border: 1px solid #dcdcdc; /* Borde más claro */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra más pronunciada */
-            margin-top: 2rem; /* Espacio superior para la tabla */
+            border-radius: 12px;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-top: 2rem;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.95rem; /* Fuente ligeramente más grande para mejor legibilidad */
+            font-size: 0.95rem;
         }
         th, td {
-            padding: 14px 18px; /* Más padding para mejor espaciado */
+            padding: 14px 18px;
             text-align: left;
-            border-bottom: 1px solid #d1d5db; /* Borde más oscuro para los separadores de fila */
+            border-bottom: 1px solid #d1d5db;
             white-space: nowrap;
         }
         th {
-            background-color: #eef1f4; /* Fondo de encabezado ligeramente más oscuro */
-            font-weight: 700; /* Fuente más negrita para los encabezados */
-            color: #4a4a4a; /* Color de texto más oscuro */
+            background-color: #eef1f4;
+            font-weight: 700;
+            color: #4a4a4a;
             text-transform: uppercase;
-            font-size: 0.88rem; /* Fuente de encabezado ligeramente más grande */
+            font-size: 0.88rem;
         }
         tbody tr:hover {
-            background-color: #eef2f7; /* Fondo más claro al pasar el cursor */
+            background-color: #eef2f7;
             cursor: pointer;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-out, box-shadow 0.2s ease-out; /* Transiciones para el hover */
-            transform: translateY(-2px); /* Pequeño levantamiento al pasar el cursor */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sombra sutil al pasar el cursor */
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-out, box-shadow 0.2s ease-out;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
         tbody tr:last-child td {
-            border-bottom: none; /* Eliminar el borde inferior de la última fila */
+            border-bottom: none;
         }
 
         /* Estilos del Modal */
@@ -106,17 +125,17 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.7); /* Capa superpuesta más oscura */
+            background-color: rgba(0,0,0,0.7);
             justify-content: center;
             align-items: center;
             animation: fadeInModal 0.3s ease-out;
         }
         .modal-content {
             background-color: #fefefe;
-            padding: 40px; /* Más padding dentro del modal */
-            border-radius: 18px; /* Esquinas del modal más redondeadas */
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4); /* Sombra más fuerte para el modal */
-            max-width: 650px; /* Modal ligeramente más ancho */
+            padding: 40px;
+            border-radius: 18px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            max-width: 650px;
             width: 90%;
             position: relative;
             animation: slideInModal 0.3s ease-out;
@@ -128,12 +147,12 @@
             to { opacity: 1; }
         }
         @keyframes slideInModal {
-            from { transform: translateY(-70px) scale(0.9); opacity: 0; } /* Efecto de entrada más pronunciado */
+            from { transform: translateY(-70px) scale(0.9); opacity: 0; }
             to { transform: translateY(0) scale(1); opacity: 1; }
         }
         .close-button {
-            color: #999; /* Color ligeramente más oscuro para el botón de cerrar */
-            font-size: 36px; /* Botón de cerrar más grande */
+            color: #999;
+            font-size: 36px;
             font-weight: bold;
             cursor: pointer;
             transition: color 0.2s;
@@ -147,35 +166,35 @@
             text-decoration: none;
         }
         .modal-body p {
-            margin-bottom: 10px; /* Más espacio entre párrafos */
-            font-size: 1rem; /* Tamaño de fuente estándar para el contenido del modal */
-            color: #333; /* Color de texto más oscuro */
-            line-height: 1.5; /* Mejor altura de línea */
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.5;
         }
         .modal-body strong {
-            color: #1a1a1a; /* Texto fuerte aún más oscuro */
+            color: #1a1a1a;
         }
         .modal-body .rating-detail {
             display: inline-block;
-            padding: 8px 14px; /* Padding aumentado para un tamaño visual mejor */
-            border-radius: 14px; /* Bordes más redondeados para los detalles de calificación */
-            font-weight: 800; /* Hacemos la fuente aún más negrita */
-            margin-left: 10px; /* Más margen */
-            font-size: 1.1rem; /* Aumentamos el tamaño de la fuente para mayor claridad */
-            border: 1px solid; /* Se define el borde, el color se asigna dinámicamente */
+            padding: 8px 14px;
+            border-radius: 14px;
+            font-weight: 800;
+            margin-left: 10px;
+            font-size: 1.1rem;
+            border: 1px solid;
         }
         .rating-detail.red { background-color: #ef4444; color: white; border-color: #dc2626; }
         .rating-detail.yellow { background-color: #facc15; color: white; border-color: #eab308; }
         .rating-detail.green { background-color: #22c55e; color: white; border-color: #16a34a; }
 
         .loader {
-            border: 5px solid #e0e0e0; /* Borde del cargador más grueso */
-            border-top: 5px solid #4f46e5; /* Color Tailwind indigo-600 para la parte superior del cargador */
+            border: 5px solid #e0e0e0;
+            border-top: 5px solid #4f46e5;
             border-radius: 50%;
-            width: 50px; /* Cargador más grande */
+            width: 50px;
             height: 50px;
             animation: spin 2s linear infinite;
-            margin: 60px auto; /* Más margen */
+            margin: 60px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -183,19 +202,19 @@
         }
         .error-message, .no-data-message {
             color: #dc2626;
-            background-color: #fef2f2; /* Fondo rojo más claro */
-            padding: 20px; /* Más padding */
-            border-radius: 12px; /* Esquinas redondeadas */
-            border: 1px solid #fca5a5; /* Borde rojo más claro */
+            background-color: #fef2f2;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #fca5a5;
             margin-top: 25px;
             text-align: center;
-            font-size: 1.05rem; /* Tamaño de fuente más grande */
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+            font-size: 1.05rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         .no-data-message {
-            color: #4f46e5; /* Color Tailwind indigo-600 */
-            background-color: #eef2ff; /* Color Tailwind indigo-50 */
-            border: 1px solid #a5b4fc; /* Color Tailwind indigo-300 */
+            color: #4f46e5;
+            background-color: #eef2ff;
+            border: 1px solid #a5b4fc;
         }
 
         /* Ajustes responsivos para pantallas más pequeñas */
@@ -204,19 +223,27 @@
                 padding: 20px;
             }
             .stats-container {
-                flex-direction: column; /* Stack cards vertically on small screens */
+                flex-direction: column;
                 gap: 15px;
             }
             .stat-card {
-                min-width: unset; /* Remove min-width to allow full width */
+                min-width: unset;
                 width: 100%;
             }
             .stat-card .value {
-                font-size: 2rem; /* Adjust font size for mobile */
+                font-size: 2rem;
+            }
+            .filter-section {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            .filter-section > div {
+                width: 100% !important; /* Ensure full width on mobile */
             }
             th, td {
                 padding: 10px;
-                font-size: 0.85rem; /* Ligeramente más pequeño para la compacidad móvil */
+                font-size: 0.85rem;
             }
             .modal-content {
                 padding: 25px;
@@ -230,11 +257,11 @@
                 right: 20px;
             }
             .table-container {
-                border-radius: 8px; /* Menos redondeado para pantallas muy pequeñas */
+                border-radius: 8px;
             }
             .modal-body .rating-detail {
-                padding: 6px 10px; /* Ajustar padding para pantallas más pequeñas */
-                font-size: 1rem; /* Ajustar tamaño de fuente para pantallas más pequeñas */
+                padding: 6px 10px;
+                font-size: 1rem;
             }
         }
     </style>
@@ -260,6 +287,25 @@
                 <div class="label">NPS del Mes</div>
             </div>
         </div>
+
+        <!-- Sección de Búsqueda y Filtro -->
+        <div class="filter-section flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+            <div class="w-full sm:w-1/2">
+                <label for="searchInput" class="sr-only">Buscar</label>
+                <input type="text" id="searchInput" placeholder="Buscar por habitación, nombre o mayordomo..." class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500">
+            </div>
+            <div class="w-full sm:w-1/4">
+                <label for="monthFilter" class="sr-only">Filtrar por mes</label>
+                <select id="monthFilter" class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500">
+                    <option value="all">Todos los Meses</option>
+                    <!-- Los meses se cargarán dinámicamente aquí -->
+                </select>
+            </div>
+            <div class="w-full sm:w-1/4">
+                <button id="clearFiltersBtn" class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition duration-300 ease-in-out">Limpiar Filtros</button>
+            </div>
+        </div>
+
 
         <div id="loadingIndicator" class="text-center py-10">
             <div class="loader"></div>
@@ -336,6 +382,8 @@
         let userId = null;
         let isAuthReady = false;
         let allSurveyData = []; // Almacena todos los datos para mostrar en el modal
+        let currentSearchQuery = '';
+        let currentFilterMonth = 'all'; // Default to all months
 
         // Elementos del DOM
         const loadingIndicator = document.getElementById('loadingIndicator');
@@ -349,9 +397,14 @@
         const modalCloseButton = document.getElementById('modalCloseButton');
         const modalCloseBtnTop = detailsModal.querySelector('.close-button');
 
-        // Nuevos elementos para los contadores
+        // Elementos para los contadores
         const monthlySurveysCountElement = document.getElementById('monthlySurveysCount');
         const monthlyNPSElement = document.getElementById('monthlyNPS');
+
+        // Elementos para el filtro y búsqueda
+        const searchInput = document.getElementById('searchInput');
+        const monthFilter = document.getElementById('monthFilter');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 
 
         // --- Funciones del Modal Personalizado ---
@@ -384,7 +437,7 @@
             return '';
         }
 
-        // --- Calcular y Mostrar Estadísticas Mensuales ---
+        // --- Calcular y Mostrar Estadísticas Mensuales (siempre para el mes actual) ---
         function calculateMonthlyStats(surveys) {
             const currentMonth = new Date().getMonth(); // 0-11
             const currentYear = new Date().getFullYear();
@@ -425,32 +478,83 @@
             monthlyNPSElement.textContent = nps; // Display NPS value
         }
 
+        // --- Poblar el filtro de meses dinámicamente ---
+        function populateMonthFilter(surveys) {
+            const monthsSet = new Set();
+            surveys.forEach(survey => {
+                const date = new Date(survey.timestamp);
+                const year = date.getFullYear();
+                const month = date.getMonth(); // 0-11
+                monthsSet.add(`${year}-${month < 9 ? '0' : ''}${month + 1}`); // Format YYYY-MM
+            });
+
+            const sortedMonths = Array.from(monthsSet).sort((a, b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                if (yearA !== yearB) return yearB - yearA; // Sort by year descending
+                return monthB - monthA; // Then by month descending
+            });
+
+            monthFilter.innerHTML = '<option value="all">Todos los Meses</option>';
+            sortedMonths.forEach(monthKey => {
+                const [year, monthNum] = monthKey.split('-');
+                const monthName = new Date(year, monthNum - 1).toLocaleString('es-ES', { month: 'long' });
+                const option = document.createElement('option');
+                option.value = monthKey;
+                option.textContent = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
+                monthFilter.appendChild(option);
+            });
+            // Set the selected value back if it was previously set
+            if (currentFilterMonth !== 'all') {
+                monthFilter.value = currentFilterMonth;
+            }
+        }
+
+        // --- Aplicar Búsqueda y Filtros a la Tabla ---
+        function applyFilters() {
+            let filteredSurveys = [...allSurveyData]; // Start with all data
+
+            // Apply search query filter
+            if (currentSearchQuery) {
+                const query = currentSearchQuery.toLowerCase();
+                filteredSurveys = filteredSurveys.filter(survey => {
+                    const roomMatch = (survey.room || '').toLowerCase().includes(query);
+                    const nameMatch = (survey.name || '').toLowerCase().includes(query);
+                    const butlerMatch = (survey.butler || '').toLowerCase().includes(query);
+                    return roomMatch || nameMatch || butlerMatch;
+                });
+            }
+
+            // Apply month filter
+            if (currentFilterMonth !== 'all') {
+                filteredSurveys = filteredSurveys.filter(survey => {
+                    const surveyDate = new Date(survey.timestamp);
+                    const year = surveyDate.getFullYear();
+                    const month = surveyDate.getMonth(); // 0-11
+                    const surveyMonthKey = `${year}-${month < 9 ? '0' : ''}${month + 1}`;
+                    return surveyMonthKey === currentFilterMonth;
+                });
+            }
+
+            renderTable(filteredSurveys); // Render the table with the filtered data
+        }
+
 
         // --- Renderizar Datos de Encuesta en la Tabla ---
-        function renderTable(data) {
+        function renderTable(surveysToRender) { // Now accepts filtered surveys
             surveyTableBody.innerHTML = ''; // Limpiar filas existentes
-            if (Object.keys(data).length === 0) {
+            if (surveysToRender.length === 0) {
                 noDataMessageDiv.classList.remove('hidden');
                 surveyTableContainer.classList.add('hidden');
-                calculateMonthlyStats([]); // Update stats to 0 if no data
                 return;
             }
 
             noDataMessageDiv.classList.add('hidden');
             surveyTableContainer.classList.remove('hidden');
 
-            // Convertir objeto a array para facilitar la ordenación/iteración
-            allSurveyData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-
-            // Ordenar por marca de tiempo si está disponible (más reciente primero)
-            allSurveyData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            // Actualizar los contadores mensuales antes de renderizar la tabla
-            calculateMonthlyStats(allSurveyData);
-
-            allSurveyData.forEach((survey, index) => {
+            surveysToRender.forEach((survey, index) => {
                 const row = document.createElement('tr');
-                row.dataset.index = index; // Almacenar el índice para recuperar datos completos más tarde
+                row.dataset.index = allSurveyData.findIndex(s => s.id === survey.id); // Find original index for full details
 
                 // Obtener la puntuación de recomendación y aplicar la clase de color para la visualización
                 const recommendationScore = survey.q1_recommend || 'N/A';
@@ -470,8 +574,8 @@
             // Añadir un listener de clic a cada fila
             surveyTableBody.querySelectorAll('tr').forEach(row => {
                 row.addEventListener('click', (event) => {
-                    const index = event.currentTarget.dataset.index;
-                    const fullDetails = allSurveyData[index];
+                    const originalIndex = event.currentTarget.dataset.index;
+                    const fullDetails = allSurveyData[originalIndex]; // Use original data for full details
                     displayFullDetailsInModal(fullDetails);
                 });
             });
@@ -526,11 +630,17 @@
                 loadingIndicator.classList.add('hidden'); // Ocultar el cargador independientemente del resultado
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    renderTable(data); // Renderiza la tabla y calcula las estadísticas
+                    allSurveyData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                    allSurveyData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort once after fetching
+
+                    populateMonthFilter(allSurveyData); // Populate filter based on all data
+                    calculateMonthlyStats(allSurveyData); // Calculate monthly stats based on all data
+                    applyFilters(); // Apply initial filters (which will be 'all' and empty search)
                 } else {
                     noDataMessageDiv.classList.remove('hidden');
                     surveyTableContainer.classList.add('hidden');
                     calculateMonthlyStats([]); // Reset stats to 0 if no data
+                    populateMonthFilter([]); // Clear month filter
                     console.log("No hay datos disponibles en Firebase para esta ruta.");
                 }
             }, (error) => {
@@ -567,8 +677,24 @@
             fetchSurveyData(); // Obtener datos una vez que la autenticación esté lista
         });
 
-        // La carga inicial de la página (se activará después de que se determine el estado de autenticación)
-        // No es necesario llamar a fetchSurveyData aquí explícitamente ya que onAuthStateChanged lo manejará.
+        // --- Event Listeners for Filters ---
+        searchInput.addEventListener('input', (event) => {
+            currentSearchQuery = event.target.value.trim();
+            applyFilters();
+        });
+
+        monthFilter.addEventListener('change', (event) => {
+            currentFilterMonth = event.target.value;
+            applyFilters();
+        });
+
+        clearFiltersBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            currentSearchQuery = '';
+            monthFilter.value = 'all';
+            currentFilterMonth = 'all';
+            applyFilters();
+        });
     </script>
 </body>
 </html>
