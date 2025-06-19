@@ -112,6 +112,14 @@
             transform: translateY(-2px);
         }
 
+        .btn-submit:disabled { /* Estilo para botón deshabilitado */
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+
         .main-content {
             display: grid;
             grid-template-columns: 1fr 1.5fr; /* Formulario más pequeño, lista más grande */
@@ -200,6 +208,20 @@
         .availability-info.full {
             color: #d32f2f; /* Rojo oscuro */
             font-weight: bold;
+        }
+
+        /* Nuevo: Mensaje de horario de operación */
+        .operating-hours-message {
+            grid-column: span 2;
+            text-align: center;
+            font-size: 0.9em;
+            color: #d32f2f; /* Rojo para advertencia */
+            background-color: #ffe0b2; /* Fondo naranja claro */
+            border: 1px solid #ffb74d;
+            border-radius: var(--border-radius);
+            padding: 10px;
+            margin-top: -10px; /* Para que esté más cerca del botón */
+            margin-bottom: 10px;
         }
 
 
@@ -637,7 +659,10 @@
                         <label for="comment">Comentario:</label>
                         <textarea id="comment" rows="3" placeholder="Notas especiales, alergias, etc."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-submit">Registrar Reserva</button>
+                    <div id="operatingHoursMessage" class="operating-hours-message" style="display:none;">
+                        Las reservas solo se pueden registrar entre las 7:00 AM y las 4:30 PM.
+                    </div>
+                    <button type="submit" class="btn btn-submit" id="submitReservationBtn">Registrar Reserva</button>
                 </form>
             </section>
 
@@ -698,7 +723,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const addReservationBtn = document.getElementById('addReservationBtn');
             const viewSummaryBtn = document.getElementById('viewSummaryBtn');
-            const viewArchiveBtn = document.getElementById('viewArchiveBtn'); // Nuevo botón de archivo
+            const viewArchiveBtn = document.getElementById('viewArchiveBtn');
             const reservationForm = document.getElementById('reservationForm');
             const reservationListDiv = document.getElementById('reservationList');
             const noReservationsMessage = document.getElementById('noReservationsMessage');
@@ -713,9 +738,9 @@
             const overallPaxTotal = document.getElementById('overallPaxTotal');
             const closeSummaryBtn = document.getElementById('closeSummaryBtn');
 
-            const archiveModal = document.getElementById('archiveModal'); // Nuevo modal de archivo
+            const archiveModal = document.getElementById('archiveModal');
             const archiveTitle = document.getElementById('archiveTitle');
-            const archiveSearchInput = document.getElementById('archiveSearch'); // Buscador del archivo
+            const archiveSearchInput = document.getElementById('archiveSearch');
             const archiveListContent = document.getElementById('archiveListContent');
             const noArchivedReservationsMessage = document.getElementById('noArchivedReservationsMessage');
             const closeArchiveBtn = document.getElementById('closeArchiveBtn');
@@ -729,11 +754,13 @@
             const availabilityInfo = document.getElementById('availabilityInfo');
 
             const reservationSearchInput = document.getElementById('reservationSearch');
+            const submitReservationBtn = document.getElementById('submitReservationBtn'); // Nuevo: botón de envío
+            const operatingHoursMessage = document.getElementById('operatingHoursMessage'); // Nuevo: mensaje de horario
 
-            let reservations = []; // Reservas del día actual
-            let archivedReservations = []; // Reservas de días anteriores
+            let reservations = [];
+            let archivedReservations = [];
             let currentReservationData = null;
-            let lastAccessDate = localStorage.getItem('lastAccessDate'); // Fecha del último acceso
+            let lastAccessDate = localStorage.getItem('lastAccessDate');
 
             const restaurantTimes = {
                 "El Patio": ["18:00", "21:00"],
@@ -753,7 +780,7 @@
                 "El Olio": 8
             };
 
-            // --- Funciones de Utilidad de Fecha ---
+            // --- Funciones de Utilidad de Fecha y Hora ---
             function getTodayDateString() {
                 const today = new Date();
                 return today.toISOString().slice(0, 10); // Formato YYYY-MM-DD
@@ -764,6 +791,31 @@
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 return date.toLocaleDateString('es-ES', options);
             }
+
+            // Nueva función para verificar el horario de operación
+            function checkOperatingHours() {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+
+                // Convertir hora actual a minutos desde medianoche para fácil comparación
+                const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+                // Horario de operación: 7:00 AM (420 minutos) a 4:30 PM (16:30 PM = 16 * 60 + 30 = 990 minutos)
+                const startHourInMinutes = 7 * 60; // 7:00 AM
+                const endHourInMinutes = 16 * 60 + 30; // 4:30 PM
+
+                const isInOperatingHours = currentTimeInMinutes >= startHourInMinutes && currentTimeInMinutes <= endHourInMinutes;
+
+                submitReservationBtn.disabled = !isInOperatingHours;
+                if (!isInOperatingHours) {
+                    operatingHoursMessage.style.display = 'block';
+                } else {
+                    operatingHoursMessage.style.display = 'none';
+                }
+                return isInOperatingHours;
+            }
+
 
             // --- Lógica de Carga y Archivamiento ---
             function loadAndArchiveReservations() {
@@ -802,6 +854,7 @@
                 lastAccessDate = today; // Actualizar la variable también
 
                 renderReservations(); // Renderizar las reservas del día
+                checkOperatingHours(); // Verificar horario y deshabilitar/habilitar botón
             }
 
             // Llamar a la función de carga y archivo al inicio
@@ -819,6 +872,7 @@
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
                 reservationSearchInput.value = ''; // Limpiar buscador
                 filterReservations(); // Volver a mostrar todas las reservas del día
+                checkOperatingHours(); // Re-chequear horario al intentar agregar
             });
 
             // Evento para abrir el popup de resumen
@@ -981,6 +1035,12 @@
             reservationForm.addEventListener('submit', (e) => {
                 e.preventDefault();
 
+                // Re-verificar horario de operación antes de procesar el formulario
+                if (!checkOperatingHours()) {
+                    alert('No se pueden registrar reservas fuera del horario de operación (7:00 AM - 4:30 PM).');
+                    return;
+                }
+
                 const room = document.getElementById('room').value;
                 const guest = document.getElementById('guest').value;
                 const place = document.getElementById('place').value;
@@ -1023,7 +1083,7 @@
                     pax,
                     comment,
                     timestamp: new Date().getTime(),
-                    date: getTodayDateString() // Guardar la fecha de la reserva
+                    date: getTodayDateString()
                 };
 
                 showValidationModal();
@@ -1038,11 +1098,12 @@
                     hideValidationModal();
                     reservationForm.reset();
                     placeSelect.value = ""; // Resetear también el select del restaurante
-                    timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
+                    updateTimeOptions(placeSelect.value); // Resetear las opciones de tiempo
                     timeSelect.disabled = true;
                     availabilityInfo.textContent = '';
                     availabilityInfo.className = 'availability-info';
                     currentReservationData = null;
+                    checkOperatingHours(); // Re-chequear horario después de registrar
                 } else {
                     alert('Por favor, ingrese el nombre de quien solicita la reserva.');
                 }
@@ -1073,18 +1134,18 @@
                 summaryModal.classList.remove('active');
             }
 
-            function showArchiveModal() { // Nuevo
+            function showArchiveModal() {
                 archiveModal.classList.add('active');
             }
 
-            function hideArchiveModal() { // Nuevo
+            function hideArchiveModal() {
                 archiveModal.classList.remove('active');
             }
 
             function addReservation(data) {
                 reservations.push(data);
                 saveReservations();
-                renderReservations(); // Llamada inicial sin filtro
+                renderReservations();
                 updateAvailabilityInfo();
             }
 
@@ -1107,7 +1168,6 @@
                 reservationListDiv.innerHTML = '';
 
                 if (filteredReservations.length === 0) {
-                    // Mostrar mensaje "No hay reservas" si no hay ninguna o ninguna coincide con la búsqueda
                     noReservationsMessage.textContent = reservations.length === 0 ?
                                                         'No hay reservas programadas para hoy.' :
                                                         'No se encontraron reservas con los criterios de búsqueda.';
@@ -1220,18 +1280,9 @@
                 localStorage.setItem('restaurantReservations', JSON.stringify(reservations));
             }
 
-            function saveArchivedReservations() { // Nuevo
+            function saveArchivedReservations() {
                 localStorage.setItem('archivedReservations', JSON.stringify(archivedReservations));
             }
-
-            // loadReservations ya no es necesaria como estaba, su lógica se movió a loadAndArchiveReservations
-            // function loadReservations() {
-            //     const storedReservations = localStorage.getItem('restaurantReservations');
-            //     if (storedReservations) {
-            //         reservations = JSON.parse(storedReservations);
-            //     }
-            //     renderReservations();
-            // }
 
             function convertTo12HourFormat(time24h) {
                 const [hours, minutes] = time24h.split(':');
@@ -1252,9 +1303,9 @@
                 const groupedReservations = {};
                 let totalOverallPax = 0;
 
-                reservations.forEach(res => { // Usa 'reservations' (las del día)
+                reservations.forEach(res => {
                     const restaurant = res.place;
-                    const time = res.time; // Formato 24h
+                    const time = res.time;
                     const pax = res.pax;
 
                     if (!groupedReservations[restaurant]) {
@@ -1323,6 +1374,9 @@
             // Asegurarse de que el campo de hora esté deshabilitado al inicio y el contador limpio
             timeSelect.disabled = true;
             availabilityInfo.textContent = '';
+
+            // Llamar checkOperatingHours() cada minuto para actualizar el estado del botón
+            setInterval(checkOperatingHours, 60 * 1000); // Cada minuto
         });
     </script>
 </body>
