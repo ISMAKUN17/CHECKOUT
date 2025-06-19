@@ -51,6 +51,8 @@
             align-items: center;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas pequeñas */
+            gap: 15px; /* Espacio entre los botones en la cabecera */
         }
 
         .header h1 {
@@ -58,6 +60,12 @@
             color: var(--primary-color);
             font-size: 2.2em;
         }
+
+        .header .buttons-group {
+            display: flex;
+            gap: 10px; /* Espacio entre los botones */
+        }
+
 
         .btn {
             padding: 12px 25px;
@@ -67,6 +75,7 @@
             cursor: pointer;
             transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap; /* Evita que el texto del botón se rompa */
         }
 
         .btn-primary {
@@ -277,6 +286,57 @@
             transition: transform var(--transition-speed) ease;
         }
 
+        /* Summary Modal specific styles */
+        #summaryModal .modal-content {
+            max-width: 600px; /* Más ancho para el resumen */
+            text-align: left; /* Alineación de texto normal */
+        }
+
+        #summaryModal .modal-content h3 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        #summaryModal .summary-restaurant {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        #summaryModal .summary-restaurant:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        #summaryModal .summary-restaurant h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: 1.2em;
+        }
+
+        #summaryModal .summary-restaurant h4 span {
+            font-size: 0.9em;
+            color: var(--light-text-color);
+            font-weight: normal;
+        }
+
+        #summaryModal .summary-time {
+            margin-left: 15px;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-size: 0.95em;
+        }
+        #summaryModal .summary-time span {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
         .modal-overlay.active .modal-content {
             transform: translateY(0);
         }
@@ -301,6 +361,7 @@
             display: flex;
             justify-content: space-around;
             gap: 15px;
+            margin-top: 20px; /* Espacio para el botón de cerrar */
         }
 
         /* Responsive Design */
@@ -322,6 +383,18 @@
                 gap: 15px;
                 text-align: center;
             }
+            .header .buttons-group {
+                flex-direction: column; /* Apilar botones en pantallas pequeñas */
+                width: 100%;
+            }
+            .header .buttons-group .btn {
+                width: 100%;
+            }
+
+            #summaryModal .modal-content {
+                width: 95%; /* Ajuste para el resumen en móviles */
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -329,9 +402,14 @@
     <div class="container">
         <header class="header">
             <h1>Gestor de Reservas Diarias</h1>
-            <button id="addReservationBtn" class="btn btn-primary">
-                Agregar Nueva Reserva
-            </button>
+            <div class="buttons-group">
+                <button id="addReservationBtn" class="btn btn-primary">
+                    Agregar Nueva Reserva
+                </button>
+                <button id="viewSummaryBtn" class="btn btn-secondary">
+                    Ver Resumen de Reservas
+                </button>
+            </div>
         </header>
 
         <main class="main-content">
@@ -398,9 +476,23 @@
         </div>
     </div>
 
+    <div id="summaryModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="summaryTitle">Resumen de Reservas</h3>
+            <div id="summaryContent" class="summary-content">
+                <p>Cargando resumen...</p>
+            </div>
+            <div class="modal-actions">
+                <button id="closeSummaryBtn" class="btn btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const addReservationBtn = document.getElementById('addReservationBtn');
+            const viewSummaryBtn = document.getElementById('viewSummaryBtn'); // Nuevo: Botón de resumen
             const reservationForm = document.getElementById('reservationForm');
             const reservationListDiv = document.getElementById('reservationList');
             const noReservationsMessage = document.getElementById('noReservationsMessage');
@@ -409,11 +501,17 @@
             const confirmValidationBtn = document.getElementById('confirmValidationBtn');
             const cancelValidationBtn = document.getElementById('cancelValidationBtn');
 
+            const summaryModal = document.getElementById('summaryModal'); // Nuevo: Modal de resumen
+            const summaryTitle = document.getElementById('summaryTitle'); // Nuevo: Título del resumen
+            const summaryContent = document.getElementById('summaryContent'); // Nuevo: Contenido del resumen
+            const closeSummaryBtn = document.getElementById('closeSummaryBtn'); // Nuevo: Botón cerrar resumen
+
+
             const roomInput = document.getElementById('room');
             const placeSelect = document.getElementById('place');
             const timeSelect = document.getElementById('time');
-            const paxInput = document.getElementById('pax'); // Nuevo: Referencia al input de PAX
-            const availabilityInfo = document.getElementById('availabilityInfo'); // Nuevo: Para el contador de disponibilidad
+            const paxInput = document.getElementById('pax');
+            const availabilityInfo = document.getElementById('availabilityInfo');
 
             let reservations = [];
             let currentReservationData = null;
@@ -427,7 +525,6 @@
                 "El Olio": ["18:30", "21:00"]
             };
 
-            // Nuevo: Límites de PAX por restaurante y horario
             const restaurantPaxLimits = {
                 "El Patio": 8,
                 "Bluewater": 8,
@@ -445,33 +542,43 @@
                 reservationForm.reset();
                 timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
                 timeSelect.disabled = true;
-                availabilityInfo.textContent = ''; // Limpiar el contador de disponibilidad
-                availabilityInfo.className = 'availability-info'; // Resetear clases
+                availabilityInfo.textContent = '';
+                availabilityInfo.className = 'availability-info';
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Nuevo: Evento para abrir el popup de resumen
+            viewSummaryBtn.addEventListener('click', () => {
+                generateReservationsSummary();
+                showSummaryModal();
+            });
+
+            // Nuevo: Evento para cerrar el popup de resumen
+            closeSummaryBtn.addEventListener('click', () => {
+                hideSummaryModal();
             });
 
             // Eventos para actualizar el contador de disponibilidad
             placeSelect.addEventListener('change', () => {
                 const selectedRestaurant = placeSelect.value;
                 updateTimeOptions(selectedRestaurant);
-                updateAvailabilityInfo(); // Actualizar info al cambiar restaurante
+                updateAvailabilityInfo();
             });
 
             timeSelect.addEventListener('change', () => {
-                updateAvailabilityInfo(); // Actualizar info al cambiar hora
+                updateAvailabilityInfo();
             });
 
             paxInput.addEventListener('input', () => {
-                updateAvailabilityInfo(); // Actualizar info al cambiar PAX
+                updateAvailabilityInfo();
             });
 
             // Función para actualizar las opciones de hora según el restaurante seleccionado
             function updateTimeOptions(restaurant) {
-                timeSelect.innerHTML = ''; // Limpiar opciones anteriores
+                timeSelect.innerHTML = '';
                 if (restaurant && restaurantTimes[restaurant]) {
-                    timeSelect.disabled = false; // Habilitar el select de la hora
+                    timeSelect.disabled = false;
                     const times = restaurantTimes[restaurant];
-                    // Añadir la opción por defecto para "seleccionar hora"
                     const defaultTimeOption = document.createElement('option');
                     defaultTimeOption.value = "";
                     defaultTimeOption.textContent = "Seleccione una hora";
@@ -484,7 +591,7 @@
                         timeSelect.appendChild(option);
                     });
                 } else {
-                    timeSelect.disabled = true; // Deshabilitar si no hay restaurante seleccionado
+                    timeSelect.disabled = true;
                     const defaultOption = document.createElement('option');
                     defaultOption.value = "";
                     defaultOption.textContent = "Seleccione un restaurante primero";
@@ -492,7 +599,7 @@
                 }
             }
 
-            // Nuevo: Función para calcular y mostrar la disponibilidad
+            // Función para calcular y mostrar la disponibilidad
             function updateAvailabilityInfo() {
                 const selectedRestaurant = placeSelect.value;
                 const selectedTime = timeSelect.value;
@@ -500,7 +607,9 @@
 
                 if (!selectedRestaurant || !selectedTime) {
                     availabilityInfo.textContent = 'Seleccione restaurante y hora para ver disponibilidad.';
-                    availabilityInfo.className = 'availability-info'; // Resetear clases
+                    availabilityInfo.className = 'availability-info';
+                    // Resetear la validación personalizada del select de tiempo si no hay selección
+                    timeSelect.setCustomValidity('');
                     return;
                 }
 
@@ -511,9 +620,6 @@
                     return;
                 }
 
-                // Filtrar reservas para el día actual y el horario/restaurante seleccionado
-                // Para una aplicación "por día", podemos considerar que todas las reservas son del mismo día
-                // Si necesitáramos fechas reales, la lógica sería más compleja
                 const occupiedPax = reservations
                     .filter(res => res.place === selectedRestaurant && res.time === selectedTime)
                     .reduce((sum, res) => sum + res.pax, 0);
@@ -522,20 +628,23 @@
 
                 availabilityInfo.textContent = `Espacios disponibles: ${remainingPax} de ${maxPax}`;
 
-                // Aplicar clases para estilos visuales
-                availabilityInfo.className = 'availability-info'; // Resetear
+                availabilityInfo.className = 'availability-info';
                 if (remainingPax > 0) {
                     if (requestedPax > remainingPax) {
                         availabilityInfo.textContent += ` (Solo quedan ${remainingPax})`;
                         availabilityInfo.classList.add('limited');
+                        // No es un error crítico, solo una advertencia visual.
+                        timeSelect.setCustomValidity(''); // Limpiar si había una validación de lleno
                     } else {
                         availabilityInfo.classList.add('available');
+                        timeSelect.setCustomValidity(''); // Limpiar validación
                     }
                 } else {
                     availabilityInfo.textContent = '¡No hay espacios disponibles para esta hora!';
                     availabilityInfo.classList.add('full');
-                    timeSelect.setCustomValidity('No hay espacios disponibles en este horario.'); // Validacion HTML5
-                    timeSelect.reportValidity();
+                    // Establecer una validación HTML5 para el campo de tiempo
+                    timeSelect.setCustomValidity('No hay espacios disponibles en este horario.');
+                    timeSelect.reportValidity(); // Mostrar el mensaje de validación del navegador
                 }
             }
 
@@ -564,7 +673,7 @@
                     return;
                 }
 
-                // **Validación de límites de PAX antes de continuar al popup**
+                // Validación de límites de PAX antes de continuar al popup
                 const maxPax = restaurantPaxLimits[place];
                 const occupiedPax = reservations
                     .filter(res => res.place === place && res.time === time)
@@ -573,7 +682,7 @@
                 const remainingPax = maxPax - occupiedPax;
 
                 if (pax > remainingPax) {
-                    alert(`Lo sentimos, solo quedan ${remainingPax} espacios disponibles para ${place} a las ${convertTo12HourFormat(time)}.`);
+                    alert(`Lo sentimos, solo quedan ${remainingPax} espacios disponibles para ${place} a las ${convertTo12HourFormat(time)}. Por favor, ajuste la cantidad de personas.`);
                     paxInput.focus();
                     return;
                 }
@@ -601,8 +710,8 @@
                     reservationForm.reset();
                     timeSelect.innerHTML = '<option value="">Seleccione un restaurante primero</option>';
                     timeSelect.disabled = true;
-                    availabilityInfo.textContent = ''; // Limpiar el contador de disponibilidad
-                    availabilityInfo.className = 'availability-info'; // Resetear clases
+                    availabilityInfo.textContent = '';
+                    availabilityInfo.className = 'availability-info';
                     currentReservationData = null;
                 } else {
                     alert('Por favor, ingrese el nombre de quien solicita la reserva.');
@@ -615,6 +724,7 @@
                 currentReservationData = null;
             });
 
+            // Funciones para mostrar/ocultar modales
             function showValidationModal() {
                 validationModal.classList.add('active');
                 validatorNameInput.value = '';
@@ -623,6 +733,14 @@
 
             function hideValidationModal() {
                 validationModal.classList.remove('active');
+            }
+
+            function showSummaryModal() {
+                summaryModal.classList.add('active');
+            }
+
+            function hideSummaryModal() {
+                summaryModal.classList.remove('active');
             }
 
             function addReservation(data) {
@@ -681,9 +799,79 @@
                 return `${displayHour}:${minutes} ${ampm}`;
             }
 
-            // Asegurarse de que el campo de hora esté deshabilitado al inicio
+            // Nuevo: Función para obtener la fecha de hoy formateada
+            function getTodayDateFormatted() {
+                const today = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return today.toLocaleDateString('es-ES', options);
+            }
+
+            // Nuevo: Función para generar y mostrar el resumen de reservas
+            function generateReservationsSummary() {
+                // Objeto para agrupar las reservas por restaurante y luego por horario
+                const groupedReservations = {};
+                let totalOverallPax = 0; // Para el total general de PAX
+
+                reservations.forEach(res => {
+                    const restaurant = res.place;
+                    const time = res.time; // Formato 24h
+                    const pax = res.pax;
+
+                    if (!groupedReservations[restaurant]) {
+                        groupedReservations[restaurant] = {
+                            totalRestaurantPax: 0,
+                            times: {}
+                        };
+                    }
+
+                    if (!groupedReservations[restaurant].times[time]) {
+                        groupedReservations[restaurant].times[time] = {
+                            pax: 0,
+                            details: [] // Aquí podrías almacenar nombres de comensales si quisieras
+                        };
+                    }
+
+                    groupedReservations[restaurant].totalRestaurantPax += pax;
+                    groupedReservations[restaurant].times[time].pax += pax;
+                    groupedReservations[restaurant].times[time].details.push(res); // Opcional: guardar los detalles de la reserva
+                    totalOverallPax += pax;
+                });
+
+                let summaryHtml = '';
+                const sortedRestaurants = Object.keys(groupedReservations).sort(); // Ordenar restaurantes alfabéticamente
+
+                if (sortedRestaurants.length === 0) {
+                    summaryHtml = '<p>No hay reservas registradas para hoy.</p>';
+                } else {
+                    sortedRestaurants.forEach(restaurant => {
+                        const restaurantData = groupedReservations[restaurant];
+                        summaryHtml += `
+                            <div class="summary-restaurant">
+                                <h4>${restaurant} <span>(Total PAX: ${restaurantData.totalRestaurantPax})</span></h4>
+                        `;
+
+                        // Ordenar horarios cronológicamente
+                        const sortedTimes = Object.keys(restaurantData.times).sort();
+
+                        sortedTimes.forEach(time24h => {
+                            const timeData = restaurantData.times[time24h];
+                            summaryHtml += `
+                                <p class="summary-time">${convertTo12HourFormat(time24h)}: <span>${timeData.pax} PAX</span></p>
+                            `;
+                        });
+                        summaryHtml += `</div>`;
+                    });
+                    summaryHtml += `<p style="text-align: right; margin-top: 20px;"><strong>PAX Total del Día: ${totalOverallPax}</strong></p>`;
+                }
+
+                summaryTitle.textContent = `Resumen de Reservas para ${getTodayDateFormatted()}`;
+                summaryContent.innerHTML = summaryHtml;
+            }
+
+
+            // Asegurarse de que el campo de hora esté deshabilitado al inicio y el contador limpio
             timeSelect.disabled = true;
-            availabilityInfo.textContent = ''; // Limpiar el contador al inicio
+            availabilityInfo.textContent = '';
         });
     </script>
 </body>
