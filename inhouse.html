@@ -236,7 +236,7 @@
 
         .reservation-item .time-pax {
             display: flex;
-            justify-content: space-between;
+            justify-content.space-between;
             font-weight: bold;
             color: var(--text-color);
             margin-top: 5px;
@@ -288,7 +288,7 @@
 
         /* Summary Modal specific styles */
         #summaryModal .modal-content {
-            max-width: 600px; /* Más ancho para el resumen */
+            max-width: 700px; /* Más ancho para el resumen detallado */
             text-align: left; /* Alineación de texto normal */
         }
 
@@ -330,12 +330,21 @@
             margin-left: 15px;
             margin-bottom: 5px;
             color: var(--text-color);
-            font-size: 0.95em;
+            font-weight: bold; /* Hacer la hora más visible */
+            font-size: 1em;
+            border-bottom: 1px dotted rgba(0,0,0,0.1); /* Separador sutil */
+            padding-bottom: 3px;
         }
-        #summaryModal .summary-time span {
-            font-weight: bold;
+        #summaryModal .summary-reservation-detail {
+            margin-left: 30px; /* Indentación para los detalles */
+            font-size: 0.9em;
+            color: var(--light-text-color);
+            margin-bottom: 3px;
+        }
+        #summaryModal .summary-reservation-detail strong {
             color: var(--accent-color);
         }
+
 
         .modal-overlay.active .modal-content {
             transform: translateY(0);
@@ -492,7 +501,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const addReservationBtn = document.getElementById('addReservationBtn');
-            const viewSummaryBtn = document.getElementById('viewSummaryBtn'); // Nuevo: Botón de resumen
+            const viewSummaryBtn = document.getElementById('viewSummaryBtn');
             const reservationForm = document.getElementById('reservationForm');
             const reservationListDiv = document.getElementById('reservationList');
             const noReservationsMessage = document.getElementById('noReservationsMessage');
@@ -501,10 +510,10 @@
             const confirmValidationBtn = document.getElementById('confirmValidationBtn');
             const cancelValidationBtn = document.getElementById('cancelValidationBtn');
 
-            const summaryModal = document.getElementById('summaryModal'); // Nuevo: Modal de resumen
-            const summaryTitle = document.getElementById('summaryTitle'); // Nuevo: Título del resumen
-            const summaryContent = document.getElementById('summaryContent'); // Nuevo: Contenido del resumen
-            const closeSummaryBtn = document.getElementById('closeSummaryBtn'); // Nuevo: Botón cerrar resumen
+            const summaryModal = document.getElementById('summaryModal');
+            const summaryTitle = document.getElementById('summaryTitle');
+            const summaryContent = document.getElementById('summaryContent');
+            const closeSummaryBtn = document.getElementById('closeSummaryBtn');
 
 
             const roomInput = document.getElementById('room');
@@ -547,13 +556,13 @@
                 reservationForm.scrollIntoView({ behavior: 'smooth' });
             });
 
-            // Nuevo: Evento para abrir el popup de resumen
+            // Evento para abrir el popup de resumen
             viewSummaryBtn.addEventListener('click', () => {
                 generateReservationsSummary();
                 showSummaryModal();
             });
 
-            // Nuevo: Evento para cerrar el popup de resumen
+            // Evento para cerrar el popup de resumen
             closeSummaryBtn.addEventListener('click', () => {
                 hideSummaryModal();
             });
@@ -608,7 +617,6 @@
                 if (!selectedRestaurant || !selectedTime) {
                     availabilityInfo.textContent = 'Seleccione restaurante y hora para ver disponibilidad.';
                     availabilityInfo.className = 'availability-info';
-                    // Resetear la validación personalizada del select de tiempo si no hay selección
                     timeSelect.setCustomValidity('');
                     return;
                 }
@@ -633,18 +641,16 @@
                     if (requestedPax > remainingPax) {
                         availabilityInfo.textContent += ` (Solo quedan ${remainingPax})`;
                         availabilityInfo.classList.add('limited');
-                        // No es un error crítico, solo una advertencia visual.
-                        timeSelect.setCustomValidity(''); // Limpiar si había una validación de lleno
+                        timeSelect.setCustomValidity('');
                     } else {
                         availabilityInfo.classList.add('available');
-                        timeSelect.setCustomValidity(''); // Limpiar validación
+                        timeSelect.setCustomValidity('');
                     }
                 } else {
                     availabilityInfo.textContent = '¡No hay espacios disponibles para esta hora!';
                     availabilityInfo.classList.add('full');
-                    // Establecer una validación HTML5 para el campo de tiempo
                     timeSelect.setCustomValidity('No hay espacios disponibles en este horario.');
-                    timeSelect.reportValidity(); // Mostrar el mensaje de validación del navegador
+                    timeSelect.reportValidity();
                 }
             }
 
@@ -747,7 +753,7 @@
                 reservations.push(data);
                 saveReservations();
                 renderReservations();
-                updateAvailabilityInfo(); // Re-calcular la disponibilidad después de añadir una reserva
+                updateAvailabilityInfo();
             }
 
             function renderReservations() {
@@ -799,18 +805,16 @@
                 return `${displayHour}:${minutes} ${ampm}`;
             }
 
-            // Nuevo: Función para obtener la fecha de hoy formateada
             function getTodayDateFormatted() {
                 const today = new Date();
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 return today.toLocaleDateString('es-ES', options);
             }
 
-            // Nuevo: Función para generar y mostrar el resumen de reservas
+            // Función para generar y mostrar el resumen de reservas con el formato deseado
             function generateReservationsSummary() {
-                // Objeto para agrupar las reservas por restaurante y luego por horario
                 const groupedReservations = {};
-                let totalOverallPax = 0; // Para el total general de PAX
+                let totalOverallPax = 0;
 
                 reservations.forEach(res => {
                     const restaurant = res.place;
@@ -827,18 +831,18 @@
                     if (!groupedReservations[restaurant].times[time]) {
                         groupedReservations[restaurant].times[time] = {
                             pax: 0,
-                            details: [] // Aquí podrías almacenar nombres de comensales si quisieras
+                            details: [] // Aquí almacenaremos los detalles de cada reserva
                         };
                     }
 
                     groupedReservations[restaurant].totalRestaurantPax += pax;
                     groupedReservations[restaurant].times[time].pax += pax;
-                    groupedReservations[restaurant].times[time].details.push(res); // Opcional: guardar los detalles de la reserva
+                    groupedReservations[restaurant].times[time].details.push(res); // Guardamos la reserva completa
                     totalOverallPax += pax;
                 });
 
                 let summaryHtml = '';
-                const sortedRestaurants = Object.keys(groupedReservations).sort(); // Ordenar restaurantes alfabéticamente
+                const sortedRestaurants = Object.keys(groupedReservations).sort();
 
                 if (sortedRestaurants.length === 0) {
                     summaryHtml = '<p>No hay reservas registradas para hoy.</p>';
@@ -850,14 +854,21 @@
                                 <h4>${restaurant} <span>(Total PAX: ${restaurantData.totalRestaurantPax})</span></h4>
                         `;
 
-                        // Ordenar horarios cronológicamente
                         const sortedTimes = Object.keys(restaurantData.times).sort();
 
                         sortedTimes.forEach(time24h => {
                             const timeData = restaurantData.times[time24h];
                             summaryHtml += `
-                                <p class="summary-time">${convertTo12HourFormat(time24h)}: <span>${timeData.pax} PAX</span></p>
+                                <p class="summary-time">${convertTo12HourFormat(time24h)} (${timeData.pax} PAX):</p>
                             `;
+                            // Ahora iteramos sobre los detalles de cada reserva para ese horario
+                            timeData.details.forEach(detail => {
+                                summaryHtml += `
+                                    <p class="summary-reservation-detail">
+                                        Hab. <strong>${detail.room}</strong> - ${detail.guest} - ${detail.pax} PAX
+                                    </p>
+                                `;
+                            });
                         });
                         summaryHtml += `</div>`;
                     });
