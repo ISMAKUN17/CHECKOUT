@@ -86,27 +86,58 @@
         }
         .table-container {
             background: #fff;
-            border-radius: 10px;
+            border-radius: 14px;
             overflow-x: auto;
             border: none;
-            box-shadow: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            margin-top: 2rem;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 1rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 1.08rem;
+            background: transparent;
         }
         th, td {
-            padding: 12px 10px;
+            padding: 16px 14px;
             border-bottom: 1px solid #e5e7eb;
+            text-align: left;
         }
         th {
             background: #f3f4f6;
             color: #22223b;
-            font-weight: 600;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            text-transform: none;
+            font-size: 1.02rem;
+        }
+        tbody tr {
+            transition: background 0.18s, box-shadow 0.18s;
+        }
+        tbody tr:nth-child(even) {
+            background: #f7f8fa;
         }
         tbody tr:hover {
-            background: #f3f4f6;
+            background: #e0e7ff;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.07);
+        }
+        tbody tr.selected {
+            background: #c7d2fe;
+        }
+        table thead tr:first-child th:first-child {
+            border-top-left-radius: 14px;
+        }
+        table thead tr:first-child th:last-child {
+            border-top-right-radius: 14px;
+        }
+        table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 14px;
+        }
+        table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 14px;
         }
         .rating-detail {
             border-radius: 8px;
@@ -366,15 +397,27 @@
         }
 
         // --- Utilidad para obtener la clase de color de calificación ---
-        function getRatingColorClass(value) {
-            if (value >= 1 && value <= 6) {
-                return 'red';
-            } else if (value >= 7 && value <= 8) {
-                return 'yellow';
-            } else if (value >= 9 && value <= 10) {
-                return 'green';
+        function getRatingColorClass(value, isRecommendation = false) {
+            const num = parseInt(value);
+            if (isRecommendation) {
+                if (num >= 1 && num <= 6) {
+                    return 'red';
+                } else if (num >= 7 && num <= 8) {
+                    return 'yellow';
+                } else if (num >= 9 && num <= 10) {
+                    return 'green';
+                }
+                return '';
+            } else {
+                if (num >= 1 && num <= 6) {
+                    return 'red';
+                } else if (num >= 7 && num <= 8) {
+                    return 'yellow';
+                } else if (num >= 9 && num <= 10) {
+                    return 'green';
+                }
+                return '';
             }
-            return '';
         }
 
         // --- Calcular y Mostrar Estadísticas Mensuales (siempre para el mes actual) ---
@@ -496,9 +539,9 @@
                 const row = document.createElement('tr');
                 row.dataset.index = allSurveyData.findIndex(s => s.id === survey.id); // Find original index for full details
 
-                // Obtener la puntuación de recomendación y aplicar la clase de color para la visualización
+                // Obtener la puntuación de recomendación y aplicar la clase de color para la visualización SOLO en la columna de recomendación
                 const recommendationScore = survey.q1_recommend || 'N/A';
-                const recommendationColorClass = getRatingColorClass(recommendationScore);
+                const recommendationColorClass = getRatingColorClass(recommendationScore, true);
 
                 row.innerHTML = `
                     <td class="px-4 py-3">${survey.room || 'N/A'}</td>
