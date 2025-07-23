@@ -11,190 +11,142 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
+            background: #f7f8fa;
+            color: #22223b;
             min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         .dashboard-container {
-            background-color: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            max-width: 1200px;
-            width: 100%;
-            transition: all 0.5s ease-in-out;
-            border: 1px solid #e0e0e0;
+            background: #fff;
+            border-radius: 16px;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 32px 24px;
+            box-shadow: none;
+            border: none;
         }
         .stats-container {
             display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-            gap: 20px; /* Space between cards */
+            gap: 24px;
             margin-bottom: 2rem;
         }
         .stat-card {
-            background-color: #fff;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 24px 0;
+            flex: 1;
             text-align: center;
-            flex: 1; /* Allow cards to grow and shrink */
-            min-width: 250px; /* Minimum width for cards before wrapping */
-            transition: transform 0.2s ease-in-out;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
         }
         .stat-card .value {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            color: #4f46e5; /* Tailwind indigo-600 */
-            margin-bottom: 0.5rem;
+            color: #4f46e5;
         }
         .stat-card .label {
             font-size: 1rem;
-            font-weight: 500;
-            color: #6b7280; /* Tailwind gray-500 */
+            color: #6b7280;
+            margin-top: 0.5rem;
         }
-
         .filter-section {
-            background-color: #f9fafb; /* Light background for filter section */
-            border-radius: 12px;
-            padding: 20px;
+            display: flex;
+            gap: 16px;
+            background: none;
+            box-shadow: none;
+            border: none;
+            padding: 0;
             margin-bottom: 2rem;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* Subtle inner shadow */
-            border: 1px solid #e5e7eb;
         }
         .filter-section input,
-        .filter-section select,
-        .filter-section button {
-            transition: all 0.2s ease-in-out;
+        .filter-section select {
+            background: #f3f4f6;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 1rem;
+            color: #22223b;
+            outline: none;
+            transition: background 0.2s;
         }
         .filter-section input:focus,
         .filter-section select:focus {
-            border-color: #6366f1; /* Indigo-500 on focus */
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Focus ring */
+            background: #e5e7eb;
         }
-
+        .filter-section button {
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 0;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .filter-section button:hover {
+            background: #3730a3;
+        }
         .table-container {
+            background: #fff;
+            border-radius: 10px;
             overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid #dcdcdc;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            margin-top: 2rem;
+            border: none;
+            box-shadow: none;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
         th, td {
-            padding: 14px 18px;
-            text-align: left;
-            border-bottom: 1px solid #d1d5db;
-            white-space: nowrap;
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
         }
         th {
-            background-color: #eef1f4;
-            font-weight: 700;
-            color: #4a4a4a;
-            text-transform: uppercase;
-            font-size: 0.88rem;
+            background: #f3f4f6;
+            color: #22223b;
+            font-weight: 600;
         }
         tbody tr:hover {
-            background-color: #eef2f7;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-out, box-shadow 0.2s ease-out;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background: #f3f4f6;
         }
-        tbody tr:last-child td {
-            border-bottom: none;
+        .rating-detail {
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-weight: 600;
+            font-size: 1rem;
         }
-
-        /* Estilos del Modal */
+        .rating-detail.red { background: #ef4444; color: #fff; }
+        .rating-detail.yellow { background: #facc15; color: #fff; }
+        .rating-detail.green { background: #22c55e; color: #fff; }
         .modal {
             display: none;
             position: fixed;
             z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.7);
+            left: 0; top: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(34,34,59,0.25);
             justify-content: center;
             align-items: center;
-            animation: fadeInModal 0.3s ease-out;
+        }
+        .modal[style*="display: flex"] {
+            display: flex !important;
         }
         .modal-content {
-            background-color: #fefefe;
-            padding: 40px;
-            border-radius: 18px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            max-width: 650px;
-            width: 90%;
-            position: relative;
-            animation: slideInModal 0.3s ease-out;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        @keyframes fadeInModal {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideInModal {
-            from { transform: translateY(-70px) scale(0.9); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
+            background: #fff;
+            border-radius: 14px;
+            padding: 32px 24px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: none;
         }
         .close-button {
-            color: #999;
-            font-size: 36px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s;
-            position: absolute;
-            top: 18px;
-            right: 25px;
+            color: #6b7280;
+            font-size: 28px;
+            top: 12px;
+            right: 18px;
         }
-        .close-button:hover,
-        .close-button:focus {
-            color: #000;
-            text-decoration: none;
+        .close-button:hover {
+            color: #22223b;
         }
-        .modal-body h3 {
-            font-size: 1.25rem; /* Large text for section titles */
-            font-weight: 700;
-            color: #374151; /* Tailwind gray-700 */
-            margin-bottom: 1rem; /* More space below headings */
-            border-bottom: 1px solid #e5e7eb; /* Subtle line below section titles */
-            padding-bottom: 0.5rem;
-        }
-        .modal-body p {
-            margin-bottom: 0.75rem; /* More space between paragraphs */
-            font-size: 1rem;
-            color: #333;
-            line-height: 1.5;
-        }
-        .modal-body strong {
-            color: #1a1a1a;
-        }
-        .modal-body .rating-detail {
-            display: inline-block;
-            padding: 8px 14px;
-            border-radius: 14px;
-            font-weight: 800;
-            margin-left: 10px;
-            font-size: 1.1rem;
-            border: 1px solid;
-        }
-        .rating-detail.red { background-color: #ef4444; color: white; border-color: #dc2626; }
-        .rating-detail.yellow { background-color: #facc15; color: white; border-color: #eab308; }
-        .rating-detail.green { background-color: #22c55e; color: white; border-color: #16a34a; }
-
         .loader {
             border: 5px solid #e0e0e0;
             border-top: 5px solid #4f46e5;
@@ -217,64 +169,34 @@
             margin-top: 25px;
             text-align: center;
             font-size: 1.05rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: none;
         }
         .no-data-message {
             color: #4f46e5;
             background-color: #eef2ff;
             border: 1px solid #a5b4fc;
         }
-
-        /* Ajustes responsivos para pantallas más pequeñas */
         @media (max-width: 768px) {
             .dashboard-container {
-                padding: 20px;
+                padding: 16px 4px;
             }
             .stats-container {
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
             }
             .stat-card {
-                min-width: unset;
                 width: 100%;
-            }
-            .stat-card .value {
-                font-size: 2rem;
             }
             .filter-section {
                 flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-            .filter-section > div {
-                width: 100% !important; /* Ensure full width on mobile */
+                gap: 10px;
             }
             th, td {
-                padding: 10px;
-                font-size: 0.85rem;
+                padding: 8px 6px;
+                font-size: 0.95rem;
             }
             .modal-content {
-                padding: 25px;
-            }
-            .modal-body p {
-                font-size: 0.9rem;
-            }
-            .close-button {
-                font-size: 30px;
-                top: 15px;
-                right: 20px;
-            }
-            .table-container {
-                border-radius: 8px;
-            }
-            .modal-body .rating-detail {
-                padding: 6px 10px;
-                font-size: 1rem;
-            }
-            .modal-body h3 {
-                font-size: 1.1rem;
-                margin-bottom: 0.75rem;
-                padding-bottom: 0.25rem;
+                padding: 18px 8px;
             }
         }
     </style>
@@ -360,7 +282,12 @@
             <div id="modalBody" class="modal-body text-gray-700">
                 <!-- Aquí se cargarán todos los detalles de la encuesta -->
             </div>
-            <button id="modalCloseButton" class="mt-8 bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300 ease-in-out">Cerrar</button>
+            <div class="flex flex-col sm:flex-row gap-3 mt-8">
+                <button id="whatsappShareButton" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition duration-300 ease-in-out">
+                    <i class="fab fa-whatsapp text-xl"></i> Enviar por WhatsApp
+                </button>
+                <button id="modalCloseButton" class="flex-1 bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300 ease-in-out">Cerrar</button>
+            </div>
         </div>
     </div>
 
@@ -633,7 +560,39 @@
                 </div>
             `;
             showModal(htmlContent);
+
+            // --- WhatsApp Share Button Logic ---
+            const whatsappBtn = document.getElementById('whatsappShareButton');
+            if (whatsappBtn) {
+                const message =
+                  `🌴 *Encuesta de Satisfacción - Secrets Royal Beach* 🌴\n\n` +
+                  `👤 *Huésped:* ${data.name || 'N/A'}\n` +
+                  `🏨 *Habitación:* ${data.room || 'N/A'}\n` +
+                  `🤵 *Mayordomo:* ${data.butler || 'N/A'}\n\n` +
+                  `📝 *Respuestas:*\n` +
+                  `1️⃣ ¿Recomendaría este hotel a su familia y amigos?\n   ➡️ ${data.q1_recommend || 'N/A'}\n` +
+                  `2️⃣ ¿Cómo calificaría su experiencia general?\n   ➡️ ${data.q2_overall_experience || 'N/A'}\n` +
+                  `3️⃣ ¿Nivel de servicio del personal?\n   ➡️ ${data.q3_staff_service || 'N/A'}\n` +
+                  `4️⃣ ¿Experiencia Preferred Club?\n   ➡️ ${data.q4_preferred_club || 'N/A'}\n\n` +
+                  `💬 *Comentarios adicionales:*\n“${data.comments || 'Sin comentarios'}”\n\n` +
+                  `📅 *Fecha de envío:* ${new Date(data.timestamp).toLocaleString()}\n\n` +
+                  `¡Gracias por ayudarnos a mejorar! 🙏`;
+                whatsappBtn.onclick = function() {
+                    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                    window.open(url, '_blank');
+                };
+            }
         }
+
+        // --- Solicitar permiso de notificaciones al cargar la página ---
+        if ("Notification" in window) {
+            if (Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+        }
+
+        // --- Variable para llevar el control de encuestas ya notificadas ---
+        let lastSurveyIds = new Set();
 
         // --- Obtención de Datos de Firebase ---
         function fetchSurveyData() {
@@ -657,6 +616,29 @@
                     const data = snapshot.val();
                     allSurveyData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                     allSurveyData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort once after fetching
+
+                    // --- Notificación push para nuevas encuestas ---
+                    if ("Notification" in window && Notification.permission === "granted") {
+                        const newIds = new Set(Object.keys(data));
+                        for (const survey of allSurveyData) {
+                            if (!lastSurveyIds.has(survey.id)) {
+                                const notifTitle = "Nueva encuesta recibida";
+                                const notifBody =
+                                    `Huésped: ${survey.name || 'N/A'}\n` +
+                                    `Habitación: ${survey.room || 'N/A'}\n` +
+                                    `Mayordomo: ${survey.butler || 'N/A'}`;
+                                new Notification(notifTitle, {
+                                    body: notifBody,
+                                    icon: "https://assets.hyatt.com/content/dam/hyatt/hyattdam/images/2022/03/01/1532/Secrets-L001c-stk-R-color-RGB.png/Secrets-L001c-stk-R-color-RGB.400x196-PSR.png"
+                                });
+                                // Solo notificar la más reciente (opcional, para evitar spam)
+                                break;
+                            }
+                        }
+                        lastSurveyIds = newIds;
+                    } else {
+                        lastSurveyIds = new Set(Object.keys(data));
+                    }
 
                     populateMonthFilter(allSurveyData); // Populate filter based on all data
                     calculateMonthlyStats(allSurveyData); // Calculate monthly stats based on all data
