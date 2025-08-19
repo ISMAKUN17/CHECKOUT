@@ -52,8 +52,8 @@
             font-weight: 600;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            background-color: #f9f9f9; /* Default background when not selected */
-            color: #333; /* Default text color when not selected */
+            background-color: #f9f9f9;
+            color: #333;
         }
         .rating-button:hover {
             transform: translateY(-3px) scale(1.05);
@@ -63,14 +63,12 @@
             transform: scale(1.1);
             border-color: #a0a0a0;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            /* Color classes will be added dynamically when selected */
         }
-        /* Color classes for ratings - only applied when 'selected' */
-        .rating-red { background-color: #ef4444; color: white; border-color: #dc2626; } /* Tailwind red-500 */
-        .rating-red.selected { background-color: #dc2626; border-color: #b91c1c; } /* Darker on selected */
-        .rating-yellow { background-color: #facc15; color: white; border-color: #eab308; } /* Tailwind yellow-400 */
+        .rating-red { background-color: #ef4444; color: white; border-color: #dc2626; }
+        .rating-red.selected { background-color: #dc2626; border-color: #b91c1c; }
+        .rating-yellow { background-color: #facc15; color: white; border-color: #eab308; }
         .rating-yellow.selected { background-color: #eab308; border-color: #d97706; }
-        .rating-green { background-color: #22c55e; color: white; border-color: #16a34a; } /* Tailwind green-500 */
+        .rating-green { background-color: #22c55e; color: white; border-color: #16a34a; }
         .rating-green.selected { background-color: #16a34a; border-color: #15803d; }
 
         textarea {
@@ -82,10 +80,10 @@
         }
         .language-switcher button:hover {
             transform: scale(1.05);
-            background-color: #e0e7ff; /* Tailwind indigo-100 */
+            background-color: #e0e7ff;
         }
         .language-switcher button.active {
-            background-color: #6366f1; /* Tailwind indigo-500 */
+            background-color: #6366f1;
             color: white;
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
         }
@@ -282,7 +280,7 @@
 
         // Use the user's provided config. If they later provided it via Canvas, it would be identical.
         const firebaseConfig = userProvidedFirebaseConfig;
-        console.log("Firebase Config being used:", firebaseConfig); // Log the config for debugging
+        console.log("Firebase Config being used:", firebaseConfig);
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -325,7 +323,7 @@
                 modalAlreadySubmitted: "This device has already submitted a survey. You cannot submit another one at this time."
             },
             es: {
-                surveyTitle: "Secrets Royal Beach Punta Cana Encuesta Interna", // Updated title here
+                surveyTitle: "Secrets Royal Beach Punta Cana Encuesta Interna",
                 section1Description: "Por favor, proporcione sus datos para iniciar la encuesta.",
                 labelRoom: "Número de Habitación",
                 labelName: "Nombre Completo",
@@ -386,12 +384,11 @@
             }
         };
 
-        let currentLang = 'en'; // Default language
+        let currentLang = 'en';
 
         // Function to update text content based on selected language
         function updateContent() {
             const langData = translations[currentLang];
-            // Actualización del título principal de la encuesta
             document.getElementById('survey-title').textContent = langData.surveyTitle;
             document.getElementById('section1-description').textContent = langData.section1Description;
             document.getElementById('label-room').textContent = langData.labelRoom;
@@ -413,7 +410,6 @@
             document.getElementById('error-title').textContent = langData.errorTitle;
             document.getElementById('error-message').textContent = langData.errorMessage;
 
-            // Update validation messages (if visible)
             document.getElementById('error-room').textContent = langData.roomRequired;
             document.getElementById('error-name').textContent = langData.nameRequired;
             document.getElementById('q1-error').textContent = langData.ratingRequired;
@@ -424,12 +420,11 @@
             document.getElementById('modal-ok-button').textContent = langData.modalOkButton;
         }
 
-        // --- Auth State Change Listener ---
+        // Auth State Change Listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
             } else {
-                // Sign in anonymously if not already signed in
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
@@ -440,8 +435,7 @@
                     }
                 } catch (error) {
                     console.error("Firebase Anonymous Auth Error:", error);
-                    // This error typically means Anonymous Auth is not enabled in Firebase project settings
-                    showModal(translations[currentLang].modalSubmissionFailed + " (" + error.message + ")"); // Added error message to modal
+                    showModal(translations[currentLang].modalSubmissionFailed + " (" + error.message + ")");
                 }
             }
             isAuthReady = true;
@@ -449,8 +443,7 @@
             checkIfAlreadySubmitted();
         });
 
-
-        // --- DOM Elements ---
+        // DOM Elements
         const roomInput = document.getElementById('room');
         const nameInput = document.getElementById('name');
         const startSurveyButton = document.getElementById('start-survey-button');
@@ -468,10 +461,10 @@
         const modalOkButton = document.getElementById('modal-ok-button');
         const modalCloseButton = modal.querySelector('.close-button');
 
-        // --- Custom Modal Functions ---
+        // Custom Modal Functions
         function showModal(message) {
             modalMessage.textContent = message;
-            modal.style.display = 'flex'; // Use flex to center
+            modal.style.display = 'flex';
         }
 
         function hideModal() {
@@ -486,18 +479,18 @@
             }
         }
 
-        // --- Language Switcher Event Listeners ---
+        // Language Switcher Event Listeners
         document.querySelectorAll('.language-switcher button').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelectorAll('.language-switcher button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 currentLang = button.dataset.lang;
-                updateContent(); // Update content for new language
-                generateRatingButtons(); // Regenerate rating buttons to ensure they pick up new language settings if any for future tooltip features etc.
+                updateContent();
+                generateRatingButtons();
             });
         });
 
-        // --- Generate Rating Buttons and Attach Listeners ---
+        // Generate Rating Buttons and Attach Listeners
         const questions = [
             { id: 'q1', container: document.querySelector('[data-question="q1"]'), rating: null, errorElement: document.getElementById('q1-error') },
             { id: 'q2', container: document.querySelector('[data-question="q2"]'), rating: null, errorElement: document.getElementById('q2-error') },
@@ -507,17 +500,16 @@
 
         function generateRatingButtons() {
             questions.forEach(q => {
-                q.container.innerHTML = ''; // Clear existing buttons
+                q.container.innerHTML = '';
                 for (let i = 1; i <= 10; i++) {
                     const button = document.createElement('div');
                     button.classList.add('rating-button');
                     button.textContent = i;
                     button.dataset.value = i;
-                    // NO longer adding color class initially here
                     q.container.appendChild(button);
                 }
             });
-            attachRatingListeners(); // Re-attach listeners after regenerating
+            attachRatingListeners();
         }
 
         function getRatingColorClass(value) {
@@ -535,67 +527,39 @@
             questions.forEach(q => {
                 q.container.querySelectorAll('.rating-button').forEach(button => {
                     button.addEventListener('click', () => {
-                        // Remove 'selected' class and color classes from all buttons in this question
                         q.container.querySelectorAll('.rating-button').forEach(btn => {
                             btn.classList.remove('selected');
-                            btn.classList.remove('rating-red', 'rating-yellow', 'rating-green'); // Remove all color classes
+                            btn.classList.remove('rating-red', 'rating-yellow', 'rating-green');
                         });
 
-                        // Add 'selected' class and the correct color class to the clicked button
                         button.classList.add('selected');
-                        button.classList.add(getRatingColorClass(parseInt(button.dataset.value))); // Add the color class based on value
+                        button.classList.add(getRatingColorClass(parseInt(button.dataset.value)));
 
-                        // Store the selected rating
                         q.rating = parseInt(button.dataset.value);
-                        // Hide error message if visible
                         q.errorElement.classList.add('hidden');
                     });
                 });
             });
         }
 
-        // --- Device Submission Check ---
-        const SUBMISSION_FLAG_KEY = 'hotelSurveySubmitted';
-        const DEVICE_ID_KEY = 'hotelSurveyDeviceId';
-
-        function getDeviceId() {
-            let deviceId = localStorage.getItem(DEVICE_ID_KEY);
-            if (!deviceId) {
-                deviceId = crypto.randomUUID();
-                localStorage.setItem(DEVICE_ID_KEY, deviceId);
-            }
-            return deviceId;
-        }
-
+        // Device Submission Check - REMOVED: No more device restrictions
         function checkIfAlreadySubmitted() {
-            // Only check if auth is ready.
             if (!isAuthReady) {
-                setTimeout(checkIfAlreadySubmitted, 100); // Retry after a short delay
+                setTimeout(checkIfAlreadySubmitted, 100);
                 return;
             }
 
-            if (localStorage.getItem(SUBMISSION_FLAG_KEY) === 'true') {
-                section1.classList.remove('active');
-                section2.classList.remove('active');
-                alreadySubmittedSection.classList.add('active');
-                console.log("Survey already submitted from this device.");
-                showModal(translations[currentLang].modalAlreadySubmitted);
-                // Optionally disable future submission attempts from this browser session.
-                submitButton.disabled = true;
-                startSurveyButton.disabled = true;
-            } else {
-                // If not submitted, ensure section1 is active and sections2/messages are hidden
-                section1.classList.add('active');
-                section2.classList.remove('active');
-                alreadySubmittedSection.classList.remove('active');
-                successMessageSection.classList.remove('active');
-                errorMessageSection.classList.remove('active');
-                submitButton.disabled = false;
-                startSurveyButton.disabled = false;
-            }
+            // Always show the survey form - no more device blocking
+            section1.classList.add('active');
+            section2.classList.remove('active');
+            alreadySubmittedSection.classList.remove('active');
+            successMessageSection.classList.remove('active');
+            errorMessageSection.classList.remove('active');
+            submitButton.disabled = false;
+            startSurveyButton.disabled = false;
         }
 
-        // --- Event Listeners ---
+        // Event Listeners
         startSurveyButton.addEventListener('click', () => {
             const room = roomInput.value.trim();
             const name = nameInput.value.trim();
@@ -619,7 +583,6 @@
             if (isValid) {
                 section1.classList.remove('active');
                 section2.classList.add('active');
-                // Ensure comments placeholder is set correctly in case of language switch
                 commentsInput.placeholder = translations[currentLang].commentsPlaceholder;
             } else {
                 showModal(translations[currentLang].modalRequiredFields);
@@ -628,11 +591,6 @@
 
         surveyForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            if (localStorage.getItem(SUBMISSION_FLAG_KEY) === 'true') {
-                showModal(translations[currentLang].modalAlreadySubmitted);
-                return;
-            }
 
             // Basic validation for rating questions
             let allRatingsSelected = true;
@@ -646,11 +604,11 @@
             });
 
             if (!allRatingsSelected) {
-                showModal(translations[currentLang].ratingRequired); // Re-use rating required message for all
+                showModal(translations[currentLang].ratingRequired);
                 return;
             }
 
-            submitButton.innerHTML = `<div class="loader"></div>`; // Show loader
+            submitButton.innerHTML = `<div class="loader"></div>`;
             submitButton.disabled = true;
 
             const surveyData = {
@@ -664,19 +622,14 @@
                 q4_preferred_club: questions[3].rating,
                 comments: commentsInput.value.trim(),
                 timestamp: new Date().toISOString(),
-                userId: userId, // Firebase Auth user ID
-                deviceId: getDeviceId(), // Unique ID for this device
-                appId: appId // The app ID from the canvas environment
+                userId: userId,
+                appId: appId
             };
 
             try {
-                // Firebase Realtime Database path: /artifacts/{appId}/public/data/surveys/{uniqueKey}
-                // Using public data as specified in instructions for shared/collaborative apps
                 const surveysRef = ref(db, `artifacts/${appId}/public/data/surveys`);
-                await push(surveysRef, surveyData); // push generates a unique key
+                await push(surveysRef, surveyData);
                 console.log("Survey data submitted successfully!");
-
-                localStorage.setItem(SUBMISSION_FLAG_KEY, 'true'); // Set flag after successful submission
 
                 section2.classList.remove('active');
                 successMessageSection.classList.add('active');
@@ -686,23 +639,18 @@
                 console.error("Error submitting survey:", error);
                 section2.classList.remove('active');
                 errorMessageSection.classList.add('active');
-                showModal(translations[currentLang].modalSubmissionFailed + " (" + error.message + ")"); // Added error message to modal
+                showModal(translations[currentLang].modalSubmissionFailed + " (" + error.message + ")");
 
             } finally {
                 submitButton.innerHTML = `<span id="button-send-survey">${translations[currentLang].buttonSendSurvey}</span>`;
-                // Only re-enable if submission was not successful or if we want to allow retry.
-                // If it was successful, we keep it disabled to prevent multiple submissions.
-                if (localStorage.getItem(SUBMISSION_FLAG_KEY) !== 'true') {
-                     submitButton.disabled = false;
-                }
+                submitButton.disabled = false;
             }
         });
 
-        // --- Initial Load ---
+        // Initial Load
         window.onload = function() {
-            updateContent(); // Set initial language content
-            generateRatingButtons(); // Generate rating buttons without initial colors
-            // The checkIfAlreadySubmitted is called after auth is ready via onAuthStateChanged
+            updateContent();
+            generateRatingButtons();
         };
     </script>
 </body>
